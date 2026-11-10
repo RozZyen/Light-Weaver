@@ -43,6 +43,14 @@ namespace LightWeaver.Player
             }
         }
 
+        public void SetSpectrumVisuals(float efficiency, float rangeMult, float angleMult, Color tint)
+        {
+            if (coneCaster != null)
+            {
+                coneCaster.SetSpectrumVisuals(efficiency, rangeMult, angleMult, tint);
+            }
+        }
+
         private void LateUpdate()
         {
             if (armPivot != null && coneCaster != null)

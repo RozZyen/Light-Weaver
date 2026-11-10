@@ -10,8 +10,11 @@ namespace LightWeaver.Player
     [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
     public sealed class RunnerMotor2D : MonoBehaviour
     {
+        public static event Action OnAnyRunnerRespawned;
+
         public event Action<float> OnRunnerLanded;
         public event Action OnRunnerFellIntoVoid;
+        public event Action OnRunnerRespawned;
 
         [Header("Movement & Climbing")]
         [SerializeField] private float baseRunSpeed = 6.6f;
@@ -115,6 +118,8 @@ namespace LightWeaver.Player
             {
                 _touchInput.ResetAimToInitial();
             }
+            OnRunnerRespawned?.Invoke();
+            OnAnyRunnerRespawned?.Invoke();
         }
 
         private void FixedUpdate()
@@ -216,15 +221,16 @@ namespace LightWeaver.Player
         private void TryAutoStepUp()
         {
             Bounds b = _capsule.bounds;
-            Vector2 lowOrigin = new Vector2(b.max.x + 0.02f, b.min.y + 0.08f);
-            Vector2 highOrigin = new Vector2(b.max.x + 0.02f, b.min.y + stepUpHeight + 0.12f);
+            Vector2 lowOrigin = new Vector2(b.max.x + 0.02f, b.min.y + 0.07f);
+            Vector2 highOrigin = new Vector2(b.max.x + 0.02f, b.min.y + stepUpHeight + 0.14f);
 
-            int lowHits = Physics2D.Raycast(lowOrigin, Vector2.right, _groundFilter, _raycastHits, 0.24f);
+            int lowHits = Physics2D.Raycast(lowOrigin, Vector2.right, _groundFilter, _raycastHits, 0.30f);
             bool hasLowStepObstacle = false;
             for (int i = 0; i < lowHits; i++)
             {
                 Collider2D col = _raycastHits[i].collider;
-                if (col != null && col != _capsule && Mathf.Abs(_raycastHits[i].normal.x) > 0.6f)
+                // Hem dik basamak kenarları hem eğimli rampa burunları (-0.18'den küçük yatay normal) için basamak atla
+                if (col != null && col != _capsule && _raycastHits[i].normal.x < -0.18f)
                 {
                     hasLowStepObstacle = true;
                     break;
@@ -233,7 +239,7 @@ namespace LightWeaver.Player
 
             if (!hasLowStepObstacle) return;
 
-            int highHits = Physics2D.Raycast(highOrigin, Vector2.right, _groundFilter, _raycastHits, 0.34f);
+            int highHits = Physics2D.Raycast(highOrigin, Vector2.right, _groundFilter, _raycastHits, 0.36f);
             for (int i = 0; i < highHits; i++)
             {
                 if (_raycastHits[i].collider != null && _raycastHits[i].collider != _capsule)
@@ -242,8 +248,8 @@ namespace LightWeaver.Player
                 }
             }
 
-            // Basamağın üzerine pürüzsüzce çık
-            _rb.position += new Vector2(0.10f, stepUpHeight * 0.72f);
+            // Basamağın/rampanın üzerine pürüzsüzce çık
+            _rb.position += new Vector2(0.08f, stepUpHeight * 0.58f);
         }
 
         private void ApplyAirborneMotion(float dt)

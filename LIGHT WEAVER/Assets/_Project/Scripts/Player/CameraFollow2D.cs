@@ -20,10 +20,44 @@ namespace LightWeaver.Player
         private float _shakeIntensity;
         private float _shakeDuration;
         private float _shakeTimer;
+        private RunnerMotor2D _targetMotor;
+
+        private void Awake()
+        {
+            CacheTargetMotor();
+        }
+
+        private void OnEnable()
+        {
+            if (_targetMotor != null) _targetMotor.OnRunnerRespawned += HandleTargetRespawned;
+        }
+
+        private void OnDisable()
+        {
+            if (_targetMotor != null) _targetMotor.OnRunnerRespawned -= HandleTargetRespawned;
+        }
+
+        private void CacheTargetMotor()
+        {
+            if (target != null)
+            {
+                _targetMotor = target.GetComponent<RunnerMotor2D>();
+            }
+        }
+
+        private void HandleTargetRespawned()
+        {
+            _velX = 0f;
+            _velY = 0f;
+            SnapToTarget();
+        }
 
         public void SetTarget(Transform newTarget)
         {
+            if (_targetMotor != null) _targetMotor.OnRunnerRespawned -= HandleTargetRespawned;
             target = newTarget;
+            CacheTargetMotor();
+            if (_targetMotor != null && isActiveAndEnabled) _targetMotor.OnRunnerRespawned += HandleTargetRespawned;
         }
 
         public void SnapToTarget()

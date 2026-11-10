@@ -11,11 +11,14 @@ namespace LightWeaver.Player
     {
         [Header("Core References")]
         [SerializeField] private RunnerMotor2D motor;
+        [SerializeField] private BatterySystem batterySystem;
         [SerializeField] private Transform visualRoot;
         [SerializeField] private Transform bodyPivot;
         [SerializeField] private Transform frontLegPivot;
         [SerializeField] private Transform backLegPivot;
         [SerializeField] private Transform backArmPivot;
+        [SerializeField] private Transform suitBatteryGaugeFill;
+        [SerializeField] private SpriteRenderer suitBatteryGaugeRenderer;
 
         [Header("VFX & Trails")]
         [SerializeField] private ParticleSystem footstepSparks;
@@ -33,6 +36,7 @@ namespace LightWeaver.Player
         private void Awake()
         {
             if (motor == null) motor = GetComponent<RunnerMotor2D>();
+            if (batterySystem == null) batterySystem = GetComponent<BatterySystem>();
             if (visualRoot != null) _baseRootScale = visualRoot.localScale;
         }
 
@@ -119,6 +123,22 @@ namespace LightWeaver.Player
             if (speedTrail != null)
             {
                 speedTrail.emitting = speedNorm > 0.35f;
+            }
+
+            // 5. Diegetik Sırt Pil Göstergesi (Zero-GC)
+            if (batterySystem != null && suitBatteryGaugeFill != null)
+            {
+                float norm = batterySystem.NormalizedBattery;
+                suitBatteryGaugeFill.localScale = new Vector3(1f, Mathf.Max(0.02f, norm), 1f);
+                if (suitBatteryGaugeRenderer != null)
+                {
+                    suitBatteryGaugeRenderer.color = batterySystem.CurrentPhase switch
+                    {
+                        SpectrumPhase.Overcharge => new Color(1.0f, 0.92f, 0.35f, 1f),
+                        SpectrumPhase.CriticalEmber => new Color(1.0f, 0.18f, 0.32f, 1f),
+                        _ => Color.Lerp(new Color(1.0f, 0.85f, 0.1f, 1f), new Color(0.0f, 0.94f, 1.0f, 1f), norm)
+                    };
+                }
             }
         }
     }

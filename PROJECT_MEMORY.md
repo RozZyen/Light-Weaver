@@ -1,7 +1,7 @@
 # 🧠 LIGHT WEAVER: Prism Runner - Canlı Proje Hafızası (Cross-Device Memory)
 
 > **Son Güncelleme:** 2026-11-10  
-> **Durum:** Faz 2 Tamamlandı — Faz 1 Düzeltmeleri, Neon Koşucu Fiziği, Otomatik Rampa Tırmanışı & Kamera Takibi Aktif (Faz 3'e Hazır)  
+> **Durum:** Faz 3 Tamamlandı — Pil Ekonomisi, Spektrum Fazları, `+ENERGY` Hücreleri, Sıçrama Halkaları & Prizmalar Kuruldu (Faz 4'e Hazır)  
 > **Cihaz Eşitleme:** Git Push/Pull (`main` dalı) ile Masaüstü & Laptop senkronizasyonu aktif.  
 
 ---
@@ -29,17 +29,17 @@ graph TD
     subgraph Player_System ["🏃‍♂️ Light Weaver Karakteri"]
         Aim --> Cone["LightConeCaster2D (Zero-GC Tarama & Volümetrik UV Huzme)"]
         Motor["RunnerMotor2D (Otomatik Koşu, Rampa Teğet Tırmanışı, Auto-Step, Coyote)"]
-        Battery["BatterySystem (Tüketim, Şarj, Overcharge & Kritik Fazlar)"]
-        Anim["RunnerProceduralAnimator (Adım, Squash & Stretch, Kıvılcım, Trail)"]
-        Cam["CameraFollow2D (İleri Görüş Look-Ahead & Shake)"]
+        Battery["BatterySystem (Tüketim, Overcharge/Ember Fazları, Perfect Weave)"]
+        Anim["RunnerProceduralAnimator (Adım, Diegetik Sırt Pili, Kıvılcım, Trail)"]
+        Cam["CameraFollow2D (İleri Görüş Look-Ahead, Respawn Snap & Shake)"]
     end
 
     subgraph World_Prisms ["💎 Kristal Dünya & Havuz"]
         Director["EndlessChunkDirector (5 Sektör & Sonsuz Örüntü)"] --> Pool["ObjectPooler (IPoolable)"]
         Pool --> Platform["CrystalPlatform : ILightReactive (Phantom -> Solid -> Afterglow)"]
-        Pool --> JumpPad["PrismaticJumpPad : ILightReactive"]
-        Pool --> Orb["EnergyOrb : ILightReactive (+ENERGY Şarj Hücresi)"]
-        Pool --> Prism["PrismRelay2D : ILightReactive (Işık Kırıcı)"]
+        Pool --> JumpPad["PrismaticJumpPad : ILightReactive (Işıkla Şarj Olan Sıçrama Halkası)"]
+        Pool --> Orb["EnergyOrb : ILightReactive (+ENERGY Manyetik Şarj Hücresi)"]
+        Pool --> Prism["PrismRelay2D : ILightReactive (Çift Huzmeli Işık Kırıcı)"]
         Pool --> Hazard["ShadowHazard : ILightReactive (UmbraStalker / MovingPillar)"]
     end
 
@@ -92,8 +92,15 @@ graph TD
   - `RunnerProceduralAnimator.cs` & `CameraFollow2D.cs`: Neon vizörlü parçalı koşucu, adım/süzülme animasyonu, ayak altı kıvılcımları, hız izi (`TrailRenderer`) ve look-ahead kamera takibi.
   - `LightWeaverSetupUtility.cs`: Katmanlar (`Player`, `HardlightWorld`), sıfır sürtünme materyali ve ~80m kristal rampa test parkuru kuruldu.
 
+- [x] **Faz 3 (Pil Ekonomisi, Enerji Hücreleri & Prizmatik Mekanikler + Akış Cila):**
+  - `BatterySystem.cs`: Mesafe/Odak Lazeri bazlı pil tüketimi, 3 Spektrum Fazı (`Normal`, `Overcharge >%95 / 6x Streak` geniş prizma huzmesi + 3x skor, `CriticalEmber <%20` titreme + %15 Adrenalin hızı + 2x şarj ödülü) ve *Perfect Weave* (`+%3` pil geri kazanımı).
+  - `EnergyOrb.cs`: Altıgen siyan çerçeveli altın yıldırım `+ENERGY` (`+12%` / `+24%` Super) hücreleri, `0.14s` ışık odaklanmasında manyetik çekim.
+  - `PrismaticJumpPad.cs`: Işıkla şarj olan dairesel neon turuncu/siyan sıçrama halkaları (*Starlight Canopy* yüksek katman çıkışı).
+  - `PrismRelay2D.cs`: Fener ışığını çift ikincil huzmeye kırarak kör noktadaki platform/bataryaları aydınlatan elmas prizmalar.
+  - `RunnerMotor2D.cs` & `LightWeaverSetupUtility.cs`: Eğimli rampa burunlarında pürüzsüz step-up, kamera respawn snap, diegetik sırt pil göstergesi ve kesintisiz ~70m parkur + 5 yeni prefab kaydedildi.
+
 ---
 
 ### 🎯 6. Sırada Ne Var? (Next Sprint)
-- [ ] **Faz 3.1:** `BatterySystem.cs` (Mesafe/odak bazlı pil tüketimi, Kritik Kor `<%20` titreme + Adrenalin hız bonusu, Overcharge `>%95` gökkuşağı fazı ve *Perfect Weave* `+3%` geri kazanım).
-- [ ] **Faz 3.2:** `EnergyOrb.cs` (`+ENERGY` altıgen batarya hücreleri, fener ışığıyla manyetik çekim) ve `PrismaticJumpPad.cs` (Işıkla şarj olan sıçrama halkaları) + `PrismRelay2D.cs` (Işık kırıcı prizmalar).
+- [ ] **Faz 4.1:** `EndlessChunkDirector.cs` (5 Sektör teması ve *Level 4 - The Echo Void* dahil 3 irtifa katmanlı sonsuz bölüm üreticisi + obje havuzu geri dönüşümü).
+- [ ] **Faz 4.2:** `ShadowHazard.cs` (*Umbra Stalker*, *Moving Shadow Pillar* ve *Void Leech* karanlık engelleri).

@@ -36,11 +36,13 @@ namespace LightWeaver.Player
         private float _aimAngularVelocity;
         private bool _isFocusedBeam;
         private float _batteryEfficiency = 1.0f;
+        private float _rangeMultiplier = 1.0f;
+        private float _angleMultiplier = 1.0f;
 
         public float CurrentAimAngleDeg => _currentAimAngleDeg;
         public bool IsFocusedBeam => _isFocusedBeam;
-        public float CurrentRange => (_isFocusedBeam ? focusedRange : standardRange) * Mathf.Lerp(0.55f, 1f, _batteryEfficiency);
-        public float CurrentHalfAngleDeg => _isFocusedBeam ? focusedHalfAngleDeg : standardHalfAngleDeg;
+        public float CurrentRange => (_isFocusedBeam ? focusedRange : standardRange) * _rangeMultiplier * Mathf.Lerp(0.45f, 1f, _batteryEfficiency);
+        public float CurrentHalfAngleDeg => (_isFocusedBeam ? focusedHalfAngleDeg : standardHalfAngleDeg) * _angleMultiplier;
 
         private void Awake()
         {
@@ -116,6 +118,14 @@ namespace LightWeaver.Player
         public void SetBatteryEfficiency(float normalizedBattery)
         {
             _batteryEfficiency = Mathf.Clamp01(normalizedBattery);
+        }
+
+        public void SetSpectrumVisuals(float efficiency, float rangeMult, float angleMult, Color tint)
+        {
+            _batteryEfficiency = Mathf.Clamp01(efficiency);
+            _rangeMultiplier = Mathf.Clamp(rangeMult, 0.4f, 1.8f);
+            _angleMultiplier = Mathf.Clamp(angleMult, 0.5f, 1.6f);
+            beamTint = tint;
         }
 
         private void Update()

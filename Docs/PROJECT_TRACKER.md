@@ -7,7 +7,7 @@
 
 ## 📊 Genel İlerleme Durumu
 
-- **Aktif Faz:** Faz 2 Tamamlandı — Faz 1 Işık/Kontrol Düzeltmeleri + Neon Koşucu & 80m Kristal Rampa Parkuru Hazır (Faz 3 Bekleniyor) 🔦🏃‍♂️💎
+- **Aktif Faz:** Faz 3 Tamamlandı — Pil Ekonomisi, `+ENERGY` Hücreleri, Sıçrama Halkaları & Prizma Kırıcıları Aktif (Faz 4 Bekleniyor) 🔋⚡💎
 - **Hedef Motor:** Unity 6 (URP 2D) + Unity MCP (`com.coplaydev.unity-mcp`)
 - **Depo Konumu:** `C:\Users\Yusuf\Documents\GitHub\Light-Weaver` (`https://github.com/RozZyen/Light-Weaver`)
 - **Son Güncelleme:** 2026-11-10
@@ -42,9 +42,9 @@
 ### ⚡ Faz 3: Pil Ekonomisi, Enerji Hücreleri & Prizmatik Mekanikler
 | Görev Kodu | Görev / Özellik | Detay | Durum |
 | :---: | :--- | :--- | :---: |
-| **F3.1** | **`BatterySystem` (Pil & Spektrum Fazları)** | Zamanla azalan pil, Kritik Kor (<%20), Overcharge (>%95) ve *Perfect Weave* | ⬜ Planlandı |
-| **F3.2** | **`EnergyOrb` (+ENERGY Batarya Hücreleri)** | Altıgen mavi çerçeveli altın yıldırım hücreleri, ışıkla şarj ve manyetik çekim | ⬜ Planlandı |
-| **F3.3** | **`PrismaticJumpPad` & `PrismRelay2D`** | Işıkla aktifleşen dairesel sıçrama halkaları ve ışığı bölen elmas prizmalar | ⬜ Planlandı |
+| **F3.1** | **`BatterySystem` (Pil & Spektrum Fazları)** | Zaman/mesafe tüketimi, Kritik Kor (<%20), Overcharge (>%95) ve *Perfect Weave* | ✅ Tamamlandı |
+| **F3.2** | **`EnergyOrb` (+ENERGY Batarya Hücreleri)** | Altıgen mavi çerçeveli altın yıldırım hücreleri, ışıkla şarj ve manyetik çekim | ✅ Tamamlandı |
+| **F3.3** | **`PrismaticJumpPad` & `PrismRelay2D`** | Işıkla aktifleşen dairesel sıçrama halkaları ve ışığı bölen elmas prizmalar | ✅ Tamamlandı |
 
 ### 🌌 Faz 4: Bölüm Üretici (Level 1-5 & Sonsuz Boşluk) + Gölge Tehlikeleri
 | Görev Kodu | Görev / Özellik | Detay | Durum |
@@ -68,6 +68,15 @@
 ---
 
 ## 📜 Geliştirme Günlüğü (Changelog)
+
+### [2026-11-10] — v0.4.0: Faz 3 Pil Ekonomisi, Enerji Hücreleri, Jump Pad & Prizmalar + Rampa Cila
+- **Faz 3 Sistemleri:**
+  - `BatterySystem.cs`: Mesafe/Focus Beam tüketim eğrisi, 3 Spektrum Fazı (`Normal`, `Overcharge` 3x skor + geniş prizma huzmesi, `CriticalEmber` titreme + %15 Adrenalin hızı + 2x şarj ödülü) ve *Perfect Weave* (`+%3` pil) kuruldu.
+  - `EnergyOrb.cs`: Altıgen neon siyan çerçeveli altın yıldırım `+ENERGY` hücreleri (`+12%` ve `+24%` Super), ışık odaklanmasında manyetik uçuşla koşucuya çekim ve respawn yenilemesi eklendi.
+  - `PrismaticJumpPad.cs` & `PrismRelay2D.cs`: Işıkla şarj olan dairesel sıçrama halkaları ve ışığı iki yöne kıran elmas prizmalar + prefab'lar üretildi.
+- **Faz 2 Akış Düzeltmeleri:**
+  - `RunnerMotor2D.cs`: Eğimli rampa uçlarında takılmayı önleyen `normal.x < -0.18f` basamak atlama düzeltmesi, boşluk düşüşünde anlık kamera snap (`CameraFollow2D`) ve kesintisiz örtüşen rampa dizilimi uygulandı.
+  - Görsel Cila: Geliştirilmiş neon koşucu silüeti, diegetik sırt pil barı ve küçültülmüş parlak emitter çekirdeği.
 
 ### [2026-11-10] — v0.3.0: Faz 1 Düzeltmeleri + Faz 2 Karakter Fiziği, Kontroller & Oynanabilir Parkur
 - **Faz 1 Düzeltmeleri:**
