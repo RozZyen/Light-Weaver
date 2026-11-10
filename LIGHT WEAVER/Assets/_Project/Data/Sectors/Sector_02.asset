@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Sector_02
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 2
-  sectorName: THE PRISM CAVERNS
+  sectorName: THE SANDSTONE TOMBS
   sectorDistanceMeters: 115
-  voidBackgroundColor: {r: 0.025, g: 0.02, b: 0.065, a: 1}
-  sectorAccentColor: {r: 0, g: 0.94, b: 1, a: 1}
-  sectorSecondaryColor: {r: 0.71, g: 0.22, b: 0.95, a: 1}
+  voidBackgroundColor: {r: 0.038, g: 0.032, b: 0.082, a: 1}
+  sectorAccentColor: {r: 0.05, g: 0.88, b: 0.82, a: 1}
+  sectorSecondaryColor: {r: 0.95, g: 0.68, b: 0.22, a: 1}
   runSpeedMultiplier: 1.07
   batteryDrainMultiplier: 1
   hazardFrequency: 0.25

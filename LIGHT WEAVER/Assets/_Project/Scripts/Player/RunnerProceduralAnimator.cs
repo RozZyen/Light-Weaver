@@ -3,9 +3,9 @@ using UnityEngine;
 namespace LightWeaver.Player
 {
     /// <summary>
-    /// Referans konsept görselindeki atletik cyber-koşucuyu prosedürel olarak canlandırır:
-    /// Bacak koşu adımı, havada süzülme pozu, rampa eğilmesi, inişte Squash & Stretch
-    /// ve kristal zemine bastığında çıkan ayak altı kıvılcımları.
+    /// Modüler parçalı Trençkotlu Dedektif karakterini prosedürel olarak canlandırır:
+    /// Çift eklemli diz/bacak koşu adımı, arka kol dirsek salınımı, rüzgârda dalgalanan trençkot etekleri,
+    /// zıplama pozu, iniş Squash & Stretch ve sıcak kum/ışık kıvılcımları.
     /// </summary>
     public sealed class RunnerProceduralAnimator : MonoBehaviour
     {
@@ -15,8 +15,13 @@ namespace LightWeaver.Player
         [SerializeField] private Transform visualRoot;
         [SerializeField] private Transform bodyPivot;
         [SerializeField] private Transform frontLegPivot;
+        [SerializeField] private Transform frontShinPivot;
         [SerializeField] private Transform backLegPivot;
+        [SerializeField] private Transform backShinPivot;
         [SerializeField] private Transform backArmPivot;
+        [SerializeField] private Transform backForearmPivot;
+        [SerializeField] private Transform coatTailFrontPivot;
+        [SerializeField] private Transform coatTailBackPivot;
         [SerializeField] private Transform suitBatteryGaugeFill;
         [SerializeField] private SpriteRenderer suitBatteryGaugeRenderer;
 
@@ -95,26 +100,40 @@ namespace LightWeaver.Player
                 bodyPivot.localPosition = new Vector3(0f, bobOffset, 0f);
             }
 
-            // 3. Bacak ve Arka Kol Adım Döngüsü
+            // 3. Modüler Çift Eklemli Bacak + Diz + Arka Kol + Trençkot Etek Animasyonu
             if (grounded)
             {
                 _strideTimer += dt * strideFrequency * Mathf.Max(0.4f, speedNorm);
                 float swing = Mathf.Sin(_strideTimer) * legSwingAngleDeg;
+                float frontKnee = Mathf.Clamp((-Mathf.Cos(_strideTimer) * 0.5f + 0.5f) * -58f, -62f, 4f);
+                float backKnee = Mathf.Clamp((Mathf.Cos(_strideTimer) * 0.5f + 0.5f) * -58f, -62f, 4f);
 
                 if (frontLegPivot != null) frontLegPivot.localRotation = Quaternion.Euler(0f, 0f, swing);
+                if (frontShinPivot != null) frontShinPivot.localRotation = Quaternion.Euler(0f, 0f, frontKnee);
                 if (backLegPivot != null) backLegPivot.localRotation = Quaternion.Euler(0f, 0f, -swing);
-                if (backArmPivot != null) backArmPivot.localRotation = Quaternion.Euler(0f, 0f, swing * 0.75f - 20f);
+                if (backShinPivot != null) backShinPivot.localRotation = Quaternion.Euler(0f, 0f, backKnee);
+                if (backArmPivot != null) backArmPivot.localRotation = Quaternion.Euler(0f, 0f, -swing * 0.72f - 12f);
+                if (backForearmPivot != null) backForearmPivot.localRotation = Quaternion.Euler(0f, 0f, 26f + Mathf.Max(0f, -swing * 0.35f));
             }
             else
             {
-                // Havada atletik sıçrama / süzülme pozu
+                // Havada atletik sıçrama / süzülme pozu (dizler kırık)
                 float airPitch = Mathf.Clamp(motor.CurrentSpeedY * 2.2f, -24f, 24f);
-                if (frontLegPivot != null) frontLegPivot.localRotation = Quaternion.Lerp(frontLegPivot.localRotation, Quaternion.Euler(0f, 0f, 28f + airPitch), dt * 10f);
-                if (backLegPivot != null) backLegPivot.localRotation = Quaternion.Lerp(backLegPivot.localRotation, Quaternion.Euler(0f, 0f, -34f + airPitch * 0.5f), dt * 10f);
-                if (backArmPivot != null) backArmPivot.localRotation = Quaternion.Lerp(backArmPivot.localRotation, Quaternion.Euler(0f, 0f, -42f), dt * 10f);
+                if (frontLegPivot != null) frontLegPivot.localRotation = Quaternion.Lerp(frontLegPivot.localRotation, Quaternion.Euler(0f, 0f, 34f + airPitch), dt * 11f);
+                if (frontShinPivot != null) frontShinPivot.localRotation = Quaternion.Lerp(frontShinPivot.localRotation, Quaternion.Euler(0f, 0f, -48f), dt * 11f);
+                if (backLegPivot != null) backLegPivot.localRotation = Quaternion.Lerp(backLegPivot.localRotation, Quaternion.Euler(0f, 0f, -32f + airPitch * 0.5f), dt * 11f);
+                if (backShinPivot != null) backShinPivot.localRotation = Quaternion.Lerp(backShinPivot.localRotation, Quaternion.Euler(0f, 0f, -24f), dt * 11f);
+                if (backArmPivot != null) backArmPivot.localRotation = Quaternion.Lerp(backArmPivot.localRotation, Quaternion.Euler(0f, 0f, -46f), dt * 11f);
+                if (backForearmPivot != null) backForearmPivot.localRotation = Quaternion.Lerp(backForearmPivot.localRotation, Quaternion.Euler(0f, 0f, 38f), dt * 11f);
             }
 
-            // 4. Ayak Altı Kristal Kıvılcımları & Hız İzi
+            // 3.5 Rüzgârda Dalgalanan Trençkot Etekleri
+            float windFlutter = Mathf.Sin(Time.time * 13f) * (3.5f + speedNorm * 6.5f);
+            float baseFlap = -10f - speedNorm * 22f;
+            if (coatTailFrontPivot != null) coatTailFrontPivot.localRotation = Quaternion.Euler(0f, 0f, baseFlap + windFlutter);
+            if (coatTailBackPivot != null) coatTailBackPivot.localRotation = Quaternion.Euler(0f, 0f, baseFlap * 1.15f - windFlutter * 0.85f);
+
+            // 4. Ayak Altı Kıvılcımları & Hız İzi
             if (footstepSparks != null)
             {
                 var emission = footstepSparks.emission;
@@ -125,7 +144,7 @@ namespace LightWeaver.Player
                 speedTrail.emitting = speedNorm > 0.35f;
             }
 
-            // 5. Diegetik Sırt Pil Göstergesi (Zero-GC)
+            // 5. Diegetik Pirinç Çanta Pil Göstergesi (Zero-GC)
             if (batterySystem != null && suitBatteryGaugeFill != null)
             {
                 float norm = batterySystem.NormalizedBattery;
@@ -134,9 +153,9 @@ namespace LightWeaver.Player
                 {
                     suitBatteryGaugeRenderer.color = batterySystem.CurrentPhase switch
                     {
-                        SpectrumPhase.Overcharge => new Color(1.0f, 0.92f, 0.35f, 1f),
-                        SpectrumPhase.CriticalEmber => new Color(1.0f, 0.18f, 0.32f, 1f),
-                        _ => Color.Lerp(new Color(1.0f, 0.85f, 0.1f, 1f), new Color(0.0f, 0.94f, 1.0f, 1f), norm)
+                        SpectrumPhase.Overcharge => new Color(0.10f, 0.92f, 0.82f, 1f),
+                        SpectrumPhase.CriticalEmber => new Color(1.0f, 0.20f, 0.28f, 1f),
+                        _ => Color.Lerp(new Color(0.95f, 0.38f, 0.14f, 1f), new Color(1.0f, 0.84f, 0.24f, 1f), norm)
                     };
                 }
             }

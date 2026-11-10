@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Sector_04
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 4
-  sectorName: THE ECHO VOID
+  sectorName: HALL OF SCARABS
   sectorDistanceMeters: 135
-  voidBackgroundColor: {r: 0.018, g: 0.03, b: 0.062, a: 1}
-  sectorAccentColor: {r: 0, g: 0.96, b: 0.92, a: 1}
-  sectorSecondaryColor: {r: 1, g: 0.78, b: 0.18, a: 1}
+  voidBackgroundColor: {r: 0.024, g: 0.04, b: 0.078, a: 1}
+  sectorAccentColor: {r: 0.18, g: 0.92, b: 0.72, a: 1}
+  sectorSecondaryColor: {r: 1, g: 0.78, b: 0.24, a: 1}
   runSpeedMultiplier: 1.22
   batteryDrainMultiplier: 1.28
   hazardFrequency: 0.44

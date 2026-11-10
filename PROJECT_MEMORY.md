@@ -1,7 +1,7 @@
 # 🧠 LIGHT WEAVER: Prism Runner - Canlı Proje Hafızası (Cross-Device Memory)
 
 > **Son Güncelleme:** 2026-11-10  
-> **Durum:** v2.1 (360° Fener Rotasyonu, Mobil Çift-Başparmak Floating Stick & Direct Touch, 4 Ayrı Kristal Görseli, Zero-GC Burst VFX & Paralaks Monolitler Tamamlandı — Faz 6'ya Hazır)  
+> **Durum:** v3.0 Mısır Gizemi Dönüşümü Tamamlandı — Modüler Trençkotlu Dedektif Rig'i, 3 Katmanlı Gize Piramit & Kumul Paralaksı, 210° Fener Yayı (`-105°..+105°`), Sol Alt `JUMP` + `LONG: OFF/ON` İkonlu Kontroller & Kumtaşı/Anubis Dünyası Hazır (Faz 6'ya Hazır)  
 > **Cihaz Eşitleme:** Git Push/Pull (`main` dalı) ile Masaüstü & Laptop senkronizasyonu aktif.  
 
 ---
@@ -70,12 +70,12 @@ graph TD
 
 ---
 
-### 🎨 3. Sanat Yönetimi & Tasarım Dili
-- **Görsel Tarz:** High-Contrast Neon Prismatic / Hardlight Sci-Fi 2D
+### 🎨 3. Sanat Yönetimi & Tasarım Dili (v3.0 — Mısır Gecesi & Trençkotlu Dedektif)
+- **Görsel Tarz:** Atmospheric Egypt Mystery Runner / Stylized Konturlu Modüler 2D
 - **Renk Paleti (60-30-10 Kuralı):**
-  - Dominant Boşluk (%60): `#05070D` (Zifiri Boşluk) -> `#0B1021` (Derin İndigo)
-  - İkincil Kristal Yapı (%30): `#00F0FF` (Neon Siyan), `#B537F2` (Prizmatik Eflatun), `#1A8CFF` (Kristal Mavi)
-  - Vurgu / Enerji / Tehlike (%10): `#FFD000` (Fener & Batarya Altını), `#FF6B00` (Sıçrama Halkası Turuncusu), `#FF1E56` (Void Tehlike Kızılı)
+  - Gece Çölü & Piramitler (%60): `#080A16` (Gökyüzü), `#2B2540`/`#141122` (Piramitler & Obelisk), `#20181D` (Kumullar)
+  - Dedektif Trençkot & Kumtaşı (%30): `#BC945F` / `#DFBE93` / `#A88453` (Bej/Deve tüyü), `#5B4039` / `#836C54` (Fedora şapka, pantolon, kemer), `#1F171A` (Kontur & Çizme)
+  - Fener Işığı & Keşif (%10): `#FFD24C` (Pirinç Fener Kehribar-Altını), `#00D8C8` (Antik Turkuaz Hiyeroglif/Scarab), `#F53855` (Anubis/Tapınak Tehlike Kızılı)
 - **Juice & ASMR Parametreleri:**
   - Pentatonik cam/arp ses gamı (`C4 - Eb5`), Pitch modülasyonu (`0.95 - 1.35`)
   - *Perfect Weave* mikro Hit-Stop (`0.04s`), Camera Shake (`CameraShake2D`), Squash & Stretch
@@ -127,7 +127,12 @@ graph TD
 - [x] **v2.1 (360° Fener Rotasyonu, Mobil Ergonomi & Görsel/VFX Cila):**
   - **Tam 360° Fener Rotasyonu:** `LightConeCaster2D` açı kıstırması (`-60°..+65°`) kaldırılarak `-180°..+180°` tam özgür dönüş açıldı; `FlashlightController2D` 90° ötesine dönüldüğünde sadece omuz/kol görselini (`armVisualTransform`) aynalarken `LightConeCaster2D` ve `BeamDustMotes` her açıda `1:1` ölçeğini (`lossyScale=(1,1,1)`) ve birebir fiziksel menzili (`standardRange=10.5m`, `focusedRange=16.0m`) koruyor.
   - **Mobil Çift-Başparmak Kontrol Mimarisi (`LightTouchInput.cs`, `LightWeaverHUD.cs`, `ProgressManager.MobileAimMode`, `MenuScreensUI`):** Yatay ekran kilidi + `EnhancedTouch.Touch` çoklu-dokunma ayrımı. Sol alt tarafta çift-oklu **`MobileJumpBtn`** ve yanında uzunu gösteren fener ikonu (`ui_highbeam_icon.png`) ile bas-aç **`MobileHighBeamBtn`** (`LONG: OFF / ON`, standart/uzun hüzme geçişi) + üstünde `MobileBurstBtn` konumlandırıldı; sağ tarafta ise `AimModeToggleBtn` ile seçilebilen **Mod 0 (`AIM: 360 STICK`)** / **Mod 1 (`AIM: TOUCH POINT`)** aktif.
-  - **Görsel Netlik & VFX (`WorldVfxManager.cs`, `CrystalPlatform.cs`, `PrismLockGate.cs`, `LightWeaverSetupUtility.cs`):** 4 kristal varyantına 4 ayrı prosedürel sprite (`crystal_standard`, `crystal_boost`, `crystal_fragile`, `crystal_umbra`), `PrismLockGate` elmas bağlantı hattı (`LineRenderer`), Zero-GC `WorldVfxManager` parçacık patlamaları (`WorldBurstParticles`), `BeamDustMotes` ve `VOID HORIZON SILHOUETTES` paralaks monolitleri eklendi.
+  - **Görsel Netlik & VFX (`WorldVfxManager.cs`, `CrystalPlatform.cs`, `PrismLockGate.cs`, `LightWeaverSetupUtility.cs`):** 4 kristal varyantına 4 ayrı prosedürel sprite (`crystal_standard`, `crystal_boost`, `crystal_fragile`, `crystal_umbra`), `PrismLockGate` elmas bağlantı hattı (`LineRenderer`), Zero-GC `WorldVfxManager` parçacık patlamaları (`WorldBurstParticles`), `BeamDustMotes` ve derinlik katan paralaks eklendi.
+
+- [x] **v3.0 (Mısır Gizemi Konsepti, Modüler Dedektif Rig'i & 210° Akıllı Fener):**
+  - **210° Fener Yayı (`-105°..+105°`) & Sol Uzun Fener Toggle (`LightConeCaster2D.cs`, `LightTouchInput.cs`, `LightWeaverHUD.cs`):** Gereksiz arka kör bölge (`|açı| > 105°`) kapatılarak ön+tepe+alt+salınım ivme açısı `-105°..+105°` bandında kilitlendi; sol altta özel fener+ışın simgeli `MobileHighBeamBtn` (`LONG: OFF/ON`) & çift ok `MobileJumpBtn` yan yana kondu.
+  - **10+ Modüler Parçalı Trençkotlu Dedektif (`FlashlightController2D.cs`, `RunnerProceduralAnimator.cs`):** Şapkalı Kafa (`HeadLookPivot`), Gövde+Kemer, Rüzgârda Dalgalanan Trençkot Etekleri, 2-Eklemli Diz/Bacak (`Thigh -> Shin+Boot`) ve 2-Eklemli Fener Kolu (`Shoulder/UpperArm -> Forearm/Elbow -> VintageFlashlight`) kuruldu; kol kırılmadan tüm `-105°..+105°` aralığında doğal bükülüp hizalanıyor.
+  - **3 Katmanlı Mısır Piramit Paralaksı & Kumtaşı Dünyası (`LightWeaverSetupUtility.cs`, `MenuScreensUI.cs`):** `EGYPT NIGHT SKY` (Çöl Dolunayı), `EGYPT PYRAMIDS FAR` (`0.85x` Gize Piramitleri & Obeliskler) ve `EGYPT DUNES & RUINS` (`0.62x` kumullar), altın hiyeroglif kumtaşı/scarab/kireçtaşı/obsidyen platformları, sıcak altın-turkuaz fener hüzmesi ve Mısır sektor isimleri (`OUTSKIRTS OF GIZA`..`THE PHARAOH'S VAULT`) eklendi.
 
 ---
 

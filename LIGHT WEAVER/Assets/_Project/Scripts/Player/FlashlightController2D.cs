@@ -3,13 +3,15 @@ using UnityEngine;
 namespace LightWeaver.Player
 {
     /// <summary>
-    /// Koşucu karakterin fener tutan omuz/kol pivotunu hedef açıya pürüzsüzce döndürür ve
-    /// uçtaki LightConeCaster2D ışık konisini senkronize eder.
+    /// Dedektifin modüler 2-eklemli fener kolunu (Üst Kol + Dirsek/Ön Kol + Fener) -105°..+105° (210°) yayda
+    /// doğal dirsek bükülmesiyle döndürür ve uçtaki LightConeCaster2D konisini birebir hizalar.
     /// </summary>
     public sealed class FlashlightController2D : MonoBehaviour
     {
         [SerializeField] private Transform armPivot;
+        [SerializeField] private Transform forearmPivot;
         [SerializeField] private Transform armVisualTransform;
+        [SerializeField] private Transform headLookPivot;
         [SerializeField] private LightConeCaster2D coneCaster;
 
         public float CurrentAimAngleDeg => coneCaster != null ? coneCaster.CurrentAimAngleDeg : 0f;
@@ -54,20 +56,27 @@ namespace LightWeaver.Player
 
         private void LateUpdate()
         {
-            if (armPivot != null && coneCaster != null)
-            {
-                float angle = coneCaster.CurrentAimAngleDeg;
-                armPivot.rotation = Quaternion.Euler(0f, 0f, angle);
-                armPivot.localScale = Vector3.one;
+            if (armPivot == null || coneCaster == null) return;
 
-                // 360° geriye çevrildiğinde yalnızca kol sprite'ını aynala; LightConeCaster2D ölçeğini (1,1,1) koru!
-                if (armVisualTransform != null)
-                {
-                    float norm = Mathf.Repeat(angle + 180f, 360f) - 180f;
-                    float flipSign = Mathf.Abs(norm) > 90f ? -1f : 1f;
-                    Vector3 s = armVisualTransform.localScale;
-                    armVisualTransform.localScale = new Vector3(Mathf.Abs(s.x) * flipSign, Mathf.Abs(s.y), s.z);
-                }
+            float angle = coneCaster.CurrentAimAngleDeg;
+            armPivot.localScale = Vector3.one;
+
+            if (forearmPivot != null)
+            {
+                // 2-eklemli doğal uzanış: omuz açının ~%56'sını alır, önkol dirsekten hedefi tam tutar!
+                float shoulderDeg = Mathf.Clamp(angle * 0.56f, -64f, 64f);
+                armPivot.rotation = Quaternion.Euler(0f, 0f, shoulderDeg);
+                forearmPivot.rotation = Quaternion.Euler(0f, 0f, angle);
+            }
+            else
+            {
+                armPivot.rotation = Quaternion.Euler(0f, 0f, angle);
+            }
+
+            if (headLookPivot != null)
+            {
+                float headPitch = Mathf.Clamp(angle * 0.16f, -15f, 20f);
+                headLookPivot.localRotation = Quaternion.Euler(0f, 0f, headPitch);
             }
         }
     }

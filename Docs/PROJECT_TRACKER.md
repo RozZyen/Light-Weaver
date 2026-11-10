@@ -7,7 +7,7 @@
 
 ## 📊 Genel İlerleme Durumu
 
-- **Aktif Faz:** v2.1 (360° Fener Rotasyonu, Mobil Floating Stick / Touch Point Ergonomisi, 4 Ayrı Kristal Dokusu, WorldVfxManager & Paralaks Derinlik Tamamlandı — Faz 6: Monetizasyon Bekleniyor) 🔥🔦📱
+- **Aktif Faz:** v3.0 Mısır Gizemi Konsepti Tamamlandı — Modüler Trençkotlu Dedektif Rig'i, 3 Katmanlı Piramit/Çöl Paralaksı, 210° (`-105°..+105°`) Fener & Sol Alt `JUMP`/`LONG: OFF-ON` İkonlu Kontroller Hazır (Faz 6: Monetizasyon Bekleniyor) 🏺🔦📱
 - **Hedef Motor:** Unity 6 (URP 2D) + Unity MCP (`com.coplaydev.unity-mcp`)
 - **Depo Konumu:** `C:\Users\Yusuf\Documents\GitHub\Light-Weaver` (`https://github.com/RozZyen/Light-Weaver`)
 - **Son Güncelleme:** 2026-11-10
@@ -59,6 +59,7 @@
 | **F5.2** | **Menü Akışı & Checkpoint/Revive** | Ana Menü, Sektör Seçimi (`L1..L5`), Duraklatma (ESC/Pause) & `Solar Revive` köprüsü | ✅ Tamamlandı |
 | **F5.3** | **`HarmonicAudioManager` & Görsel Cila** | Prosedürel Do Minör Pentatonik kristal cam/çan ASMR, Hit-Stop, Shake & URP Bloom | ✅ Tamamlandı |
 | **F5.4** | **360° Fener, Mobil Ergonomi & VFX Cila (v2.1)** | Tam 360° huzme + `1:1` ölçek fix, `EnhancedTouch` 360° Floating Stick / Touch Point, `WorldVfxManager` & 4 ayrı kristal görseli | ✅ Tamamlandı |
+| **F5.5** | **Mısır Gizemi & Modüler Dedektif Dönüşümü (v3.0)** | Modüler 2-eklemli trençkotlu dedektif, 3 katmanlı Piramit/Kumul paralaks, `210°` (`-105°..+105°`) yay & sol alt `LONG BEAM` toggle | ✅ Tamamlandı |
 
 ### 📱 Faz 6: Mobil Mağaza Hazırlığı, Monetizasyon & Cila
 | Görev Kodu | Görev / Özellik | Detay | Durum |
@@ -69,6 +70,11 @@
 ---
 
 ## 📜 Geliştirme Günlüğü (Changelog)
+
+### [2026-11-10] — v0.9.0 (v3.0): Mısır Piramit Gecesi Konsepti, Modüler Trençkotlu Dedektif & 210° Akıllı Fener
+- **210° Fener Yayı (`-105° .. +105°`) & Sol Uzun Fener Butonu (`LightConeCaster2D.cs`, `LightTouchInput.cs`, `LightWeaverHUD.cs`):** Sürekli ileri koşuda gereksiz tam arka görüş kapatıldı, ancak ayak altı & Photon Anchor salınım ivmesi için `±90°` üzerine `15°` pay eklenerek `-105°..+105°` akıllı açıya inildi. Sol alta çift-oklu `MobileJumpBtn` yanına fener+uzun ışın simgeli bas-aç `MobileHighBeamBtn` (`LONG: OFF / ON`) yerleştirildi.
+- **Modüler Parçalı Trençkotlu Dedektif (`FlashlightController2D.cs`, `RunnerProceduralAnimator.cs`):** Referans paletinden (`#BC945F`, `#DFBE93`, `#5B4039`, `#836C54`, `#1F171A`, `#FFD24C`) türetilen ayrı Head+Fedora, Gövde, dalgalanan Trençkot Etekleri, 2-eklemli diz/bot (`Thigh -> ShinBoot`) ve **2-eklemli Modüler Fener Kolu** (`Shoulder/UpperArm -> Forearm/Elbow -> VintageFlashlight`) inşa edildi.
+- **3 Katmanlı Gize Piramitleri Paralaksı & Mısır Taşları (`LightWeaverSetupUtility.cs`, `CrystalPlatform.cs`, `MenuScreensUI.cs`):** Çöl Dolunayı (`0.96x`), Büyük Piramitler & Obeliskler (`0.85x`), Çöl Kumulları (`0.62x`); hiyeroglif kumtaşı, Horus hız taşı, çatlak kireçtaşı, lanetli Anubis obsidyen platformları, sıcak altın-turkuaz fener konisi ve Level 1–5 Mısır sektör profilleri kuruldu.
 
 ### [2026-11-10] — v0.8.0: v2.1 360° Fener Rotasyonu, Mobil Çift-Başparmak Kontrolleri & Görsel/VFX Yükseltmesi
 - **360° Tam Özgür Işık & `1:1` Huzme Doğruluğu (`LightConeCaster2D.cs`, `FlashlightController2D.cs`, `LightWeaverSetupUtility.cs`):** `-60°..+65°` açı sınırı kaldırılarak `-180°..+180°` tam 360° yönlendirme açıldı. `FlashlightEmitterTip` üzerindeki `0.34x` ölçek mirasının ışık konisi ve toz partiküllerini küçültme hatası `EmitterCoreGlow` alt nesnesi ayrılarak düzeltildi (`ConeScale=(1,1,1)`, `standardRange=10.5m`, `focusedRange=16.0m`). Kol aynalaması koni ölçeğini bozmadan yalnızca `armVisualTransform` üzerinde yapılıyor.

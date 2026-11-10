@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Sector_03
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 3
-  sectorName: THE UMBRA SWARM
+  sectorName: CHAMBER OF ANUBIS
   sectorDistanceMeters: 125
-  voidBackgroundColor: {r: 0.035, g: 0.022, b: 0.055, a: 1}
-  sectorAccentColor: {r: 1, g: 0.72, b: 0, a: 1}
-  sectorSecondaryColor: {r: 0.55, g: 0.15, b: 0.85, a: 1}
+  voidBackgroundColor: {r: 0.045, g: 0.026, b: 0.068, a: 1}
+  sectorAccentColor: {r: 0.96, g: 0.56, b: 0.18, a: 1}
+  sectorSecondaryColor: {r: 0.68, g: 0.3, b: 0.88, a: 1}
   runSpeedMultiplier: 1.14
   batteryDrainMultiplier: 1.15
   hazardFrequency: 0.36

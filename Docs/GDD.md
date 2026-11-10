@@ -1,23 +1,24 @@
-# 🔦 LIGHT WEAVER: Prism Runner — Master Game Design Document (GDD v2.1)
+# 🔦 LIGHT WEAVER: Sands of Mystery — Master Game Design Document (GDD v3.0)
 
 > **Proje Kodu:** `LIGHT_WEAVER`  
-> **Sürüm:** `v2.1.0-360-mobile-ready` (360° Tam Fener + Mobil Yatay Çift-Başparmak Ergonomisi + VFX Cila)  
+> **Sürüm:** `v3.0.0-egypt-detective` (Mısır Piramit Gecesi, Modüler Trençkotlu Dedektif & 210° Fener Yayı)  
 > **Hedef Motor:** Unity 6 (`6000.3.23f1`, Universal Render Pipeline - URP 2D)  
 > **Hedef Platformlar:** Mobil (Android & iOS Landscape — 60/120 FPS Zero-GC) + PC  
-> **Geliştirme Metodolojisi:** 6 Evrensel DDA Sütunu, Çoklu-Dokunma Ayrımı (`EnhancedTouch`), Sıfır Tahsis (Zero-GC)  
+> **Geliştirme Metodolojisi:** 6 Evrensel DDA Sütunu, Çoklu-Dokunma Ayrımı (`EnhancedTouch`), Modüler 2D Kemik/Eklem Rig'i, Sıfır Tahsis (Zero-GC)  
 
 ---
 
-## 📌 1. VİZYON DEĞİŞİMİ & OYUN KİMLİĞİ (Neden v2.0 / v2.1?)
+## 📌 1. VİZYON DEĞİŞİMİ & OYUN KİMLİĞİ (Mısır Gizemi + Dedektif)
 
-İlk prototip yalnızca "feneri aşağıda tutup dümdüz koşma" ve kısıtlı açıya kilitlenme riskini taşıyordu. **GDD v2.0 & v2.1**, oyuncunun fenerini **tam 360 derece (-180° .. +180°) özgürce** yukarı, aşağı, ileri ve arkaya çevirebildiği; pasif izlemeyi **aktif refleks, bulmaca ve aksiyona** dönüştüren derin sistemik mimariyi ve telefon ergonomisini tanımlar.
+**GDD v3.0**, oyunu soğuk soyut uzaydan çıkarıp **Antik Mısır Gecesi, Gize Piramitleri Paralaksı ve Elinde Pirinç Feneriyle Yolunu Arayan Trençkotlu Bir Dedektif** kimliğine oturtur. Oyuncu `210°` (`-105°` .. `+105°`) taktiksel ileri+dikey fener yayıyla gereksiz arka görüş karmaşası olmadan hem ayağının tam altını hem de Photon Anchor salınımlarındaki tepe ivmesini ustaca yakalar.
 
 | Alan | Detay |
 | :--- | :--- |
-| **Oyun Adı** | **LIGHT WEAVER: Prism Runner** |
-| **Tür (Genre)** | 2D Sistemik Işık Platformeri & Taktiksel Sonsuz Koşucu (*Active Hardlight Action-Runner*) |
-| **Temel Kanca (The Rule-Breaker Hook)** | **Dünya Zifiri Karanlıktır — Ama Her Işık İyi Değildir!**<br>• Siyan kristaller ışığınla katılaşır; ancak **Ters Faz (*Umbra*) Köprüleri** ışığın değdiğinde **erir** (üzerinden geçerken ışığı 360° döndürüp yukarıya/arkaya kaçırman gerekir!).<br>• Önünü kesen **Karanlık Kilit Kapılarını** açmak için ışığını kapının tepesindeki elmasa odaklamalısın (`LineRenderer` enerji halatıyla bağlı).<br>• Zemini olmayan devasa uçurumlardan geçmek için havadaki **Foton Çapalarına (*Photon Anchor*)** ışık tutup sallanmalısın! |
-| **Kontrol Şeması (360° PC & Mobil)** | **PC:** `Fare` (Tam 360° imleç takibi) · `W/A/S/D` veya `Ok Tuşları` (8-Yön 360° nişan) · `Space` (Zıpla / Çift Zıpla) · `Sağ Tık` / `Shift` (Odak Lazeri) · `F`/`E` (Flash-Burst)<br>**Mobil Yatay (Landscape Ergonomisi):** `EnhancedTouch` Çoklu-Dokunma ayrımıyla:<br>• **Sol Başparmak Kontrol Grubu:** Sol alt **`JUMP`** (Zıplama / Çift Zıplama) ve hemen yanında fener+uzun ışın simgeli **`LONG: OFF/ON` (Uzun Far / High-Beam Toggle)** butonu (`12.39m <-> 18.88m` menzil değişimi) + üstünde `BURST [F]`.<br>• **Sağ Başparmak (2 Tercihli 360° Nişan Modu):**<br>  — **Mod 0 (`AIM: 360 STICK` — Varsayılan):** Sağ alanda dokunulan noktada açılan şeffaf **360° Sanal Joystick** (`FloatingAimStickBase/Knob`). Parmağın hedefi ve kristalleri kapatmaz; merkeze göre kaydırma yönü anlık 360° fener açısını belirler!<br>  — **Mod 1 (`AIM: TOUCH POINT`):** Dokunulan dünya noktasına doğrudan 360° ışık yöneltme.<br>• **Hızlı Aksiyon:** Çift dokunuş veya sol üstteki `BURST [F]` ile Flash-Burst patlaması (Menüdeki `AimModeToggleBtn` ile mod tercihi kalıcı kaydedilir). |
+| **Oyun Adı** | **LIGHT WEAVER: Sands of Mystery** |
+| **Tür (Genre)** | 2D Sistemik Işık Platformeri & Taktiksel Sonsuz Koşucu (*Atmospheric Egypt Mystery Runner*) |
+| **Ana Kahraman (Modüler Rig)** | **Trençkotlu Dedektif** (`#BC945F` Deve Tüyü, `#DFBE93` Açık Yaka, `#5B4039` Fedora Şapka, `#836C54` Pantolon, `#1F171A` Kontur & Bot): Ayrı Kafa/Şapka, Gövde+Kemer, Rüzgârda Dalgalanan Trençkot Etekleri, 2-Eklemli Diz/Bacak ve **2-Eklemli Modüler Fener Kolu (`UpperArm -> Forearm -> VintageFlashlight`)**. |
+| **Temel Kanca (The Rule-Breaker Hook)** | **Çöl Gecesi Zifiri Karanlıktır — Ama Her Işık İyi Değildir!**<br>• Altın hiyeroglifli kumtaşları ışığınla katılaşır; ancak **Lanetli Anubis (*Umbra*) Köprüleri** fener değdiğinde **çözünüp erir** (feneri yukarı/+105°'ye kaçırmalısın!).<br>• Önünü kesen **Tapınak Lazer Kapılarını** açmak için ışığını kapının tepesindeki mühür elmasına odaklamalısın.<br>• Uçurumları aşmak için gökyüzündeki **Foton Çapalarına (*Photon Anchor*)** `210°` yayı kullanarak ışık halatıyla tutunup sallanmalısın! |
+| **Kontrol Şeması (210° PC & Mobil)** | **PC:** `Fare` (`-105°..+105°` 210° imleç takibi) · `W/A/S/D` veya `Oklar` · `Space` (Zıpla / Çift Zıpla) · `Sağ Tık` / `Shift` (Uzun Fener) · `F`/`E` (Flash-Burst)<br>**Mobil Yatay (Landscape Ergonomisi):** `EnhancedTouch` Çoklu-Dokunma ayrımıyla:<br>• **Sol Başparmak Kontrol Grubu:** Sol alt **`JUMP`** ve yanında fener+uzun ışın ikonlu **`LONG: OFF/ON` (Uzun Fener Toggle)** butonu (`12.39m <-> 18.88m` menzil) + üstünde `BURST [F]`.<br>• **Sağ Başparmak (`AIM: 210 STICK` / `TOUCH POINT`):** Sağ alanda açılan şeffaf sanal joystick veya dokunma noktasıyla `-105°..+105°` kesintisiz fener kontrolü. |
 | **Baskı Mekaniği** | **The Eclipse (Hiçlik Dalgası):** Ekranın solundan kovalayan canlı mor-kızıl karanlık dalgası. Yavaşlarsan seni yutar; Hız Kristalleri ve üst rotalarla onu geri püskürtürsün. |
 | **Roguelite Derinliği** | Her sektör geçişinde zaman yavaşlar ve oyuncu 3 rastgele **Prizma Yükseltmesi (*Prism Blessing*)** kartından birini seçer! |
 
@@ -71,12 +72,12 @@ Feneri sürekli `-12°` aşağı tutan oyuncu **maksimum 8 saniye** hayatta kala
 
 ## 🌌 3. SEKTÖRLER & 8 RİTMİK BÖLÜM ÖRÜNTÜSÜ
 
-### 5 Sektör Profili
-1. **Level 1 - THE SILENT ABYSS:** Siyan kristaller, ilk Hız Kristalleri, basit zıplamalar, *UmbraStalker* girişi.
-2. **Level 2 - THE PRISM CAVERNS:** *Prism Relay* kırıcıları, **Prism Lock Gates (Kilitli Kapılar)** ve ilk **Umbra Bridge (Ters Köprü)**!
-3. **Level 3 - THE UMBRA SWARM:** **Photon Anchor** uçurum sallanmaları, *Void Leech* kümeleri, *Fragile Shard* kırılan buz basamakları.
-4. **Level 4 - THE ECHO VOID:** Hızlı tempo, çift katmanlı *JumpPad + Tether* akrobatik kombinasyonları, kombine kapı+ters köprü sınavları.
-5. **Level 5 - THE SINGULARITY CORE:** Yoğun karanlık baskısı (*The Eclipse*), hızlı peş peşe kilit kapıları ve kırılgan kristal koşuları!
+### 5 Mısır Keşif Sektörü Profili
+1. **Level 1 - OUTSKIRTS OF GIZA:** Gece çölünde kumtaşı harabeler, ilk Horus Hız Taşları, basit zıplamalar, *UmbraStalker* girişi.
+2. **Level 2 - THE SANDSTONE TOMBS:** *Prism Relay* kırıcıları, **Prism Lock Gates (Tapınak Lazer Kapıları)** ve ilk **Umbra Bridge (Lanetli Köprü)**!
+3. **Level 3 - CHAMBER OF ANUBIS:** **Photon Anchor** uçurum sallanmaları, *Void Leech* kümeleri, *Fragile Shard* çatlak kireçtaşları.
+4. **Level 4 - HALL OF SCARABS:** Hızlı tempo, çift katmanlı *JumpPad + Tether* akrobatik kombinasyonları, kombine kapı+lanetli köprü sınavları.
+5. **Level 5 - THE PHARAOH'S VAULT:** Yoğun kum fırtınası baskısı (*The Eclipse*), hızlı peş peşe kilit kapıları ve kırılgan tablet koşuları!
 
 ### 8 Balistik Doğrulanmış Chunk Örüntüsü (`EndlessChunkDirector`)
 1. `FlatPulse`: Standart + `+ENERGY` yayları ve zıplama boşlukları.
@@ -92,6 +93,9 @@ Feneri sürekli `-12°` aşağı tutan oyuncu **maksimum 8 saniye** hayatta kala
 
 ## 🎨 4. SANAT, UI/UX VE SES BİBLOSU
 
-* **Renk Paleti (60-30-10):** Boşluk `#05070D` (%60) · Siyan/Eflatun Kristaller `#00F0FF` / `#B537F2` (%30) · Altın Enerji / Turuncu Sıçrama / Kırmızı Tehlike `#FFD000` / `#FF6B00` / `#FF1E56` (%10).
-* **HUD:** Sol üstte gradyan pil barı (`BATTERY: XX%`) + Flash-Burst dolum çubuğu; sağ üstte `LEVEL X - SECTOR` + virgüllü skor sayacı (`31,500`) + *Eclipse* tehlike mesafe çubuğu; alt köşelerde ergonomik mobil dokunmatik `JUMP` ve `FOCUS / BURST` kontrolleri.
+* **Renk Paleti (60-30-10 — Mısır Gecesi & Dedektif Referansı):**
+  * **Gece Çölü & Piramitler (%60 Zemin):** `#080A16` (Çöl Gecesi), `#2B2540` / `#141122` (Piramit & Obelisk Paralaksı), `#20181D` (Yakın Kumullar)
+  * **Dedektif Trençkot & Kumtaşı (%30 Karakter/Platform):** `#BC945F` / `#DFBE93` / `#A88453` (Trençkot beji), `#5B4039` / `#836C54` (Fedora şapka, pantolon, kemer), `#1F171A` (Dış kontur & çizme)
+  * **Fener Işını, Altın & Turkuaz (%10 Odak):** `#FFD24C` (Pirinç fener kehribar-altını), `#00D8C8` (Antik turkuaz scarab keşfi), `#F53855` (Lanet & tehlike)
+* **HUD:** Sol üstte gradyan pil barı (`BATTERY: XX%`) + Flash-Burst barı; sağ üstte `LEVEL X - OUTSKIRTS OF GIZA` + skor sayacı + *Eclipse* tehlike barı; sol altta **`JUMP`** + **`LONG: OFF/ON`** ikon butonları + **`BURST [F]`**, sağ alanda şeffaf **210° Floating Stick**.
 * **ASMR Ses:** Do Minör Pentatonik (`C4–G5`) prosedürel cam arp/çan notaları, kilit kapısı kırılma rezonansı, Photon Tether ışık çekiş sesi, hız kristali armonisi ve dinamik space drone.

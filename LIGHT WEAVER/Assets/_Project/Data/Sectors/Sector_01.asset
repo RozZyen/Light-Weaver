@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Sector_01
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 1
-  sectorName: THE SILENT ABYSS
+  sectorName: OUTSKIRTS OF GIZA
   sectorDistanceMeters: 90
-  voidBackgroundColor: {r: 0.02, g: 0.027, b: 0.051, a: 1}
-  sectorAccentColor: {r: 0, g: 0.94, b: 1, a: 1}
-  sectorSecondaryColor: {r: 0.35, g: 0.55, b: 1, a: 1}
+  voidBackgroundColor: {r: 0.032, g: 0.038, b: 0.088, a: 1}
+  sectorAccentColor: {r: 1, g: 0.82, b: 0.3, a: 1}
+  sectorSecondaryColor: {r: 0, g: 0.85, b: 0.78, a: 1}
   runSpeedMultiplier: 1
   batteryDrainMultiplier: 0.85
   hazardFrequency: 0.14

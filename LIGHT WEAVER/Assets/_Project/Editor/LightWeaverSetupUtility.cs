@@ -32,7 +32,7 @@ namespace LightWeaver.EditorTools
         private const int PlayerLayer = 6;
         private const int HardlightWorldLayer = 7;
 
-        [MenuItem("LightWeaver/Build Complete Game Scene (360 Aim & Mobile Ready)")]
+        [MenuItem("LightWeaver/Build Complete Game Scene (Egypt Mystery & 210 Aim)")]
         public static void BuildPlayableScene()
         {
             EnsureDirectories();
@@ -40,7 +40,7 @@ namespace LightWeaver.EditorTools
             ConfigureMobileLandscapeSettings();
             PhysicsMaterial2D zeroFrictionMat = CreateOrLoadZeroFrictionMaterial();
 
-            // 1. Prosedürel Sprite Üretimi (4 Kristal Varyantı + Koşucu + UI + VFX)
+            // 1. Prosedürel Mısır Gizemi & Modüler Dedektif Sprite Üretimi
             Sprite crystalStandardSprite = GenerateCrystalPlatformSprite(Path.Combine(SpritesFolder, "prism_crystal_block.png"));
             Sprite crystalBoostSprite = GenerateBoostCrystalSprite(Path.Combine(SpritesFolder, "crystal_boost.png"));
             Sprite crystalFragileSprite = GenerateFragileCrystalSprite(Path.Combine(SpritesFolder, "crystal_fragile.png"));
@@ -50,8 +50,14 @@ namespace LightWeaver.EditorTools
             Sprite starburstSprite = GenerateStarburstSprite(Path.Combine(SpritesFolder, "diamond_starburst.png"));
             Sprite emitterCoreSprite = GenerateEmitterCoreSprite(Path.Combine(SpritesFolder, "flashlight_emitter_core.png"));
 
-            Sprite runnerTorsoSprite = GenerateRunnerTorsoHeadSprite(Path.Combine(SpritesFolder, "runner_torso_head.png"));
-            Sprite runnerLimbSprite = GenerateRunnerLimbSprite(Path.Combine(SpritesFolder, "runner_limb.png"));
+            Sprite detTorsoSprite = GenerateDetectiveTorsoSprite(Path.Combine(SpritesFolder, "detective_torso.png"));
+            Sprite detHeadHatSprite = GenerateDetectiveHeadHatSprite(Path.Combine(SpritesFolder, "detective_head_hat.png"));
+            Sprite detCoatTailSprite = GenerateDetectiveCoatTailSprite(Path.Combine(SpritesFolder, "detective_coat_tail.png"));
+            Sprite detArmSprite = GenerateDetectiveArmSprite(Path.Combine(SpritesFolder, "detective_arm_seg.png"));
+            Sprite detThighSprite = GenerateDetectiveThighSprite(Path.Combine(SpritesFolder, "detective_thigh.png"));
+            Sprite detShinBootSprite = GenerateDetectiveShinBootSprite(Path.Combine(SpritesFolder, "detective_shin_boot.png"));
+            Sprite detFlashlightSprite = GenerateVintageFlashlightSprite(Path.Combine(SpritesFolder, "detective_flashlight.png"));
+
             Sprite runnerSparkSprite = GenerateSoftDotSprite(Path.Combine(SpritesFolder, "runner_spark_dot.png"));
             Sprite heroAuraSprite = GenerateSoftDotSprite(Path.Combine(SpritesFolder, "hero_aura_glow.png"));
             Texture2D beamGradientTex = GenerateBeamGradientTexture(Path.Combine(SpritesFolder, "volumetric_beam_gradient.png"));
@@ -71,7 +77,11 @@ namespace LightWeaver.EditorTools
             Sprite gateBarrierSprite = GenerateLaserBarrierSprite(Path.Combine(SpritesFolder, "prism_gate_barrier.png"));
             Sprite anchorRingSprite = GeneratePhotonAnchorSprite(Path.Combine(SpritesFolder, "photon_anchor_ring.png"));
             Sprite eclipseWallSprite = GenerateEclipseWaveSprite(Path.Combine(SpritesFolder, "eclipse_wave_wall.png"));
-            Sprite voidMonolithSprite = GenerateHorizonMonolithSprite(Path.Combine(SpritesFolder, "void_horizon_monolith.png"));
+
+            Sprite pyramidFarSprite = GeneratePyramidSprite(Path.Combine(SpritesFolder, "egypt_pyramid_far.png"));
+            Sprite obeliskSprite = GenerateObeliskSilhouetteSprite(Path.Combine(SpritesFolder, "egypt_obelisk_silhouette.png"));
+            Sprite sandDuneSprite = GenerateSandDuneSprite(Path.Combine(SpritesFolder, "egypt_dune_mid.png"));
+            Sprite desertMoonSprite = GenerateDesertMoonSprite(Path.Combine(SpritesFolder, "egypt_moon.png"));
 
             Sprite batteryOutlineSprite = GenerateBatteryFrameSprite(Path.Combine(SpritesFolder, "ui_battery_frame.png"));
             Sprite batteryGradientSprite = GenerateBatteryGradientFillSprite(Path.Combine(SpritesFolder, "ui_battery_gradient.png"));
@@ -84,7 +94,7 @@ namespace LightWeaver.EditorTools
 
             SectorProfileSO[] sectorProfiles = CreateOrUpdateSectorProfiles();
 
-            // 2. Kamera & URP Post-Process Bloom
+            // 2. Kamera & Mısır Çöl Gecesi Post-Process
             Camera mainCam = Camera.main;
             if (mainCam == null)
             {
@@ -95,7 +105,7 @@ namespace LightWeaver.EditorTools
             mainCam.orthographic = true;
             mainCam.orthographicSize = 5.8f;
             mainCam.clearFlags = CameraClearFlags.SolidColor;
-            mainCam.backgroundColor = new Color(0.02f, 0.027f, 0.051f, 1f);
+            mainCam.backgroundColor = new Color(0.032f, 0.038f, 0.088f, 1f);
 
             UniversalAdditionalCameraData urpCamData = mainCam.GetUniversalAdditionalCameraData();
             if (urpCamData != null) urpCamData.renderPostProcessing = true;
@@ -108,6 +118,9 @@ namespace LightWeaver.EditorTools
             DestroyExistingIfFound("=== LIGHT WEAVER RUNNER ===");
             DestroyExistingIfFound("=== VOID STARFIELD ===");
             DestroyExistingIfFound("=== VOID HORIZON SILHOUETTES ===");
+            DestroyExistingIfFound("=== EGYPT NIGHT SKY ===");
+            DestroyExistingIfFound("=== EGYPT PYRAMIDS FAR ===");
+            DestroyExistingIfFound("=== EGYPT DUNES & RUINS ===");
             DestroyExistingIfFound("=== THE ECLIPSE WAVE ===");
             DestroyExistingIfFound("=== LIGHT WEAVER POSTPROCESS ===");
             DestroyExistingIfFound("=== LIGHT WEAVER UI CANVAS ===");
@@ -127,13 +140,18 @@ namespace LightWeaver.EditorTools
             GameObject gatePrefab = SavePrismGatePrefab(gateBarrierSprite, prismDiamondSprite);
             GameObject anchorPrefab = SavePhotonAnchorPrefab(anchorRingSprite);
 
-            // 4. Neon Cyber-Runner
+            // 4. Modüler Parçalı Trençkotlu Dedektif Karakteri
             GameObject runnerGo = BuildRunnerCharacter(
                 mainCam,
                 camFollow,
                 zeroFrictionMat,
-                runnerTorsoSprite,
-                runnerLimbSprite,
+                detTorsoSprite,
+                detHeadHatSprite,
+                detCoatTailSprite,
+                detArmSprite,
+                detThighSprite,
+                detShinBootSprite,
+                detFlashlightSprite,
                 emitterCoreSprite,
                 runnerSparkSprite,
                 heroAuraSprite,
@@ -153,9 +171,9 @@ namespace LightWeaver.EditorTools
             mainCam.transform.position = new Vector3(runnerGo.transform.position.x + 4.6f, runnerGo.transform.position.y + 0.9f, -10f);
             PrefabUtility.SaveAsPrefabAsset(runnerGo, Path.Combine(PrefabsFolder, "PF_LightWeaverRunner.prefab"));
 
-            // 5. Sonsuz Yıldız Alanı & Uzak Monolit Silüetleri
-            BuildInfiniteStarfield(mainCam.transform, runnerSparkSprite);
-            BuildHorizonSilhouettes(mainCam.transform, voidMonolithSprite);
+            // 5. Mısır Gece Gökyüzü + Piramit & Çöl Paralaks Katmanları
+            BuildInfiniteStarfield(mainCam.transform, runnerSparkSprite, desertMoonSprite);
+            BuildEgyptParallaxLayers(mainCam.transform, pyramidFarSprite, obeliskSprite, sandDuneSprite);
 
             // 6. Merkezi Sistemler + WorldVfxManager + Eclipse Dalgası
             GameObject systemsRoot = new GameObject("=== LIGHT WEAVER SYSTEMS ===");
@@ -260,7 +278,7 @@ namespace LightWeaver.EditorTools
 
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             EditorSceneManager.SaveOpenScenes();
-            Debug.Log("[LightWeaver Setup] v2.1 Complete: 360° Aim, Floating Mobile Stick, 4 Distinct Crystal Variants, Burst VFX & Parallax Depth Built!");
+            Debug.Log("[LightWeaver Setup] v3.0 Egypt Mystery Complete: Modular Trench-Coat Detective, 210° Beam, Multi-Layer Pyramid Parallax & Sandstone World Built!");
         }
 
         private static void ConfigureMobileLandscapeSettings()
@@ -476,7 +494,7 @@ namespace LightWeaver.EditorTools
             scoreRt.anchoredPosition = new Vector2(-132f, -40f);
             scoreRt.sizeDelta = new Vector2(540f, 130f);
 
-            Text sectorText = CreateUIText("SectorTitle", scoreContainer.transform, builtinFont, "LEVEL 1 - <color=#00F0FF>THE SILENT ABYSS</color>", 23, FontStyle.Bold, TextAnchor.UpperRight, new Color(0.86f, 0.90f, 0.96f, 1f));
+            Text sectorText = CreateUIText("SectorTitle", scoreContainer.transform, builtinFont, "LEVEL 1 - <color=#FFD24C>OUTSKIRTS OF GIZA</color>", 23, FontStyle.Bold, TextAnchor.UpperRight, new Color(0.95f, 0.90f, 0.80f, 1f));
             sectorText.supportRichText = true;
             RectTransform secRt = sectorText.GetComponent<RectTransform>();
             secRt.anchorMin = new Vector2(1f, 1f);
@@ -623,39 +641,39 @@ namespace LightWeaver.EditorTools
             hudSo.ApplyModifiedPropertiesWithoutUndo();
 
             // =================================================================
-            // 2. ANA MENÜ (360° Kontroller & Mobil Aim Modu Seçimi Dahil)
+            // 2. ANA MENÜ (Mısır Gizemi, 210° Kontroller & Mobil Aim Modu Seçimi)
             // =================================================================
-            GameObject mainMenuPanel = CreateModalCard("MainMenuPanel", safeRoot.transform, panelSprite, new Vector2(860f, 690f), new Color(0.03f, 0.05f, 0.11f, 0.90f));
-            Text titleTxt = CreateUIText("Title", mainMenuPanel.transform, builtinFont, "LIGHT WEAVER", 62, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.0f, 0.94f, 1.0f, 1f));
+            GameObject mainMenuPanel = CreateModalCard("MainMenuPanel", safeRoot.transform, panelSprite, new Vector2(860f, 690f), new Color(0.08f, 0.06f, 0.07f, 0.92f));
+            Text titleTxt = CreateUIText("Title", mainMenuPanel.transform, builtinFont, "LIGHT WEAVER", 62, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.82f, 0.30f, 1f));
             SetAnchoredPos(titleTxt.rectTransform, new Vector2(0f, 250f), new Vector2(720f, 76f));
 
-            Text subTxt = CreateUIText("Subtitle", mainMenuPanel.transform, builtinFont, "360° LIGHT AIM: MOUSE / WASD / STICK  •  JUMP: SPACE  •  BURST: F", 17, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.85f, 0.92f, 1f, 0.88f));
+            Text subTxt = CreateUIText("Subtitle", mainMenuPanel.transform, builtinFont, "SANDS OF GIZA  •  210° BEAM: MOUSE / WASD / STICK  •  JUMP: SPACE", 17, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.92f, 0.84f, 0.68f, 0.92f));
             SetAnchoredPos(subTxt.rectTransform, new Vector2(0f, 192f), new Vector2(800f, 34f));
 
-            Text bestTxt = CreateUIText("BestScoreText", mainMenuPanel.transform, builtinFont, "BEST: 0   |   0m", 22, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.84f, 0.18f, 1f));
+            Text bestTxt = CreateUIText("BestScoreText", mainMenuPanel.transform, builtinFont, "BEST: 0   |   0m", 22, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.10f, 0.88f, 0.80f, 1f));
             SetAnchoredPos(bestTxt.rectTransform, new Vector2(0f, 138f), new Vector2(640f, 36f));
 
             Button[] sectorBtns = new Button[5];
             for (int i = 0; i < 5; i++)
             {
-                Button sBtn = CreateNeonButton($"SectorBtn_{i + 1}", mainMenuPanel.transform, panelSprite, builtinFont, $"L{i + 1}", 22, new Color(0.10f, 0.16f, 0.28f, 0.85f), Color.white, new Vector2(96f, 52f));
+                Button sBtn = CreateNeonButton($"SectorBtn_{i + 1}", mainMenuPanel.transform, panelSprite, builtinFont, $"L{i + 1}", 22, new Color(0.16f, 0.13f, 0.12f, 0.88f), Color.white, new Vector2(96f, 52f));
                 SetAnchoredPos(sBtn.GetComponent<RectTransform>(), new Vector2((i - 2) * 112f, 62f), new Vector2(96f, 52f));
                 sectorBtns[i] = sBtn;
             }
 
-            Text secInfoTxt = CreateUIText("SelectedSectorInfo", mainMenuPanel.transform, builtinFont, "LEVEL 1 - THE SILENT ABYSS", 20, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.0f, 0.94f, 1.0f, 0.95f));
+            Text secInfoTxt = CreateUIText("SelectedSectorInfo", mainMenuPanel.transform, builtinFont, "LEVEL 1 - OUTSKIRTS OF GIZA", 20, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.82f, 0.30f, 0.96f));
             SetAnchoredPos(secInfoTxt.rectTransform, new Vector2(0f, 6f), new Vector2(620f, 32f));
 
-            Button playBtn = CreateNeonButton("PlayButton", mainMenuPanel.transform, panelSprite, builtinFont, "PLAY", 34, new Color(0.0f, 0.82f, 0.95f, 1f), new Color(0.02f, 0.05f, 0.10f, 1f), new Vector2(360f, 82f));
-            SetAnchoredPos(playBtn.GetComponent<RectTransform>(), new Vector2(0f, -82f), new Vector2(360f, 82f));
+            Button playBtn = CreateNeonButton("PlayButton", mainMenuPanel.transform, panelSprite, builtinFont, "EXPLORE THE PYRAMIDS", 28, new Color(0.95f, 0.72f, 0.18f, 1f), new Color(0.10f, 0.06f, 0.04f, 1f), new Vector2(400f, 82f));
+            SetAnchoredPos(playBtn.GetComponent<RectTransform>(), new Vector2(0f, -82f), new Vector2(400f, 82f));
 
-            Button musicBtn = CreateNeonButton("MusicToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "MUSIC: ON", 19, new Color(0.10f, 0.16f, 0.28f, 0.9f), Color.white, new Vector2(215f, 54f));
+            Button musicBtn = CreateNeonButton("MusicToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "MUSIC: ON", 19, new Color(0.16f, 0.13f, 0.12f, 0.9f), Color.white, new Vector2(215f, 54f));
             SetAnchoredPos(musicBtn.GetComponent<RectTransform>(), new Vector2(-240f, -205f), new Vector2(215f, 54f));
 
-            Button sfxBtn = CreateNeonButton("SfxToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "ASMR SFX: ON", 19, new Color(0.10f, 0.16f, 0.28f, 0.9f), Color.white, new Vector2(215f, 54f));
+            Button sfxBtn = CreateNeonButton("SfxToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "ASMR SFX: ON", 19, new Color(0.16f, 0.13f, 0.12f, 0.9f), Color.white, new Vector2(215f, 54f));
             SetAnchoredPos(sfxBtn.GetComponent<RectTransform>(), new Vector2(0f, -205f), new Vector2(215f, 54f));
 
-            Button aimBtn = CreateNeonButton("AimModeToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "AIM: 360 STICK", 19, new Color(0.10f, 0.20f, 0.34f, 0.9f), new Color(0.45f, 0.96f, 1f, 1f), new Vector2(230f, 54f));
+            Button aimBtn = CreateNeonButton("AimModeToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "AIM: 210 STICK", 19, new Color(0.16f, 0.14f, 0.18f, 0.92f), new Color(1.0f, 0.86f, 0.36f, 1f), new Vector2(230f, 54f));
             SetAnchoredPos(aimBtn.GetComponent<RectTransform>(), new Vector2(245f, -205f), new Vector2(230f, 54f));
 
             // =================================================================
@@ -923,11 +941,11 @@ namespace LightWeaver.EditorTools
         {
             var specs = new (int num, string title, float dist, Color bg, Color accent, Color sec, float speed, float drain, float haz, float prism)[]
             {
-                (1, "THE SILENT ABYSS",     90f,  new Color(0.020f, 0.027f, 0.051f, 1f), new Color(0.00f, 0.94f, 1.00f, 1f), new Color(0.35f, 0.55f, 1.00f, 1f), 1.00f, 0.85f, 0.14f, 0.15f),
-                (2, "THE PRISM CAVERNS",    115f, new Color(0.025f, 0.020f, 0.065f, 1f), new Color(0.00f, 0.94f, 1.00f, 1f), new Color(0.71f, 0.22f, 0.95f, 1f), 1.07f, 1.00f, 0.25f, 0.30f),
-                (3, "THE UMBRA SWARM",      125f, new Color(0.035f, 0.022f, 0.055f, 1f), new Color(1.00f, 0.72f, 0.00f, 1f), new Color(0.55f, 0.15f, 0.85f, 1f), 1.14f, 1.15f, 0.36f, 0.24f),
-                (4, "THE ECHO VOID",        135f, new Color(0.018f, 0.030f, 0.062f, 1f), new Color(0.00f, 0.96f, 0.92f, 1f), new Color(1.00f, 0.78f, 0.18f, 1f), 1.22f, 1.28f, 0.44f, 0.28f),
-                (5, "THE SINGULARITY CORE", 150f, new Color(0.045f, 0.015f, 0.040f, 1f), new Color(1.00f, 0.12f, 0.34f, 1f), new Color(0.00f, 0.94f, 1.00f, 1f), 1.32f, 1.42f, 0.52f, 0.30f),
+                (1, "OUTSKIRTS OF GIZA",      90f,  new Color(0.032f, 0.038f, 0.088f, 1f), new Color(1.00f, 0.82f, 0.30f, 1f), new Color(0.00f, 0.85f, 0.78f, 1f), 1.00f, 0.85f, 0.14f, 0.15f),
+                (2, "THE SANDSTONE TOMBS",    115f, new Color(0.038f, 0.032f, 0.082f, 1f), new Color(0.05f, 0.88f, 0.82f, 1f), new Color(0.95f, 0.68f, 0.22f, 1f), 1.07f, 1.00f, 0.25f, 0.30f),
+                (3, "CHAMBER OF ANUBIS",      125f, new Color(0.045f, 0.026f, 0.068f, 1f), new Color(0.96f, 0.56f, 0.18f, 1f), new Color(0.68f, 0.30f, 0.88f, 1f), 1.14f, 1.15f, 0.36f, 0.24f),
+                (4, "HALL OF SCARABS",        135f, new Color(0.024f, 0.040f, 0.078f, 1f), new Color(0.18f, 0.92f, 0.72f, 1f), new Color(1.00f, 0.78f, 0.24f, 1f), 1.22f, 1.28f, 0.44f, 0.28f),
+                (5, "THE PHARAOH'S VAULT",    150f, new Color(0.055f, 0.020f, 0.048f, 1f), new Color(1.00f, 0.24f, 0.38f, 1f), new Color(1.00f, 0.84f, 0.28f, 1f), 1.32f, 1.42f, 0.52f, 0.30f),
             };
 
             SectorProfileSO[] result = new SectorProfileSO[specs.Length];
@@ -965,7 +983,12 @@ namespace LightWeaver.EditorTools
             CameraFollow2D camFollow,
             PhysicsMaterial2D zeroFrictionMat,
             Sprite torsoSprite,
-            Sprite limbSprite,
+            Sprite headHatSprite,
+            Sprite coatTailSprite,
+            Sprite armSegmentSprite,
+            Sprite thighSprite,
+            Sprite shinBootSprite,
+            Sprite flashlightPropSprite,
             Sprite emitterCoreSprite,
             Sprite sparkSprite,
             Sprite auraSprite,
@@ -997,35 +1020,60 @@ namespace LightWeaver.EditorTools
             GameObject visualRoot = new GameObject("VisualRoot");
             visualRoot.transform.SetParent(runner.transform, false);
 
-            GameObject auraObj = new GameObject("HeroCyanAura");
+            GameObject auraObj = new GameObject("DetectiveLanternAura");
             auraObj.transform.SetParent(visualRoot.transform, false);
-            auraObj.transform.localPosition = new Vector3(0f, 0.1f, 0f);
-            auraObj.transform.localScale = new Vector3(2.2f, 2.6f, 1f);
+            auraObj.transform.localPosition = new Vector3(0.05f, 0.14f, 0f);
+            auraObj.transform.localScale = new Vector3(2.3f, 2.7f, 1f);
             SpriteRenderer auraSr = auraObj.AddComponent<SpriteRenderer>();
             auraSr.sprite = auraSprite;
-            auraSr.color = new Color(0.0f, 0.88f, 1.0f, 0.22f);
+            auraSr.color = new Color(1.0f, 0.80f, 0.34f, 0.18f);
             auraSr.sortingOrder = 9;
 
-            Transform backArmPivot = CreateLimbPivot("BackArmPivot", visualRoot.transform, new Vector3(-0.08f, 0.26f, 0f), new Vector3(0.20f, 0.52f, 1f), new Vector3(0f, -0.22f, 0f), limbSprite, new Color(0.10f, 0.52f, 0.78f, 1f), 11);
-            Transform backLegPivot = CreateLimbPivot("BackLegPivot", visualRoot.transform, new Vector3(-0.04f, -0.14f, 0f), new Vector3(0.26f, 0.58f, 1f), new Vector3(0f, -0.24f, 0f), limbSprite, new Color(0.10f, 0.54f, 0.82f, 1f), 11);
+            // Arka Bacak (Kalça -> Uyluk -> Diz/Baldır/Çizme)
+            Transform backLegPivot = CreateLimbPivot("BackLegPivot", visualRoot.transform, new Vector3(-0.04f, -0.08f, 0f), new Vector3(0.24f, 0.36f, 1f), new Vector3(0f, -0.15f, 0f), thighSprite, new Color(0.84f, 0.78f, 0.72f, 1f), 11);
+            Transform backShinPivot = CreateLimbPivot("BackShinPivot", backLegPivot, new Vector3(0f, -0.28f, 0f), new Vector3(0.32f, 0.38f, 1f), new Vector3(0.04f, -0.17f, 0f), shinBootSprite, new Color(0.84f, 0.78f, 0.72f, 1f), 11);
 
+            // Gövde (Trençkot + Dalgalanan Etekler + Ayrı Şapkalı Kafa + Arka Kol + Sırt Bataryası)
             GameObject bodyPivot = new GameObject("BodyPivot");
             bodyPivot.transform.SetParent(visualRoot.transform, false);
-            GameObject torsoGo = new GameObject("TorsoHeadSprite");
+
+            // Trençkot Arka ve Ön Etek Kanatları
+            Transform coatTailBackPivot = CreateLimbPivot("CoatTailBackPivot", bodyPivot.transform, new Vector3(-0.08f, -0.05f, 0f), new Vector3(0.42f, 0.48f, 1f), new Vector3(-0.06f, -0.20f, 0f), coatTailSprite, new Color(0.82f, 0.76f, 0.70f, 1f), 10);
+            Transform coatTailFrontPivot = CreateLimbPivot("CoatTailFrontPivot", bodyPivot.transform, new Vector3(0.02f, -0.06f, 0f), new Vector3(0.44f, 0.50f, 1f), new Vector3(-0.05f, -0.21f, 0f), coatTailSprite, Color.white, 15);
+
+            // Arka Kol (Üst Kol -> Dirsek/Ön Kol)
+            Transform backArmPivot = CreateLimbPivot("BackArmPivot", bodyPivot.transform, new Vector3(-0.08f, 0.34f, 0f), new Vector3(0.18f, 0.30f, 1f), new Vector3(0f, -0.13f, 0f), armSegmentSprite, new Color(0.82f, 0.76f, 0.70f, 1f), 10);
+            Transform backForearmPivot = CreateLimbPivot("BackForearmPivot", backArmPivot, new Vector3(0f, -0.24f, 0f), new Vector3(0.16f, 0.28f, 1f), new Vector3(0f, -0.12f, 0f), armSegmentSprite, new Color(0.82f, 0.76f, 0.70f, 1f), 10);
+
+            // Trençkot Gövde
+            GameObject torsoGo = new GameObject("DetectiveTorsoSprite");
             torsoGo.transform.SetParent(bodyPivot.transform, false);
-            torsoGo.transform.localPosition = new Vector3(0f, 0.30f, 0f);
-            torsoGo.transform.localScale = new Vector3(0.95f, 1.08f, 1f);
+            torsoGo.transform.localPosition = new Vector3(0f, 0.16f, 0f);
+            torsoGo.transform.localScale = new Vector3(0.68f, 0.66f, 1f);
             SpriteRenderer torsoSr = torsoGo.AddComponent<SpriteRenderer>();
             torsoSr.sprite = torsoSprite;
             torsoSr.sortingOrder = 13;
 
+            // Ayrı Modüler Kafa + Fedora Şapka (Işığa göre yukarı/aşağı bakar)
+            GameObject headPivot = new GameObject("HeadPivot");
+            headPivot.transform.SetParent(bodyPivot.transform, false);
+            headPivot.transform.localPosition = new Vector3(0.03f, 0.43f, 0f);
+            GameObject headGo = new GameObject("HeadHatSprite");
+            headGo.transform.SetParent(headPivot.transform, false);
+            headGo.transform.localPosition = new Vector3(0.02f, 0.16f, 0f);
+            headGo.transform.localScale = new Vector3(0.58f, 0.54f, 1f);
+            SpriteRenderer headSr = headGo.AddComponent<SpriteRenderer>();
+            headSr.sprite = headHatSprite;
+            headSr.sortingOrder = 16;
+
+            // Diegetik Pirinç Çanta Pil Göstergesi
             GameObject gaugeBg = new GameObject("SuitBatteryGaugeBg");
             gaugeBg.transform.SetParent(bodyPivot.transform, false);
-            gaugeBg.transform.localPosition = new Vector3(-0.25f, 0.26f, 0f);
-            gaugeBg.transform.localScale = new Vector3(0.075f, 0.44f, 1f);
+            gaugeBg.transform.localPosition = new Vector3(-0.22f, 0.16f, 0f);
+            gaugeBg.transform.localScale = new Vector3(0.085f, 0.40f, 1f);
             SpriteRenderer gaugeBgSr = gaugeBg.AddComponent<SpriteRenderer>();
             gaugeBgSr.sprite = barSprite;
-            gaugeBgSr.color = new Color(0.04f, 0.08f, 0.14f, 0.92f);
+            gaugeBgSr.color = new Color(0.16f, 0.11f, 0.08f, 0.95f);
             gaugeBgSr.sortingOrder = 14;
 
             GameObject gaugeFillPivot = new GameObject("SuitBatteryGaugeFillPivot");
@@ -1037,36 +1085,59 @@ namespace LightWeaver.EditorTools
             gaugeFillBar.transform.localScale = new Vector3(0.74f, 0.96f, 1f);
             SpriteRenderer gaugeFillSr = gaugeFillBar.AddComponent<SpriteRenderer>();
             gaugeFillSr.sprite = barSprite;
-            gaugeFillSr.color = new Color(0f, 0.96f, 1f, 1f);
+            gaugeFillSr.color = new Color(1.0f, 0.82f, 0.24f, 1f);
             gaugeFillSr.sortingOrder = 15;
 
-            Transform frontLegPivot = CreateLimbPivot("FrontLegPivot", visualRoot.transform, new Vector3(0.06f, -0.14f, 0f), new Vector3(0.28f, 0.60f, 1f), new Vector3(0f, -0.25f, 0f), limbSprite, new Color(0.28f, 0.96f, 1f, 1f), 14);
+            // Ön Bacak (Kalça -> Uyluk -> Diz/Baldır/Çizme)
+            Transform frontLegPivot = CreateLimbPivot("FrontLegPivot", visualRoot.transform, new Vector3(0.05f, -0.08f, 0f), new Vector3(0.24f, 0.36f, 1f), new Vector3(0f, -0.15f, 0f), thighSprite, Color.white, 14);
+            Transform frontShinPivot = CreateLimbPivot("FrontShinPivot", frontLegPivot, new Vector3(0f, -0.28f, 0f), new Vector3(0.32f, 0.38f, 1f), new Vector3(0.04f, -0.17f, 0f), shinBootSprite, Color.white, 14);
 
+            // Modüler 2-Eklemli Ön Fener Kolu (Omuz -> Üst Kol -> Dirsek/Ön Kol -> Pirinç Fener -> Işık Konisi)
             GameObject flashlightArmPivot = new GameObject("FlashlightArmPivot");
             flashlightArmPivot.transform.SetParent(visualRoot.transform, false);
-            flashlightArmPivot.transform.localPosition = new Vector3(0.08f, 0.28f, 0f);
+            flashlightArmPivot.transform.localPosition = new Vector3(0.06f, 0.33f, 0f);
 
-            GameObject frontArmSpriteObj = new GameObject("FrontArmSprite");
-            frontArmSpriteObj.transform.SetParent(flashlightArmPivot.transform, false);
-            frontArmSpriteObj.transform.localPosition = new Vector3(0.23f, 0f, 0f);
-            frontArmSpriteObj.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
-            frontArmSpriteObj.transform.localScale = new Vector3(0.20f, 0.52f, 1f);
-            SpriteRenderer frontArmSr = frontArmSpriteObj.AddComponent<SpriteRenderer>();
-            frontArmSr.sprite = limbSprite;
-            frontArmSr.color = new Color(0.35f, 0.98f, 1f, 1f);
-            frontArmSr.sortingOrder = 15;
+            GameObject upperArmObj = new GameObject("UpperArmSprite");
+            upperArmObj.transform.SetParent(flashlightArmPivot.transform, false);
+            upperArmObj.transform.localPosition = new Vector3(0.13f, 0f, 0f);
+            upperArmObj.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+            upperArmObj.transform.localScale = new Vector3(0.18f, 0.30f, 1f);
+            SpriteRenderer upperArmSr = upperArmObj.AddComponent<SpriteRenderer>();
+            upperArmSr.sprite = armSegmentSprite;
+            upperArmSr.sortingOrder = 17;
+
+            GameObject forearmPivot = new GameObject("ForearmPivot");
+            forearmPivot.transform.SetParent(flashlightArmPivot.transform, false);
+            forearmPivot.transform.localPosition = new Vector3(0.25f, 0f, 0f);
+
+            GameObject forearmSpriteObj = new GameObject("ForearmSprite");
+            forearmSpriteObj.transform.SetParent(forearmPivot.transform, false);
+            forearmSpriteObj.transform.localPosition = new Vector3(0.12f, 0f, 0f);
+            forearmSpriteObj.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+            forearmSpriteObj.transform.localScale = new Vector3(0.17f, 0.28f, 1f);
+            SpriteRenderer forearmSr = forearmSpriteObj.AddComponent<SpriteRenderer>();
+            forearmSr.sprite = armSegmentSprite;
+            forearmSr.sortingOrder = 18;
+
+            GameObject flashlightPropObj = new GameObject("VintageFlashlightProp");
+            flashlightPropObj.transform.SetParent(forearmPivot.transform, false);
+            flashlightPropObj.transform.localPosition = new Vector3(0.28f, 0.01f, 0f);
+            flashlightPropObj.transform.localScale = new Vector3(0.32f, 0.18f, 1f);
+            SpriteRenderer torchSr = flashlightPropObj.AddComponent<SpriteRenderer>();
+            torchSr.sprite = flashlightPropSprite;
+            torchSr.sortingOrder = 19;
 
             GameObject emitterTip = new GameObject("FlashlightEmitterTip");
-            emitterTip.transform.SetParent(flashlightArmPivot.transform, false);
-            emitterTip.transform.localPosition = new Vector3(0.48f, 0f, 0f);
+            emitterTip.transform.SetParent(forearmPivot.transform, false);
+            emitterTip.transform.localPosition = new Vector3(0.42f, 0.01f, 0f);
             emitterTip.transform.localScale = Vector3.one;
 
             GameObject emitterCoreObj = new GameObject("EmitterCoreGlow");
             emitterCoreObj.transform.SetParent(emitterTip.transform, false);
-            emitterCoreObj.transform.localScale = new Vector3(0.34f, 0.34f, 1f);
+            emitterCoreObj.transform.localScale = new Vector3(0.28f, 0.28f, 1f);
             SpriteRenderer emitterSr = emitterCoreObj.AddComponent<SpriteRenderer>();
             emitterSr.sprite = emitterCoreSprite;
-            emitterSr.color = new Color(1f, 0.96f, 0.72f, 0.95f);
+            emitterSr.color = new Color(1f, 0.90f, 0.52f, 0.96f);
             emitterSr.sortingOrder = 21;
 
             GameObject coneObj = new GameObject("LightConeCaster2D");
@@ -1077,7 +1148,7 @@ namespace LightWeaver.EditorTools
             coneSo.FindProperty("beamGradientTexture").objectReferenceValue = beamGradientTex;
             coneSo.ApplyModifiedPropertiesWithoutUndo();
 
-            // Huzme içi parlayan toz partikülleri (gerçek 1:1 dünya ölçeğinde)
+            // Huzme içi parlayan sıcak çöl tozu partikülleri
             GameObject beamMotes = new GameObject("BeamDustMotes");
             beamMotes.transform.SetParent(coneObj.transform, false);
             beamMotes.transform.localPosition = new Vector3(3.8f, 0f, 0f);
@@ -1086,7 +1157,9 @@ namespace LightWeaver.EditorTools
             FlashlightController2D flashlightCtrl = flashlightArmPivot.AddComponent<FlashlightController2D>();
             SerializedObject ctrlSo = new SerializedObject(flashlightCtrl);
             ctrlSo.FindProperty("armPivot").objectReferenceValue = flashlightArmPivot.transform;
-            ctrlSo.FindProperty("armVisualTransform").objectReferenceValue = frontArmSpriteObj.transform;
+            ctrlSo.FindProperty("forearmPivot").objectReferenceValue = forearmPivot.transform;
+            ctrlSo.FindProperty("armVisualTransform").objectReferenceValue = forearmSpriteObj.transform;
+            ctrlSo.FindProperty("headLookPivot").objectReferenceValue = headPivot.transform;
             ctrlSo.FindProperty("coneCaster").objectReferenceValue = coneCaster;
             ctrlSo.ApplyModifiedPropertiesWithoutUndo();
 
@@ -1135,8 +1208,13 @@ namespace LightWeaver.EditorTools
             animSo.FindProperty("visualRoot").objectReferenceValue = visualRoot.transform;
             animSo.FindProperty("bodyPivot").objectReferenceValue = bodyPivot.transform;
             animSo.FindProperty("frontLegPivot").objectReferenceValue = frontLegPivot;
+            animSo.FindProperty("frontShinPivot").objectReferenceValue = frontShinPivot;
             animSo.FindProperty("backLegPivot").objectReferenceValue = backLegPivot;
+            animSo.FindProperty("backShinPivot").objectReferenceValue = backShinPivot;
             animSo.FindProperty("backArmPivot").objectReferenceValue = backArmPivot;
+            animSo.FindProperty("backForearmPivot").objectReferenceValue = backForearmPivot;
+            animSo.FindProperty("coatTailFrontPivot").objectReferenceValue = coatTailFrontPivot;
+            animSo.FindProperty("coatTailBackPivot").objectReferenceValue = coatTailBackPivot;
             animSo.FindProperty("suitBatteryGaugeFill").objectReferenceValue = gaugeFillPivot.transform;
             animSo.FindProperty("suitBatteryGaugeRenderer").objectReferenceValue = gaugeFillSr;
             animSo.FindProperty("footstepSparks").objectReferenceValue = ps;
@@ -1179,7 +1257,7 @@ namespace LightWeaver.EditorTools
             main.startLifetime = 0.28f;
             main.startSpeed = new ParticleSystem.MinMaxCurve(1.8f, 3.8f);
             main.startSize = new ParticleSystem.MinMaxCurve(0.08f, 0.16f);
-            main.startColor = new Color(0.25f, 0.96f, 1.0f, 0.95f);
+            main.startColor = new Color(1.0f, 0.84f, 0.36f, 0.92f);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.gravityModifier = 0.6f;
             main.maxParticles = 40;
@@ -1206,7 +1284,7 @@ namespace LightWeaver.EditorTools
             main.startLifetime = 0.85f;
             main.startSpeed = 0.35f;
             main.startSize = new ParticleSystem.MinMaxCurve(0.04f, 0.10f);
-            main.startColor = new Color(0.85f, 0.98f, 1.0f, 0.45f);
+            main.startColor = new Color(1.0f, 0.90f, 0.56f, 0.42f);
             main.simulationSpace = ParticleSystemSimulationSpace.Local;
             main.maxParticles = 28;
 
@@ -1236,9 +1314,9 @@ namespace LightWeaver.EditorTools
             grad.SetKeys(
                 new[]
                 {
-                    new GradientColorKey(new Color(0.0f, 0.94f, 1.0f), 0f),
-                    new GradientColorKey(new Color(1.0f, 0.68f, 0.14f), 0.55f),
-                    new GradientColorKey(new Color(0.71f, 0.22f, 0.95f), 1f)
+                    new GradientColorKey(new Color(1.0f, 0.84f, 0.30f), 0f),
+                    new GradientColorKey(new Color(0.82f, 0.58f, 0.25f), 0.55f),
+                    new GradientColorKey(new Color(0.10f, 0.85f, 0.78f), 1f)
                 },
                 new[]
                 {
@@ -1253,53 +1331,117 @@ namespace LightWeaver.EditorTools
             return tr;
         }
 
-        private static void BuildInfiniteStarfield(Transform camTransform, Sprite dotSprite)
+        private static void BuildInfiniteStarfield(Transform camTransform, Sprite dotSprite, Sprite moonSprite)
         {
-            GameObject starRoot = new GameObject("=== VOID STARFIELD ===");
+            GameObject starRoot = new GameObject("=== EGYPT NIGHT SKY ===");
             Random.InitState(42);
-            for (int i = 0; i < 70; i++)
+            for (int i = 0; i < 65; i++)
             {
-                GameObject star = new GameObject($"Star_{i:00}");
+                GameObject star = new GameObject($"DesertStar_{i:00}");
                 star.transform.SetParent(starRoot.transform, false);
-                star.transform.position = new Vector3(Random.Range(-17f, 17f), Random.Range(-9f, 9f), 2f);
-                float scale = Random.Range(0.03f, 0.09f);
+                star.transform.position = new Vector3(Random.Range(-17f, 17f), Random.Range(-1.5f, 9f), 5f);
+                float scale = Random.Range(0.025f, 0.08f);
                 star.transform.localScale = new Vector3(scale, scale, 1f);
 
                 SpriteRenderer sr = star.AddComponent<SpriteRenderer>();
                 sr.sprite = dotSprite;
-                sr.color = new Color(0.45f, 0.85f, 1f, Random.Range(0.08f, 0.26f));
-                sr.sortingOrder = -10;
+                sr.color = new Color(1.0f, 0.92f, 0.72f, Random.Range(0.10f, 0.34f));
+                sr.sortingOrder = -26;
             }
+
+            // Çöl Dolunayı (Yavaş paralaksla ufukta süzülür)
+            GameObject moon = new GameObject("DesertFullMoon");
+            moon.transform.SetParent(starRoot.transform, false);
+            moon.transform.position = new Vector3(8.5f, 3.6f, 6f);
+            moon.transform.localScale = new Vector3(2.8f, 2.8f, 1f);
+            SpriteRenderer moonSr = moon.AddComponent<SpriteRenderer>();
+            moonSr.sprite = moonSprite;
+            moonSr.color = new Color(1.0f, 0.94f, 0.80f, 0.72f);
+            moonSr.sortingOrder = -25;
 
             ParallaxStarfield parallax = starRoot.AddComponent<ParallaxStarfield>();
             SerializedObject so = new SerializedObject(parallax);
             so.FindProperty("cameraTransform").objectReferenceValue = camTransform;
+            so.FindProperty("parallaxFactor").floatValue = 0.96f;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void BuildHorizonSilhouettes(Transform camTransform, Sprite monolithSprite)
+        private static void BuildEgyptParallaxLayers(Transform camTransform, Sprite pyramidSprite, Sprite obeliskSprite, Sprite duneSprite)
         {
-            GameObject root = new GameObject("=== VOID HORIZON SILHOUETTES ===");
-            Random.InitState(108);
-            for (int i = 0; i < 14; i++)
+            // Katman 1 (Uzak): Gize Piramitleri & Obelisk Silüetleri
+            GameObject farRoot = new GameObject("=== EGYPT PYRAMIDS FAR ===");
+            float[] pyramidXs = { -22f, -15f, -7.5f, 0f, 7f, 15.5f, 22f, 28f };
+            float[] pyramidScales = { 9.2f, 12.6f, 7.8f, 11.4f, 8.6f, 13.0f, 9.6f, 7.2f };
+            for (int i = 0; i < pyramidXs.Length; i++)
             {
-                GameObject pillar = new GameObject($"HorizonMonolith_{i:00}");
-                pillar.transform.SetParent(root.transform, false);
-                pillar.transform.position = new Vector3(-16f + i * 2.6f, Random.Range(-5.5f, -2.5f), 4f);
-                pillar.transform.localScale = new Vector3(Random.Range(1.2f, 2.5f), Random.Range(5.0f, 11.0f), 1f);
+                GameObject pyr = new GameObject($"GreatPyramid_{i:00}");
+                pyr.transform.SetParent(farRoot.transform, false);
+                float h = pyramidScales[i] * 0.56f;
+                pyr.transform.position = new Vector3(pyramidXs[i], -6.2f + h * 0.48f, 4f);
+                pyr.transform.localScale = new Vector3(pyramidScales[i], h, 1f);
 
-                SpriteRenderer sr = pillar.AddComponent<SpriteRenderer>();
-                sr.sprite = monolithSprite;
-                sr.color = new Color(0.09f, 0.17f, 0.34f, Random.Range(0.38f, 0.58f));
-                sr.sortingOrder = -15;
+                SpriteRenderer sr = pyr.AddComponent<SpriteRenderer>();
+                sr.sprite = pyramidSprite;
+                sr.color = i % 2 == 0
+                    ? new Color(0.18f, 0.16f, 0.28f, 0.92f)
+                    : new Color(0.13f, 0.12f, 0.22f, 0.95f);
+                sr.sortingOrder = -22;
+
+                if (i % 3 == 1)
+                {
+                    GameObject ob = new GameObject($"FarObelisk_{i:00}");
+                    ob.transform.SetParent(farRoot.transform, false);
+                    ob.transform.position = new Vector3(pyramidXs[i] + 3.6f, -3.2f, 4f);
+                    ob.transform.localScale = new Vector3(0.68f, 4.4f, 1f);
+                    SpriteRenderer obSr = ob.AddComponent<SpriteRenderer>();
+                    obSr.sprite = obeliskSprite;
+                    obSr.color = new Color(0.16f, 0.14f, 0.25f, 0.88f);
+                    obSr.sortingOrder = -21;
+                }
             }
 
-            ParallaxStarfield parallax = root.AddComponent<ParallaxStarfield>();
-            SerializedObject so = new SerializedObject(parallax);
-            so.FindProperty("cameraTransform").objectReferenceValue = camTransform;
-            so.FindProperty("fieldWidth").floatValue = 36f;
-            so.FindProperty("parallaxFactor").floatValue = 0.65f;
-            so.ApplyModifiedPropertiesWithoutUndo();
+            ParallaxStarfield farParallax = farRoot.AddComponent<ParallaxStarfield>();
+            SerializedObject farSo = new SerializedObject(farParallax);
+            farSo.FindProperty("cameraTransform").objectReferenceValue = camTransform;
+            farSo.FindProperty("fieldWidth").floatValue = 56f;
+            farSo.FindProperty("fieldHeight").floatValue = 28f;
+            farSo.FindProperty("parallaxFactor").floatValue = 0.85f;
+            farSo.ApplyModifiedPropertiesWithoutUndo();
+
+            // Katman 2 (Yakın-Orta): Çöl Kumulları & Tapınak Sütunları
+            GameObject midRoot = new GameObject("=== EGYPT DUNES & RUINS ===");
+            for (int i = 0; i < 8; i++)
+            {
+                GameObject dune = new GameObject($"DesertDune_{i:00}");
+                dune.transform.SetParent(midRoot.transform, false);
+                dune.transform.position = new Vector3(-20f + i * 6.0f, -5.25f - (i % 2) * 0.35f, 3f);
+                dune.transform.localScale = new Vector3(11.0f, 4.4f, 1f);
+
+                SpriteRenderer sr = dune.AddComponent<SpriteRenderer>();
+                sr.sprite = duneSprite;
+                sr.color = new Color(0.20f, 0.15f, 0.19f, 1.0f);
+                sr.sortingOrder = -16;
+
+                if (i % 2 == 0)
+                {
+                    GameObject ruin = new GameObject($"MidObelisk_{i:00}");
+                    ruin.transform.SetParent(midRoot.transform, false);
+                    ruin.transform.position = new Vector3(-18.5f + i * 6.0f, -2.5f, 3f);
+                    ruin.transform.localScale = new Vector3(0.95f, 5.4f, 1f);
+                    SpriteRenderer rSr = ruin.AddComponent<SpriteRenderer>();
+                    rSr.sprite = obeliskSprite;
+                    rSr.color = new Color(0.15f, 0.11f, 0.16f, 0.90f);
+                    rSr.sortingOrder = -17;
+                }
+            }
+
+            ParallaxStarfield midParallax = midRoot.AddComponent<ParallaxStarfield>();
+            SerializedObject midSo = new SerializedObject(midParallax);
+            midSo.FindProperty("cameraTransform").objectReferenceValue = camTransform;
+            midSo.FindProperty("fieldWidth").floatValue = 48f;
+            midSo.FindProperty("fieldHeight").floatValue = 28f;
+            midSo.FindProperty("parallaxFactor").floatValue = 0.62f;
+            midSo.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static GameObject SaveCrystalPrefab(Sprite stdSprite, Sprite boostSprite, Sprite fragileSprite, Sprite umbraSprite, Sprite rimSprite, Sprite starSprite)
@@ -1326,7 +1468,7 @@ namespace LightWeaver.EditorTools
             leftSparkle.transform.localPosition = new Vector3(-0.48f, 0.48f, 0f);
             SpriteRenderer leftSr = leftSparkle.AddComponent<SpriteRenderer>();
             leftSr.sprite = starSprite;
-            leftSr.color = new Color(0.85f, 0.98f, 1f, 0.98f);
+            leftSr.color = new Color(1.0f, 0.86f, 0.42f, 0.98f);
             leftSr.sortingOrder = 9;
 
             GameObject rightSparkle = new GameObject("SparkleRight");
@@ -1604,32 +1746,33 @@ namespace LightWeaver.EditorTools
             Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[w * h];
 
+            Color darkStone = new Color(0.24f, 0.18f, 0.14f, 0.94f);
+            Color warmSand = new Color(0.58f, 0.44f, 0.30f, 0.94f);
+            Color goldRune = new Color(1.0f, 0.82f, 0.30f, 0.98f);
+            Color scarabRim = new Color(0.10f, 0.86f, 0.78f, 0.92f);
+
             for (int y = 0; y < h; y++)
             {
                 float ny = (float)y / (h - 1);
                 for (int x = 0; x < w; x++)
                 {
                     float nx = (float)x / (w - 1);
-                    float diag1 = Mathf.Abs((nx - ny * 0.45f) - 0.18f);
-                    float diag2 = Mathf.Abs((nx + ny * 0.45f) - 0.82f);
-                    float diag3 = Mathf.Abs((nx - ny * 0.35f) - 0.55f);
-                    float centerFacet = Mathf.Abs(ny - 0.62f);
+                    bool isTopEdge = y >= h - 6;
+                    bool isBorder = x < 4 || x >= w - 4 || y < 5;
 
-                    bool isTopEdge = y >= h - 5;
-                    bool isSideEdge = x < 4 || x >= w - 4 || y < 4;
-                    bool isFacetLine = diag1 < 0.012f || diag2 < 0.012f || diag3 < 0.012f || centerFacet < 0.016f;
+                    // Antik Mısır kumtaşı blok derzi ve hiyeroglif zikzak bandı
+                    float blockU = Mathf.Repeat(nx * 4f, 1f);
+                    bool isStoneJoint = (blockU < 0.03f && ny > 0.25f) || Mathf.Abs(ny - 0.74f) < 0.025f || Mathf.Abs(ny - 0.24f) < 0.025f;
+                    float hieroWave = Mathf.Abs((ny - 0.49f) - Mathf.Sin(nx * Mathf.PI * 16f) * 0.09f);
+                    bool isHieroglyph = hieroWave < 0.026f && nx > 0.06f && nx < 0.94f;
 
                     Color c;
-                    if (isTopEdge) c = new Color(0.95f, 1.0f, 1.0f, 1f);
-                    else if (isSideEdge) c = new Color(0.65f, 0.96f, 1.0f, 0.98f);
-                    else if (isFacetLine) c = new Color(0.70f, 0.96f, 1.0f, 0.90f);
-                    else
-                    {
-                        Color topTint = new Color(0.15f, 0.86f, 1.0f, 0.80f);
-                        Color midTint = new Color(0.12f, 0.52f, 0.95f, 0.72f);
-                        Color bottomTint = new Color(0.54f, 0.20f, 0.92f, 0.70f);
-                        c = ny > 0.5f ? Color.Lerp(midTint, topTint, (ny - 0.5f) * 2f) : Color.Lerp(bottomTint, midTint, ny * 2f);
-                    }
+                    if (isTopEdge) c = new Color(1.0f, 0.94f, 0.72f, 1f);
+                    else if (isBorder) c = goldRune;
+                    else if (isHieroglyph) c = scarabRim;
+                    else if (isStoneJoint) c = goldRune * new Color(0.85f, 0.85f, 0.85f, 0.9f);
+                    else c = Color.Lerp(darkStone, warmSand, ny * 0.85f);
+
                     pixels[y * w + x] = c;
                 }
             }
@@ -1655,11 +1798,11 @@ namespace LightWeaver.EditorTools
                     float nx = (float)x / (w - 1);
                     bool isBorder = y >= h - 5 || y < 4 || x < 4 || x >= w - 4;
                     float chevronRepeat = Mathf.Repeat((nx - chevronShift) * 4.5f, 1f);
-                    bool isChevron = chevronRepeat < 0.25f && ny > 0.2f && ny < 0.8f;
+                    bool isChevron = chevronRepeat < 0.25f && ny > 0.18f && ny < 0.82f;
 
-                    if (isBorder) pixels[y * w + x] = new Color(1.0f, 0.96f, 0.55f, 1f);
-                    else if (isChevron) pixels[y * w + x] = new Color(1.0f, 0.92f, 0.35f, 0.98f);
-                    else pixels[y * w + x] = Color.Lerp(new Color(0.05f, 0.65f, 0.55f, 0.78f), new Color(0.15f, 0.98f, 0.72f, 0.85f), ny);
+                    if (isBorder) pixels[y * w + x] = new Color(1.0f, 0.86f, 0.34f, 1f);
+                    else if (isChevron) pixels[y * w + x] = new Color(1.0f, 0.92f, 0.45f, 0.98f);
+                    else pixels[y * w + x] = Color.Lerp(new Color(0.06f, 0.38f, 0.38f, 0.92f), new Color(0.10f, 0.78f, 0.72f, 0.94f), ny);
                 }
             }
 
@@ -1682,12 +1825,12 @@ namespace LightWeaver.EditorTools
                 {
                     float nx = (float)x / (w - 1);
                     bool isBorder = y >= h - 4 || y < 4 || x < 4 || x >= w - 4;
-                    float crack = Mathf.Abs(Mathf.Sin(nx * 18f + ny * 9f) * 0.12f - (ny - 0.5f));
-                    bool isCrack = crack < 0.024f || Mathf.Abs(nx - 0.35f) < 0.012f || Mathf.Abs(nx - 0.70f) < 0.012f;
+                    float crack = Mathf.Abs(Mathf.Sin(nx * 18f + ny * 9f) * 0.13f - (ny - 0.5f));
+                    bool isCrack = crack < 0.028f || Mathf.Abs(nx - 0.34f) < 0.015f || Mathf.Abs(nx - 0.68f) < 0.015f;
 
-                    if (isBorder) pixels[y * w + x] = new Color(0.92f, 0.98f, 1f, 0.96f);
-                    else if (isCrack) pixels[y * w + x] = new Color(1f, 1f, 1f, 0.92f);
-                    else pixels[y * w + x] = new Color(0.65f, 0.88f, 1.0f, 0.58f);
+                    if (isBorder) pixels[y * w + x] = new Color(0.96f, 0.86f, 0.66f, 0.98f);
+                    else if (isCrack) pixels[y * w + x] = new Color(0.16f, 0.11f, 0.09f, 0.96f);
+                    else pixels[y * w + x] = Color.Lerp(new Color(0.64f, 0.51f, 0.34f, 0.88f), new Color(0.88f, 0.76f, 0.58f, 0.90f), ny);
                 }
             }
 
@@ -1711,11 +1854,11 @@ namespace LightWeaver.EditorTools
                     float nx = (float)x / (w - 1);
                     bool isBorder = y >= h - 5 || y < 4 || x < 4 || x >= w - 4;
                     float stripe = Mathf.Repeat((nx * 5f) + (ny * 1.4f), 1f);
-                    bool isHazardStripe = stripe < 0.24f;
+                    bool isCurseSeal = stripe < 0.24f;
 
-                    if (isBorder) pixels[y * w + x] = new Color(1.0f, 0.22f, 0.72f, 1f);
-                    else if (isHazardStripe) pixels[y * w + x] = new Color(0.75f, 0.14f, 0.95f, 0.88f);
-                    else pixels[y * w + x] = new Color(0.14f, 0.03f, 0.24f, 0.92f);
+                    if (isBorder) pixels[y * w + x] = new Color(0.95f, 0.28f, 0.62f, 1f);
+                    else if (isCurseSeal) pixels[y * w + x] = new Color(0.68f, 0.18f, 0.84f, 0.90f);
+                    else pixels[y * w + x] = new Color(0.11f, 0.05f, 0.16f, 0.96f);
                 }
             }
 
@@ -1724,10 +1867,10 @@ namespace LightWeaver.EditorTools
             return SaveAndImportSprite(tex, assetPath, 256f);
         }
 
-        private static Sprite GenerateHorizonMonolithSprite(string assetPath)
+        private static Sprite GeneratePyramidSprite(string assetPath)
         {
-            const int w = 64;
-            const int h = 128;
+            const int w = 256;
+            const int h = 160;
             Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[w * h];
 
@@ -1737,17 +1880,130 @@ namespace LightWeaver.EditorTools
                 for (int x = 0; x < w; x++)
                 {
                     float nx = (float)x / (w - 1);
-                    bool isEdge = x < 2 || x >= w - 2 || y >= h - 3;
-                    float alpha = Mathf.Clamp01(ny * 0.85f);
-                    pixels[y * w + x] = isEdge
-                        ? new Color(0.15f, 0.48f, 0.75f, alpha)
-                        : new Color(0.05f, 0.09f, 0.18f, alpha * 0.9f);
+                    float dxFromCenter = nx - 0.5f;
+                    float halfSpan = (1f - ny) * 0.49f;
+
+                    if (Mathf.Abs(dxFromCenter) <= halfSpan)
+                    {
+                        bool isApexCap = ny > 0.87f;
+                        bool isLeftLit = dxFromCenter < 0.01f;
+                        bool isRim = Mathf.Abs(Mathf.Abs(dxFromCenter) - halfSpan) < 0.016f && isLeftLit;
+                        // Yatay antik taş katman dokusu
+                        bool isLayer = (y % 14) == 0 && ny < 0.87f;
+
+                        if (isApexCap) pixels[y * w + x] = new Color(1.0f, 0.84f, 0.36f, 0.95f);
+                        else if (isRim) pixels[y * w + x] = new Color(0.86f, 0.82f, 0.95f, 0.95f);
+                        else if (isLeftLit) pixels[y * w + x] = isLayer ? new Color(0.65f, 0.60f, 0.78f, 0.95f) : new Color(0.76f, 0.70f, 0.88f, 0.98f);
+                        else pixels[y * w + x] = isLayer ? new Color(0.32f, 0.28f, 0.42f, 0.96f) : new Color(0.40f, 0.36f, 0.52f, 0.98f);
+                    }
+                    else
+                    {
+                        pixels[y * w + x] = Color.clear;
+                    }
                 }
             }
 
             tex.SetPixels(pixels);
             tex.Apply();
-            return SaveAndImportSprite(tex, assetPath, 64f);
+            return SaveAndImportSprite(tex, assetPath, 160f);
+        }
+
+        private static Sprite GenerateObeliskSilhouetteSprite(string assetPath)
+        {
+            const int w = 64;
+            const int h = 192;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    float dx = nx - 0.5f;
+                    float halfW = ny > 0.86f
+                        ? Mathf.Lerp(0.28f, 0.01f, (ny - 0.86f) / 0.14f)
+                        : Mathf.Lerp(0.42f, 0.28f, ny / 0.86f);
+
+                    if (Mathf.Abs(dx) <= halfW)
+                    {
+                        bool isGlyph = Mathf.Abs(dx) < 0.05f && (y % 18) < 6 && ny < 0.82f && ny > 0.15f;
+                        if (isGlyph) pixels[y * w + x] = new Color(0.98f, 0.80f, 0.34f, 0.85f);
+                        else if (dx < 0f) pixels[y * w + x] = new Color(0.74f, 0.68f, 0.86f, 0.98f);
+                        else pixels[y * w + x] = new Color(0.44f, 0.38f, 0.54f, 0.98f);
+                    }
+                    else pixels[y * w + x] = Color.clear;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 128f);
+        }
+
+        private static Sprite GenerateSandDuneSprite(string assetPath)
+        {
+            const int w = 256;
+            const int h = 96;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    float crest = 0.52f + Mathf.Sin(nx * Mathf.PI) * 0.42f + Mathf.Sin(nx * Mathf.PI * 2f) * 0.06f;
+                    if (ny <= crest)
+                    {
+                        float distRidge = crest - ny;
+                        Color c = distRidge < 0.035f
+                            ? new Color(0.84f, 0.72f, 0.62f, 1f)
+                            : Color.Lerp(new Color(0.26f, 0.20f, 0.24f, 1f), new Color(0.56f, 0.44f, 0.46f, 1f), ny / Mathf.Max(0.01f, crest));
+                        pixels[y * w + x] = c;
+                    }
+                    else pixels[y * w + x] = Color.clear;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 128f);
+        }
+
+        private static Sprite GenerateDesertMoonSprite(string assetPath)
+        {
+            const int size = 128;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[size * size];
+            float c = (size - 1) * 0.5f;
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float nx = (x - c) / c;
+                    float ny = (y - c) / c;
+                    float r = Mathf.Sqrt(nx * nx + ny * ny);
+                    if (r <= 0.55f)
+                    {
+                        float crater = Mathf.Sin(nx * 8f) * Mathf.Cos(ny * 7f) * 0.05f;
+                        pixels[y * size + x] = new Color(1.0f, 0.94f + crater, 0.78f + crater, 0.96f);
+                    }
+                    else if (r <= 1.0f)
+                    {
+                        float halo = Mathf.Pow(Mathf.Clamp01(1f - (r - 0.55f) / 0.45f), 2.2f) * 0.35f;
+                        pixels[y * size + x] = new Color(1.0f, 0.90f, 0.68f, halo);
+                    }
+                    else pixels[y * size + x] = Color.clear;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 128f);
         }
 
         private static Sprite GenerateLaserBarrierSprite(string assetPath)
@@ -1822,8 +2078,8 @@ namespace LightWeaver.EditorTools
                     {
                         float distFromFront = front - nx;
                         float rim = Mathf.Exp(-distFromFront * 12f);
-                        Color darkVoid = new Color(0.06f, 0.01f, 0.12f, 0.95f);
-                        Color crimsonEdge = new Color(1.0f, 0.14f, 0.45f, 0.98f);
+                        Color darkVoid = new Color(0.08f, 0.04f, 0.05f, 0.95f);
+                        Color crimsonEdge = new Color(0.95f, 0.34f, 0.16f, 0.98f);
                         Color c = Color.Lerp(darkVoid, crimsonEdge, rim);
                         c.a *= Mathf.Clamp01(nx * 2.5f + 0.3f);
                         pixels[y * w + x] = c;
@@ -1905,17 +2161,21 @@ namespace LightWeaver.EditorTools
             return SaveAndImportSprite(tex, assetPath, 64f);
         }
 
-        private static Sprite GenerateRunnerTorsoHeadSprite(string assetPath)
+        private static Sprite GenerateDetectiveTorsoSprite(string assetPath)
         {
             const int w = 160;
-            const int h = 192;
+            const int h = 160;
             Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[w * h];
 
-            Color armorDark = new Color(0.08f, 0.14f, 0.25f, 1f);
-            Color armorMid = new Color(0.16f, 0.30f, 0.48f, 1f);
-            Color neonCyan = new Color(0.05f, 0.96f, 1.0f, 1f);
-            Color visorGlow = new Color(0.90f, 1.0f, 1.0f, 1f);
+            // Referans Dedektif Renk Paleti
+            Color coatBase = new Color(0.737f, 0.580f, 0.373f, 1f);    // #BC945F Deve tüyü trençkot
+            Color coatLight = new Color(0.875f, 0.745f, 0.576f, 1f);   // #DFBE93 Açık yaka/vurgu
+            Color coatShadow = new Color(0.659f, 0.518f, 0.325f, 1f);  // #A88453 Gölge kıvrım
+            Color darkBrown = new Color(0.357f, 0.251f, 0.224f, 1f);   // #5B4039 Yaka tersi & kemer
+            Color outline = new Color(0.122f, 0.090f, 0.102f, 1f);     // #1F171A Keskin dış kontur
+            Color shirtCream = new Color(0.961f, 0.886f, 0.604f, 1f);  // #F5E29A Gömlek kremi
+            Color brassGold = new Color(1.0f, 0.824f, 0.298f, 1f);     // #FFD24C Pirinç toka/düğme
 
             for (int y = 0; y < h; y++)
             {
@@ -1925,28 +2185,33 @@ namespace LightWeaver.EditorTools
                     float nx = (float)x / (w - 1);
                     Color c = Color.clear;
 
-                    if (ny >= 0.08f && ny <= 0.65f)
+                    if (ny >= 0.06f && ny <= 0.90f)
                     {
-                        float torsoT = (ny - 0.08f) / 0.57f;
-                        float torsoHalfW = Mathf.Lerp(0.15f, 0.28f, torsoT);
-                        float centerX = Mathf.Lerp(0.45f, 0.53f, torsoT);
-                        float dx = Mathf.Abs(nx - centerX);
-                        if (dx <= torsoHalfW)
-                        {
-                            bool isOuterRim = dx > torsoHalfW - 0.035f;
-                            bool isChestCore = Mathf.Abs(ny - 0.46f) < 0.05f && dx < 0.16f;
-                            bool isShoulderStripe = ny > 0.54f && dx > 0.12f;
-                            c = (isOuterRim || isChestCore || isShoulderStripe) ? neonCyan : Color.Lerp(armorDark, armorMid, torsoT);
-                        }
-                    }
+                        float torsoT = (ny - 0.06f) / 0.84f;
+                        float halfW = Mathf.Lerp(0.24f, 0.28f, torsoT);
+                        float centerX = Mathf.Lerp(0.47f, 0.51f, torsoT);
+                        float dx = nx - centerX;
+                        float absDx = Mathf.Abs(dx);
 
-                    Vector2 headCenter = new Vector2(0.55f, 0.80f);
-                    float headDist = Vector2.Distance(new Vector2(nx, ny), headCenter);
-                    if (headDist <= 0.145f)
-                    {
-                        c = armorMid;
-                        if (nx >= 0.53f && nx <= 0.70f && ny >= 0.77f && ny <= 0.85f) c = visorGlow;
-                        else if (headDist >= 0.118f) c = neonCyan;
+                        if (absDx <= halfW)
+                        {
+                            bool isOuterRim = absDx > halfW - 0.032f || ny < 0.09f || (ny > 0.86f && absDx > 0.12f);
+                            bool isBelt = Mathf.Abs(ny - 0.26f) < 0.055f;
+                            bool isBeltBuckle = isBelt && Mathf.Abs(dx - 0.08f) < 0.045f;
+                            bool isShirtV = ny > 0.62f && absDx < (ny - 0.60f) * 0.42f;
+                            bool isTie = ny > 0.63f && Mathf.Abs(dx - 0.01f) < 0.025f;
+                            bool isCollarWing = ny > 0.70f && !isShirtV && absDx < 0.19f && ny < 0.90f;
+                            bool isButtons = (Mathf.Abs(ny - 0.48f) < 0.022f || Mathf.Abs(ny - 0.36f) < 0.022f) && Mathf.Abs(dx - 0.08f) < 0.022f;
+
+                            if (isOuterRim) c = outline;
+                            else if (isBeltBuckle) c = brassGold;
+                            else if (isBelt) c = darkBrown;
+                            else if (isTie) c = outline;
+                            else if (isShirtV) c = shirtCream;
+                            else if (isCollarWing) c = (ny > 0.81f ? darkBrown : coatLight);
+                            else if (isButtons) c = darkBrown;
+                            else c = dx < -0.06f ? coatShadow : (dx > 0.11f ? coatLight : coatBase);
+                        }
                     }
 
                     pixels[y * w + x] = c;
@@ -1955,15 +2220,125 @@ namespace LightWeaver.EditorTools
 
             tex.SetPixels(pixels);
             tex.Apply();
-            return SaveAndImportSprite(tex, assetPath, 160f);
+            return SaveAndImportSprite(tex, assetPath, 145f);
         }
 
-        private static Sprite GenerateRunnerLimbSprite(string assetPath)
+        private static Sprite GenerateDetectiveHeadHatSprite(string assetPath)
+        {
+            const int w = 160;
+            const int h = 160;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            Color hatCrown = new Color(0.357f, 0.251f, 0.224f, 1f);    // #5B4039
+            Color hatHighlight = new Color(0.514f, 0.424f, 0.329f, 1f);// #836C54
+            Color outline = new Color(0.122f, 0.090f, 0.102f, 1f);     // #1F171A
+            Color skin = new Color(0.875f, 0.745f, 0.576f, 1f);        // #DFBE93
+            Color skinShadow = new Color(0.737f, 0.580f, 0.373f, 1f);  // #BC945F
+            Color eyeGlow = new Color(1.0f, 0.92f, 0.56f, 1f);         // Keskin dedektif bakışı
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    Color c = Color.clear;
+
+                    // Yüz silüeti (sağa bakan profil)
+                    Vector2 headCenter = new Vector2(0.49f, 0.36f);
+                    float dHead = Vector2.Distance(new Vector2((nx - headCenter.x) * 1.05f, (ny - headCenter.y) * 0.92f), Vector2.zero);
+                    bool nose = nx >= 0.65f && nx <= 0.73f && ny >= 0.31f && ny <= 0.42f && (nx - 0.65f) <= (0.42f - ny) * 0.8f;
+
+                    if (dHead <= 0.21f || nose)
+                    {
+                        bool rim = (!nose && dHead > 0.18f) || (nose && (nx > 0.705f || ny < 0.325f));
+                        bool eye = nx >= 0.55f && nx <= 0.63f && ny >= 0.37f && ny <= 0.43f;
+                        if (rim) c = outline;
+                        else if (eye) c = eyeGlow;
+                        else c = nx < 0.42f ? skinShadow : skin;
+                    }
+
+                    // Fedora şapka siperliği (sağa hafif aşağı açılı stilize gölge)
+                    float brimCenterY = 0.53f - (nx - 0.50f) * 0.10f;
+                    if (nx >= 0.18f && nx <= 0.84f && Mathf.Abs(ny - brimCenterY) <= 0.042f)
+                    {
+                        bool rim = Mathf.Abs(ny - brimCenterY) > 0.025f || nx < 0.21f || nx > 0.81f;
+                        c = rim ? outline : hatCrown;
+                    }
+
+                    // Fedora şapka tacı
+                    if (ny >= 0.54f && ny <= 0.86f)
+                    {
+                        float crownT = (ny - 0.54f) / 0.32f;
+                        float halfW = Mathf.Lerp(0.22f, 0.15f, crownT);
+                        float dx = nx - 0.48f;
+                        float notchDip = Mathf.Abs(dx) < 0.06f && ny > 0.80f ? 0.04f : 0f;
+                        if (Mathf.Abs(dx) <= halfW && ny <= 0.86f - notchDip)
+                        {
+                            bool rim = Mathf.Abs(dx) > halfW - 0.025f || ny > 0.83f - notchDip;
+                            bool hatBand = ny >= 0.55f && ny <= 0.61f;
+                            if (rim) c = outline;
+                            else if (hatBand) c = outline;
+                            else c = dx > 0.03f ? hatHighlight : hatCrown;
+                        }
+                    }
+
+                    pixels[y * w + x] = c;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 145f);
+        }
+
+        private static Sprite GenerateDetectiveCoatTailSprite(string assetPath)
+        {
+            const int w = 96;
+            const int h = 128;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            Color coatBase = new Color(0.737f, 0.580f, 0.373f, 1f);
+            Color coatShadow = new Color(0.659f, 0.518f, 0.325f, 1f);
+            Color outline = new Color(0.122f, 0.090f, 0.102f, 1f);
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    float centerX = Mathf.Lerp(0.36f, 0.54f, ny);
+                    float halfW = Mathf.Lerp(0.28f, 0.22f, ny);
+                    float dx = Mathf.Abs(nx - centerX);
+                    if (ny >= 0.06f && ny <= 0.96f && dx <= halfW)
+                    {
+                        bool rim = dx > halfW - 0.045f || ny < 0.10f;
+                        pixels[y * w + x] = rim ? outline : (nx < centerX ? coatShadow : coatBase);
+                    }
+                    else pixels[y * w + x] = Color.clear;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 110f);
+        }
+
+        private static Sprite GenerateDetectiveArmSprite(string assetPath)
         {
             const int w = 48;
             const int h = 96;
             Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[w * h];
+
+            Color coatBase = new Color(0.737f, 0.580f, 0.373f, 1f);
+            Color coatShadow = new Color(0.659f, 0.518f, 0.325f, 1f);
+            Color darkBrown = new Color(0.357f, 0.251f, 0.224f, 1f);
+            Color skinHand = new Color(0.875f, 0.745f, 0.576f, 1f);
+            Color outline = new Color(0.122f, 0.090f, 0.102f, 1f);
 
             for (int y = 0; y < h; y++)
             {
@@ -1972,11 +2347,124 @@ namespace LightWeaver.EditorTools
                 {
                     float nx = (float)x / (w - 1);
                     float dx = Mathf.Abs(nx - 0.5f);
-                    float halfWidth = Mathf.Lerp(0.24f, 0.39f, ny);
-                    if (dx <= halfWidth)
+                    float halfWidth = Mathf.Lerp(0.28f, 0.38f, ny);
+                    if (dx <= halfWidth && ny >= 0.04f && ny <= 0.96f)
                     {
-                        bool isBootOrStripe = ny < 0.18f || dx > halfWidth - 0.09f;
-                        pixels[y * w + x] = isBootOrStripe ? Color.white : new Color(0.18f, 0.30f, 0.46f, 1f);
+                        bool rim = dx > halfWidth - 0.07f || ny < 0.08f || ny > 0.92f;
+                        if (rim) pixels[y * w + x] = outline;
+                        else if (ny < 0.16f) pixels[y * w + x] = skinHand;
+                        else if (ny < 0.28f) pixels[y * w + x] = darkBrown;
+                        else pixels[y * w + x] = nx < 0.45f ? coatShadow : coatBase;
+                    }
+                    else pixels[y * w + x] = Color.clear;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 96f);
+        }
+
+        private static Sprite GenerateDetectiveThighSprite(string assetPath)
+        {
+            const int w = 48;
+            const int h = 96;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            Color pants = new Color(0.514f, 0.424f, 0.329f, 1f);     // #836C54
+            Color dark = new Color(0.357f, 0.251f, 0.224f, 1f);      // #5B4039
+            Color outline = new Color(0.122f, 0.090f, 0.102f, 1f);
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    float dx = Mathf.Abs(nx - 0.5f);
+                    float halfW = Mathf.Lerp(0.28f, 0.38f, ny);
+                    if (dx <= halfW && ny >= 0.04f && ny <= 0.96f)
+                    {
+                        bool rim = dx > halfW - 0.075f;
+                        pixels[y * w + x] = rim ? outline : (nx < 0.44f ? dark : pants);
+                    }
+                    else pixels[y * w + x] = Color.clear;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 96f);
+        }
+
+        private static Sprite GenerateDetectiveShinBootSprite(string assetPath)
+        {
+            const int w = 64;
+            const int h = 96;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            Color pants = new Color(0.514f, 0.424f, 0.329f, 1f);
+            Color boot = new Color(0.145f, 0.105f, 0.115f, 1f);
+            Color bootHighlight = new Color(0.357f, 0.251f, 0.224f, 1f);
+            Color outline = new Color(0.08f, 0.06f, 0.07f, 1f);
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    bool inBootFoot = ny >= 0.04f && ny <= 0.28f && nx >= 0.24f && nx <= Mathf.Lerp(0.88f, 0.62f, (ny - 0.04f) / 0.24f);
+                    bool inLegCol = ny > 0.24f && ny <= 0.96f && Mathf.Abs(nx - 0.42f) <= Mathf.Lerp(0.20f, 0.24f, ny);
+
+                    if (inBootFoot)
+                    {
+                        pixels[y * w + x] = ny > 0.20f && nx > 0.56f ? bootHighlight : boot;
+                    }
+                    else if (inLegCol)
+                    {
+                        bool rim = Mathf.Abs(nx - 0.42f) > Mathf.Lerp(0.20f, 0.24f, ny) - 0.055f;
+                        if (rim) pixels[y * w + x] = outline;
+                        else pixels[y * w + x] = ny < 0.42f ? boot : pants;
+                    }
+                    else pixels[y * w + x] = Color.clear;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 96f);
+        }
+
+        private static Sprite GenerateVintageFlashlightSprite(string assetPath)
+        {
+            const int w = 96;
+            const int h = 56;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            Color handle = new Color(0.357f, 0.251f, 0.224f, 1f);
+            Color brass = new Color(0.95f, 0.74f, 0.24f, 1f);
+            Color lens = new Color(1.0f, 0.96f, 0.76f, 1f);
+            Color outline = new Color(0.122f, 0.090f, 0.102f, 1f);
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                float dy = Mathf.Abs(ny - 0.5f);
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    float halfH = nx < 0.58f ? 0.19f : Mathf.Lerp(0.19f, 0.42f, (nx - 0.58f) / 0.34f);
+                    if (nx >= 0.08f && nx <= 0.94f && dy <= halfH)
+                    {
+                        bool rim = dy > halfH - 0.06f || nx < 0.12f || nx > 0.90f;
+                        if (rim) pixels[y * w + x] = outline;
+                        else if (nx > 0.84f) pixels[y * w + x] = lens;
+                        else if (nx >= 0.56f) pixels[y * w + x] = brass;
+                        else pixels[y * w + x] = handle;
                     }
                     else pixels[y * w + x] = Color.clear;
                 }
@@ -2336,26 +2824,26 @@ namespace LightWeaver.EditorTools
             Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[w * h];
 
-            Color hotCore = new Color(0.75f, 1.0f, 1.0f, 1f);
-            Color cyanBeam = new Color(0.0f, 0.94f, 1.0f, 1f);
-            Color goldenRim = new Color(1.0f, 0.72f, 0.18f, 1f);
+            Color hotCore = new Color(1.0f, 0.97f, 0.84f, 1f);      // Sıcak dedektif feneri beyaz-altın çekirdek
+            Color goldBeam = new Color(1.0f, 0.78f, 0.24f, 1f);     // Kehribar-altın huzme gövdesi
+            Color scarabRim = new Color(0.08f, 0.88f, 0.80f, 1f);   // Antik Mısır turkuazı keşif kenarı
 
             for (int y = 0; y < h; y++)
             {
                 float v = (float)y / (h - 1);
                 float distFromCenter = Mathf.Abs(v - 0.5f) * 2f;
                 float angularAlpha = Mathf.Pow(Mathf.Clamp01(1f - distFromCenter), 1.45f);
-                float goldenRimBand = Mathf.Exp(-Mathf.Pow((distFromCenter - 0.62f) / 0.18f, 2f));
+                float scarabRimBand = Mathf.Exp(-Mathf.Pow((distFromCenter - 0.68f) / 0.18f, 2f));
 
                 for (int x = 0; x < w; x++)
                 {
                     float u = (float)x / (w - 1);
                     float radialAlpha = Mathf.Pow(Mathf.Clamp01(1f - u), 1.35f);
 
-                    Color baseCol = Color.Lerp(hotCore, cyanBeam, Mathf.Clamp01(u * 1.4f + distFromCenter * 0.5f));
-                    baseCol = Color.Lerp(baseCol, goldenRim, goldenRimBand * 0.75f);
+                    Color baseCol = Color.Lerp(hotCore, goldBeam, Mathf.Clamp01(u * 1.35f + distFromCenter * 0.45f));
+                    baseCol = Color.Lerp(baseCol, scarabRim, scarabRimBand * 0.45f);
 
-                    float finalAlpha = radialAlpha * angularAlpha * 0.85f;
+                    float finalAlpha = radialAlpha * angularAlpha * 0.86f;
                     pixels[y * w + x] = new Color(baseCol.r, baseCol.g, baseCol.b, finalAlpha);
                 }
             }

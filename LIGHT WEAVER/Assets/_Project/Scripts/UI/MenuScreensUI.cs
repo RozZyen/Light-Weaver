@@ -55,11 +55,11 @@ namespace LightWeaver.UI
 
         private static readonly string[] SectorDisplayNames =
         {
-            "LEVEL 1 - THE SILENT ABYSS",
-            "LEVEL 2 - THE PRISM CAVERNS",
-            "LEVEL 3 - THE UMBRA SWARM",
-            "LEVEL 4 - THE ECHO VOID",
-            "LEVEL 5 - THE SINGULARITY CORE"
+            "LEVEL 1 - OUTSKIRTS OF GIZA",
+            "LEVEL 2 - THE SANDSTONE TOMBS",
+            "LEVEL 3 - CHAMBER OF ANUBIS",
+            "LEVEL 4 - HALL OF SCARABS",
+            "LEVEL 5 - THE PHARAOH'S VAULT"
         };
 
         private void Awake()
@@ -152,8 +152,8 @@ namespace LightWeaver.UI
                     if (img != null)
                     {
                         img.color = i == selectedIndex
-                            ? new Color(0.0f, 0.94f, 1.0f, 0.95f)
-                            : new Color(0.10f, 0.16f, 0.28f, 0.85f);
+                            ? new Color(0.95f, 0.74f, 0.22f, 0.95f)
+                            : new Color(0.16f, 0.13f, 0.12f, 0.88f);
                     }
                 }
             }
@@ -190,7 +190,7 @@ namespace LightWeaver.UI
             ProgressManager.EnsureLoaded();
             if (musicToggleLabel != null) musicToggleLabel.text = ProgressManager.MusicEnabled ? "MUSIC: ON" : "MUSIC: OFF";
             if (sfxToggleLabel != null) sfxToggleLabel.text = ProgressManager.SfxEnabled ? "ASMR SFX: ON" : "ASMR SFX: OFF";
-            if (aimModeToggleLabel != null) aimModeToggleLabel.text = ProgressManager.MobileAimMode == 0 ? "AIM: 360 STICK" : "AIM: TOUCH POINT";
+            if (aimModeToggleLabel != null) aimModeToggleLabel.text = ProgressManager.MobileAimMode == 0 ? "AIM: 210 STICK" : "AIM: TOUCH POINT";
         }
 
         private void HandleGameStateChanged(GameState state)

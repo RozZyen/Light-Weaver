@@ -31,12 +31,12 @@ namespace LightWeaver.World
         [SerializeField] private float fragileBreakDelay = 0.24f;
         [SerializeField] private float umbraMeltCooldown = 0.65f;
 
-        [Header("Visual Palette")]
-        [SerializeField] private Color solidCyanColor = new Color(0.0f, 0.94f, 1.0f, 0.96f);
-        [SerializeField] private Color boostGoldCyanColor = new Color(0.25f, 1.0f, 0.72f, 0.98f);
-        [SerializeField] private Color fragileIceColor = new Color(0.78f, 0.96f, 1.0f, 0.95f);
-        [SerializeField] private Color umbraDarkVioletColor = new Color(0.58f, 0.12f, 0.92f, 0.92f);
-        [SerializeField] private Color afterglowVioletColor = new Color(0.71f, 0.22f, 0.95f, 0.78f);
+        [Header("Visual Palette (Egypt Mystery Sandstone & Scarab)")]
+        [SerializeField] private Color solidCyanColor = new Color(1.0f, 0.96f, 0.86f, 0.98f);
+        [SerializeField] private Color boostGoldCyanColor = new Color(0.55f, 1.0f, 0.88f, 0.98f);
+        [SerializeField] private Color fragileIceColor = new Color(1.0f, 0.92f, 0.78f, 0.96f);
+        [SerializeField] private Color umbraDarkVioletColor = new Color(0.76f, 0.36f, 0.95f, 0.94f);
+        [SerializeField] private Color afterglowVioletColor = new Color(0.78f, 0.56f, 0.32f, 0.72f);
 
         [Header("Variant Sprites & References")]
         [SerializeField] private Sprite standardCrystalSprite;

@@ -50,7 +50,7 @@ namespace LightWeaver.Feedbacks
 
         private void HandleCrystalSolidified(CrystalPlatform plat, float intensity)
         {
-            if (plat != null) EmitBurst(plat.WorldPosition, new Color(0.0f, 0.94f, 1.0f, 0.85f), 6, 3.2f, 0.14f);
+            if (plat != null) EmitBurst(plat.WorldPosition, new Color(1.0f, 0.84f, 0.36f, 0.85f), 6, 3.2f, 0.14f);
         }
 
         private void HandleVariantTriggered(CrystalPlatform plat, CrystalVariant variant)
@@ -58,11 +58,11 @@ namespace LightWeaver.Feedbacks
             if (plat == null) return;
             if (variant == CrystalVariant.KineticBoost)
             {
-                EmitBurst(plat.WorldPosition, new Color(0.25f, 1.0f, 0.72f, 1f), 14, 5.5f, 0.18f);
+                EmitBurst(plat.WorldPosition, new Color(0.12f, 0.92f, 0.82f, 1f), 14, 5.5f, 0.18f);
             }
             else if (variant == CrystalVariant.FragileShard)
             {
-                EmitBurst(plat.WorldPosition, new Color(0.82f, 0.96f, 1f, 0.95f), 16, 4.8f, 0.16f);
+                EmitBurst(plat.WorldPosition, new Color(0.90f, 0.78f, 0.56f, 0.95f), 16, 4.8f, 0.16f);
             }
         }
 
@@ -94,15 +94,15 @@ namespace LightWeaver.Feedbacks
         {
             if (runnerMotor == null) return;
             Vector3 feetPos = runnerMotor.transform.position + new Vector3(0f, -0.65f, 0f);
-            Color col = isDoubleJump ? new Color(0.0f, 0.96f, 1.0f, 1f) : new Color(0.75f, 0.95f, 1f, 0.85f);
+            Color col = isDoubleJump ? new Color(0.10f, 0.92f, 0.84f, 1f) : new Color(0.92f, 0.76f, 0.45f, 0.85f);
             EmitBurst(feetPos, col, isDoubleJump ? 14 : 8, isDoubleJump ? 4.8f : 3.0f, isDoubleJump ? 0.16f : 0.12f);
         }
 
         private void HandleRunnerDefeat()
         {
             if (runnerMotor == null) return;
-            EmitBurst(runnerMotor.transform.position, new Color(0.0f, 0.94f, 1.0f, 1f), 16, 7.5f, 0.24f);
-            EmitBurst(runnerMotor.transform.position, new Color(1.0f, 0.78f, 0.18f, 1f), 12, 6.2f, 0.20f);
+            EmitBurst(runnerMotor.transform.position, new Color(0.95f, 0.72f, 0.28f, 1f), 16, 7.5f, 0.24f);
+            EmitBurst(runnerMotor.transform.position, new Color(0.85f, 0.30f, 0.18f, 1f), 12, 6.2f, 0.20f);
         }
 
         public void EmitBurst(Vector3 worldPos, Color color, int count, float speed, float size)

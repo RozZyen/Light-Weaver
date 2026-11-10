@@ -29,8 +29,10 @@ namespace LightWeaver.Player
         [SerializeField] private float joystickMaxRadiusPx = 95f;
         [SerializeField] private float joystickDeadzonePx = 10f;
 
-        [Header("Aim Tuning")]
+        [Header("Aim Tuning (210° Forward & Vertical Arc)")]
         [SerializeField] private float initialAngleDeg = -10f;
+        [SerializeField] private float minAimAngleDeg = -105f;
+        [SerializeField] private float maxAimAngleDeg = 105f;
         [SerializeField] private float doubleTapMaxInterval = 0.28f;
 
         private float _targetAngleDeg;
@@ -120,16 +122,21 @@ namespace LightWeaver.Player
                 {
                     keyboardAimed = true;
                     _mouseAimActive = false;
-                    // Yalnızca W veya S'ye basılırsa mevcut yatay yöne göre yumuşak açısal dönüş;
-                    // hem X hem Y basılırsa doğrudan 360° vektör açısı!
-                    if (kx != 0f)
+                    if (kx > 0.01f)
                     {
-                        float desiredAngle = Mathf.Atan2(ky, kx) * Mathf.Rad2Deg;
-                        _targetAngleDeg = Mathf.MoveTowardsAngle(_targetAngleDeg, desiredAngle, 420f * dt);
+                        float desiredAngle = ClampAim210(Mathf.Atan2(ky, kx) * Mathf.Rad2Deg);
+                        _targetAngleDeg = Mathf.MoveTowards(_targetAngleDeg, desiredAngle, 420f * dt);
+                    }
+                    else if (ky != 0f)
+                    {
+                        float verticalTarget = ky > 0f ? maxAimAngleDeg : minAimAngleDeg;
+                        _targetAngleDeg = Mathf.MoveTowards(_targetAngleDeg, verticalTarget, 240f * dt);
                     }
                     else
                     {
-                        _targetAngleDeg += ky * 165f * dt;
+                        // Sadece A/Sol: mevcutta yukarı bakıyorsa +105°, aşağı bakıyorsa -105° eşiğine yaslan
+                        float pullTarget = _targetAngleDeg >= 0f ? maxAimAngleDeg : minAimAngleDeg;
+                        _targetAngleDeg = Mathf.MoveTowards(_targetAngleDeg, pullTarget, 240f * dt);
                     }
                 }
 
@@ -219,8 +226,8 @@ namespace LightWeaver.Player
                         float dist = delta.magnitude;
                         if (dist > joystickDeadzonePx)
                         {
-                            _targetAngleDeg = Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg;
-                            // Parmağı çok uzağa çekince otomatik Focus Lazeri (veya UI Focus butonu)
+                            _targetAngleDeg = ClampAim210(Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+                            // Parmağı çok uzağa çekince otomatik Focus Lazeri (veya sol UI LONG BEAM butonu)
                             if (dist > joystickMaxRadiusPx * 1.15f) isFocused = true;
                         }
                         UpdateJoystickUi(_stickOriginScreenPos, Vector2.ClampMagnitude(delta, joystickMaxRadiusPx));
@@ -246,8 +253,14 @@ namespace LightWeaver.Player
             Vector2 dir = (Vector2)worldPt - flashlightController.EmitterWorldPosition;
             if (dir.sqrMagnitude > 0.04f)
             {
-                _targetAngleDeg = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+                _targetAngleDeg = ClampAim210(Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
             }
+        }
+
+        private float ClampAim210(float rawAngleDeg)
+        {
+            float wrapped = Mathf.Repeat(rawAngleDeg + 180f, 360f) - 180f;
+            return Mathf.Clamp(wrapped, minAimAngleDeg, maxAimAngleDeg);
         }
 
         private void UpdateJoystickUi(Vector2 originScreen, Vector2 clampedOffset)
