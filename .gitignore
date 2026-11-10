@@ -1,0 +1,95 @@
+# ==============================================================================
+# 🔒 GÜVENLİK VE GİZLİ VERİLER (API KEYS, SECRETS & CREDENTIALS)
+# ==============================================================================
+*.env
+*.env.*
+.env
+.env.local
+.env.production
+!.env.example
+*secrets*
+*Secrets*
+*secret*
+*Secret*
+*credentials*
+*Credentials*
+*api_key*
+*apiKey*
+*ApiKey*
+*API_KEY*
+*.private.*
+*.local.*
+*.private.json
+*.local.json
+*.keystore
+*.jks
+**/Secrets/**
+**/Secrets.meta
+**/Private/**
+**/Private.meta
+google-services.json
+google-services.json.meta
+GoogleService-Info.plist
+GoogleService-Info.plist.meta
+
+# ==============================================================================
+# 🎮 UNITY 6 STANDART GITIGNORE (Kök ve Alt Klasör Uyumlu)
+# ==============================================================================
+**/[Ll]ibrary/
+**/[Tt]emp/
+**/[Oo]bj/
+**/[Bb]uild/
+**/[Bb]uilds/
+**/[Ll]ogs/
+**/[Uu]ser[Ss]ettings/
+**/.utmp/
+*.log
+
+# Python & Araçlar
+__pycache__/
+__pycache__.meta
+*.pyc
+
+# Blender
+*.blend1
+*.blend1.meta
+
+# Memory & Recordings
+**/[Mm]emoryCaptures/
+**/[Rr]ecordings/
+
+# IDE / Editor
+.vs/
+.vscode/
+.idea/
+.gradle/
+.consulo/
+ExportedObj/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+*.DotSettings.user
+sysinfo.txt
+mono_crash.*
+
+# Paket Çıktıları
+*.apk
+*.aab
+*.unitypackage
+*.unitypackage.meta
+*.app

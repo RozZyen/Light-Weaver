@@ -1,0 +1,25 @@
+# Masaüstü + Laptop arasında satır sonu (CRLF/LF) karmaşasını önler:
+* text=auto
+
+# Unity YAML dosyaları:
+*.unity      merge=unityyamlmerge
+*.prefab     merge=unityyamlmerge
+*.asset      merge=unityyamlmerge
+*.anim       merge=unityyamlmerge
+*.controller merge=unityyamlmerge
+*.mat        merge=unityyamlmerge
+*.meta       merge=unityyamlmerge
+
+# İkili (Binary) dosyalar:
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.psd  binary
+*.wav  binary
+*.mp3  binary
+*.ogg  binary
+*.ttf  binary
+*.otf  binary
+*.fbx  binary
+*.blend binary
