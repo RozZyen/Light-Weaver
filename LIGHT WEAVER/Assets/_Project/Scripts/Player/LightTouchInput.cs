@@ -1,5 +1,7 @@
 using System;
+using LightWeaver.Core;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace LightWeaver.Player
@@ -63,6 +65,18 @@ namespace LightWeaver.Player
         private void Update()
         {
             if (flashlightController == null) return;
+            if (GameFlowManager.ActiveInstance != null && GameFlowManager.ActiveInstance.CurrentState != GameState.Playing)
+            {
+                _isTouchDragging = false;
+                _isMouseDragging = false;
+                return;
+            }
+
+            // UI butonlarına tıklanırken fener açısını bozma
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
 
             bool isFocused = false;
             float dt = Time.deltaTime;

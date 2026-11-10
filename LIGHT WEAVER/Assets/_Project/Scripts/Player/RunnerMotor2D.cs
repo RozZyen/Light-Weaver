@@ -100,6 +100,31 @@ namespace LightWeaver.Player
             if (!active && _rb != null)
             {
                 _rb.linearVelocity = Vector2.zero;
+                _rb.simulated = false;
+            }
+            else if (active && _rb != null)
+            {
+                _rb.simulated = true;
+            }
+        }
+
+        public void SetAutoRespawnOnVoidFall(bool enabled)
+        {
+            autoRespawnOnVoidFall = enabled;
+        }
+
+        public void ReviveAtPosition(Vector3 worldPos)
+        {
+            if (_rb == null) return;
+            _rb.simulated = true;
+            _rb.position = worldPos;
+            _rb.linearVelocity = Vector2.zero;
+            _isGrounded = false;
+            _coyoteTimer = 0f;
+            _externalJumpLockTimer = 0f;
+            if (_touchInput != null)
+            {
+                _touchInput.ResetAimToInitial();
             }
         }
 

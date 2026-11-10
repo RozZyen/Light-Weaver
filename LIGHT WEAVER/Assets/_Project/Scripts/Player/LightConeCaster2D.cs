@@ -101,7 +101,7 @@ namespace LightWeaver.Player
                 _meshRenderer.sharedMaterial.mainTexture = beamGradientTexture;
             }
 
-            _meshRenderer.sortingOrder = 15;
+            _meshRenderer.sortingOrder = 10;
         }
 
         public void SetTargetAngle(float angleDeg, bool focused, bool snapImmediate = false)

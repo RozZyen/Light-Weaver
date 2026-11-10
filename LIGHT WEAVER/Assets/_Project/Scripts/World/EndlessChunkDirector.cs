@@ -109,6 +109,32 @@ namespace LightWeaver.World
             ResetWorldFromStart();
         }
 
+        public void SpawnReviveSafetyBridge(float centerX, float topY)
+        {
+            if (pooler == null) return;
+            float width = 7.0f;
+            float startX = centerX - 1.5f;
+            Vector3 pos = new Vector3(startX + width * 0.5f, topY - platformThickness * 0.5f, 0f);
+            GameObject go = pooler.Spawn(PoolCrystalPlatform, pos, Quaternion.identity);
+            if (go != null)
+            {
+                go.transform.localScale = new Vector3(width, platformThickness, 1f);
+                if (go.TryGetComponent(out CrystalPlatform plat))
+                {
+                    plat.OnSpawnedFromPool();
+                    plat.OnLightExposure(pos, 1.0f, true, 0.2f);
+                }
+                _activeObjects.Add(go);
+            }
+
+            if (_cursorX < startX + width)
+            {
+                _cursorX = startX + width;
+                _cursorTopY = topY;
+                FillHorizon();
+            }
+        }
+
         public void ResetWorldFromStart()
         {
             if (pooler != null)

@@ -7,7 +7,7 @@
 
 ## 📊 Genel İlerleme Durumu
 
-- **Aktif Faz:** Faz 4 Tamamlandı — Sonsuz Bölüm Üretici, 5 Sektör, 3 Gölge Tehlikesi & Flash-Burst Parry Aktif (Faz 5: HUD, Menüler, ASMR Ses & Görsel Cila Bekleniyor) 🌌⚡👾
+- **Aktif Faz:** Faz 5 Tamamlandı — Referans Görsel HUD, Menüler, ASMR Pentatonik Ses, Juice & URP Bloom Cilası Tamam (Faz 6: Mobil Monetizasyon & Mağaza Hazırlığı Bekleniyor) 🎨🎵📱
 - **Hedef Motor:** Unity 6 (URP 2D) + Unity MCP (`com.coplaydev.unity-mcp`)
 - **Depo Konumu:** `C:\Users\Yusuf\Documents\GitHub\Light-Weaver` (`https://github.com/RozZyen/Light-Weaver`)
 - **Son Güncelleme:** 2026-11-10
@@ -55,9 +55,9 @@
 ### 🎨 Faz 5: HUD, Menüler & Pentatonik ASMR Ses Motoru
 | Görev Kodu | Görev / Özellik | Detay | Durum |
 | :---: | :--- | :--- | :---: |
-| **F5.1** | **`LightWeaverHUD` (Referans Birebir HUD)** | Sol üst gradyan pil barı (`BATTERY: 74%`), Sağ üst `LEVEL 4 - THE ECHO VOID` & Skor | ⬜ Planlandı |
-| **F5.2** | **Menü Akışı & Checkpoint/Revive** | Ana Menü, Seviye Seçimi, Duraklatma (ESC/Pause) ve Acil Solar Şarj (Revive) | ⬜ Planlandı |
-| **F5.3** | **`HarmonicAudioManager` & Juice** | Do Minör Pentatonik kristal cam/çan ASMR ses sentezleyicisi, Hit-Stop & Shake | ⬜ Planlandı |
+| **F5.1** | **`LightWeaverHUD` (Referans Birebir HUD)** | Sol üst gradyan pil barı (`BATTERY: 74%`), Sağ üst `LEVEL 4 - THE ECHO VOID` & Skor | ✅ Tamamlandı |
+| **F5.2** | **Menü Akışı & Checkpoint/Revive** | Ana Menü, Sektör Seçimi (`L1..L5`), Duraklatma (ESC/Pause) & `Solar Revive` köprüsü | ✅ Tamamlandı |
+| **F5.3** | **`HarmonicAudioManager` & Görsel Cila** | Prosedürel Do Minör Pentatonik kristal cam/çan ASMR, Hit-Stop, Shake & URP Bloom | ✅ Tamamlandı |
 
 ### 📱 Faz 6: Mobil Mağaza Hazırlığı, Monetizasyon & Cila
 | Görev Kodu | Görev / Özellik | Detay | Durum |
@@ -68,6 +68,11 @@
 ---
 
 ## 📜 Geliştirme Günlüğü (Changelog)
+
+### [2026-11-10] — v0.6.0: Faz 5 Referans Görsel HUD, Menüler, ASMR Pentatonik Ses, Juice & URP Bloom Cilası
+- **Oyun Akışı & Kalıcı İlerleme (`GameFlowManager.cs`, `ProgressManager.cs`):** `MainMenu -> Playing -> Paused -> GameOver` akışı, 3x Overcharge skor çarpanı, PlayerPrefs yüksek skor/mesafe kaydı ve güvenli köprü oluşturan `Solar Revive` sistemi kuruldu.
+- **UI/UX (`LightWeaverHUD.cs`, `MenuScreensUI.cs`, `SafeAreaFit.cs`):** Konsept görseldeki gradyan pil barı (`BATTERY: XX%`), sağ üst `LEVEL X - SECTOR` & virgüllü skor sayacı, *Flash-Burst* barı, L1–L5 sektör seçmeli Ana Menü, ESC/Pause modalı ve çentikli ekran uyumu `InputSystemUIInputModule` ile eklendi.
+- **ASMR Ses, Juice & Görsel Cila (`HarmonicAudioManager.cs`, `JuiceFeedbackManager.cs`):** Prosedürel Do Minör Pentatonik kristal cam/arp tınıları, uzay ambient pad, Hit-Stop (`0.032s`), kamera sarsıntısı, URP **Bloom** (`LightWeaverPostProcess.asset`), Hero Cyan Aura ve fasetli `256x96` kristal dokuları eklendi.
 
 ### [2026-11-10] — v0.5.0: Faz 4 Sonsuz Bölüm Üretici, 5 Sektör & Gölge Tehlikeleri + Step-Up Düzeltmesi
 - **Sonsuz Üretim & Sektörler (`EndlessChunkDirector.cs`, `SectorProfileSO.cs`):** `ObjectPooler` üzerinden 6 balistik-doğrulanmış chunk (rampa, Jump Pad 3 katman çatalı, Prizma köprü, tehlike koridoru, süzülme) ve Level 1–5 sektör profilleri (`Sector_01..05.asset`) oluşturuldu.

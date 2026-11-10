@@ -1,7 +1,7 @@
 # 🧠 LIGHT WEAVER: Prism Runner - Canlı Proje Hafızası (Cross-Device Memory)
 
 > **Son Güncelleme:** 2026-11-10  
-> **Durum:** Faz 4 Tamamlandı — Sonsuz Bölüm Üretici (`EndlessChunkDirector`), 5 Sektör Profili, 3 Gölge Tehlikesi (`ShadowHazard`) & `FlashBurst` Aktif (Faz 5'e Hazır)  
+> **Durum:** Faz 5 Tamamlandı — Referans Görsel HUD, Ana Menü/Pause/Solar Revive, Pentatonik ASMR Ses, Juice & URP Bloom Görsel Cilası Aktif (Faz 6'ya Hazır)  
 > **Cihaz Eşitleme:** Git Push/Pull (`main` dalı) ile Masaüstü & Laptop senkronizasyonu aktif.  
 
 ---
@@ -21,9 +21,10 @@
 ```mermaid
 graph TD
     subgraph Input_UI ["📱 Girdi & Arayüz (UI)"]
-        Touch["LightTouchInput (Tek Parmak Yay, W/S Klavye & Hareketli Fare)"] --> Aim["FlashlightController2D"]
-        HUD["LightWeaverHUD (BatteryBar, ScoreCounter, SectorTitle)"]
-        Menus["MainMenuUI / PauseModalUI / GameOverReviveUI"]
+        Touch["LightTouchInput (Tek Parmak Yay, W/S Klavye & UI Koruması)"] --> Aim["FlashlightController2D"]
+        Flow["GameFlowManager (Menu/Playing/Pause/GameOver + Solar Revive)"] --> HUD["LightWeaverHUD (BatteryBar, ScoreCounter, SectorTitle)"]
+        Flow --> Menus["MenuScreensUI (Sektör Seçimi, PauseModal, SolarRevive)"]
+        Safe["SafeAreaFit (Çentikli Ekran Uyumu)"] -.-> HUD
     end
 
     subgraph Player_System ["🏃‍♂️ Light Weaver Karakteri"]
@@ -46,10 +47,10 @@ graph TD
     end
 
     subgraph Juice_Services ["✨ ASMR Juice, Ses & Servisler"]
-        Audio["HarmonicAudioManager (Pentatonik Cam/Çan ASMR + Müzik)"]
-        Juice["JuiceFeedbackManager (HitStop 0.04s, CameraShake2D, Haptics)"]
-        Progress["ProgressManager (Seviye, Skor, PlayerPrefs)"]
-        Ads["AdManager (Rewarded Solar Revive / 2x Score)"]
+        Audio["HarmonicAudioManager (Prosedürel C Minör Pentatonik Cam/Çan ASMR + Space Pad)"]
+        Juice["JuiceFeedbackManager (HitStop 0.032s, CameraShake2D, Haptics)"]
+        Progress["ProgressManager (HighScore, BestDist, UnlockedSector, PlayerPrefs)"]
+        Ads["AdManager (Faz 6 - Rewarded Solar Revive / 2x Score)"]
     end
 
     Cone ==>|Işık Konisi Taraması| Platform
@@ -107,9 +108,14 @@ graph TD
   - `EndlessChunkDirector.cs`: `ObjectPooler` üzerinden 6 balistik-doğrulanmış ritmik chunk (3 irtifa katmanlı Jump Pad çatalı, Prizma köprü, rampa, süzülme, tehlike koridoru) üreten ve geride kalanları geri dönüştüren sonsuz yönetmen.
   - `ShadowHazard.cs` & `FlashBurstController.cs`: 3 sistemik gölge engeli (`MovingShadowPillar`, ışıktan eriyen `UmbraStalker`, ışık emen `VoidLeech`) + Çift Dokunuş/`F`/`E` ile radyal Parlama Patlaması (Flash-Burst Parry) + `ParallaxStarfield.cs`.
 
+- [x] **Faz 5 (Referans Görsel HUD, Menüler, ASMR Pentatonik Ses, Juice & Görsel Cila):**
+  - `GameFlowManager.cs` & `ProgressManager.cs`: Tam oyun döngüsü (`MainMenu`, `Playing`, `Paused`, `GameOver`), mesafe/kristal/*Perfect Weave* skor sistemi, PlayerPrefs kalıcı yüksek skor ve **Solar Revive** kurtarma köprüsü (`SpawnReviveSafetyBridge`).
+  - `LightWeaverHUD.cs`, `MenuScreensUI.cs` & `SafeAreaFit.cs`: Referans görseldeki birebir sol üst gradyan `BATTERY: XX%` pil barı, sağ üst `LEVEL X - SECTOR` & `31,500` skor sayacı, *Flash-Burst* dolum çubuğu, sektör seçmeli Ana Menü (`L1..L5`), ESC/Pause ve Game Over ekranı (`InputSystemUIInputModule`).
+  - `HarmonicAudioManager.cs` & `JuiceFeedbackManager.cs`: Harici ses dosyası gerektirmeyen Do Minör Pentatonik kristal cam/çan ASMR sentezleyicisi, uzay ambient drone, mikro Hit-Stop (`0.032s`), Camera Shake ve mobil haptik titreşim.
+  - **Görsel Cila (`LightWeaverSetupUtility.cs`):** URP Post-Processing **Bloom** (`LightWeaverPostProcess.asset`), Hero Cyan Aura, fasetli `256x96` cam kristal dokusu ve doğru katmanlama (`sortingOrder`).
+
 ---
 
 ### 🎯 6. Sırada Ne Var? (Next Sprint)
-- [ ] **Faz 5.1:** Referans görseldeki birebir `LightWeaverHUD` (`BATTERY: 74%` gradyan pil barı, `LEVEL 4 - THE ECHO VOID`, `31,500` skor sayacı, *Perfect Weave* / `+ENERGY` bildirimleri).
-- [ ] **Faz 5.2:** Ana Menü, Sektör Seçimi, Duraklatma (ESC / Pause) ve Oyun Sonu / Solar Canlanma akışı (`ProgressManager`).
-- [ ] **Faz 5.3:** `HarmonicAudioManager.cs` (Do Minör Pentatonik kristal cam/arp ASMR ses sentezleyicisi) + Hit-Stop / görsel cila.
+- [ ] **Faz 6.1:** Mobil Mağaza Monetizasyon Altyapısı — Gevşek bağlı ScriptableObject kanallı `AdManager` (Solar Revive / 2x Score ödüllü reklam) ve `IAPManager` (`Remove Ads`).
+- [ ] **Faz 6.2:** Android & iOS 21:9 / 16:9 / 4:3 çözünürlük testleri, 60/120 FPS performans & Zero-GC Profiler doğrulaması ve Google Play / App Store uyumluluk kontrolü.

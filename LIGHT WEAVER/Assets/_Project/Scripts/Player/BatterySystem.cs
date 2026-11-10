@@ -54,6 +54,13 @@ namespace LightWeaver.Player
         private SpectrumPhase _currentPhase = SpectrumPhase.Normal;
         private bool _isDepleted;
         private float _hazardInvulnTimer;
+        private float _distanceDrainMultiplier = 1.0f;
+        private bool _isSimulationPaused;
+
+        public void SetSimulationPaused(bool paused)
+        {
+            _isSimulationPaused = paused;
+        }
 
         public float CurrentBattery => _currentBattery;
         public float MaxBattery => maxBattery;
@@ -154,8 +161,6 @@ namespace LightWeaver.Player
             }
         }
 
-        private float _distanceDrainMultiplier = 1.0f;
-
         public void SetSectorDrainMultiplier(float multiplier)
         {
             _distanceDrainMultiplier = Mathf.Clamp(multiplier, 0.5f, 2.5f);
@@ -164,6 +169,11 @@ namespace LightWeaver.Player
         private void Update()
         {
             float dt = Time.deltaTime;
+            if (_isSimulationPaused)
+            {
+                ApplyConeVisuals(dt);
+                return;
+            }
             if (_hazardInvulnTimer > 0f) _hazardInvulnTimer -= dt;
 
             if (_isDepleted)
