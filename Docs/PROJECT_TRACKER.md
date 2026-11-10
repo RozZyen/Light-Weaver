@@ -7,7 +7,7 @@
 
 ## 📊 Genel İlerleme Durumu
 
-- **Aktif Faz:** Faz 1 Tamamlandı — Çekirdek Işık Konisi & Kristalleşen Platform Motoru Sahnede Kuruldu (Faz 2'ye Hazır) 🔦💎
+- **Aktif Faz:** Faz 2 Tamamlandı — Faz 1 Işık/Kontrol Düzeltmeleri + Neon Koşucu & 80m Kristal Rampa Parkuru Hazır (Faz 3 Bekleniyor) 🔦🏃‍♂️💎
 - **Hedef Motor:** Unity 6 (URP 2D) + Unity MCP (`com.coplaydev.unity-mcp`)
 - **Depo Konumu:** `C:\Users\Yusuf\Documents\GitHub\Light-Weaver` (`https://github.com/RozZyen/Light-Weaver`)
 - **Son Güncelleme:** 2026-11-10
@@ -35,9 +35,9 @@
 ### 🏃‍♂️ Faz 2: Karakter Fiziği, Dikey Tırmanış & Kontroller
 | Görev Kodu | Görev / Özellik | Detay | Durum |
 | :---: | :--- | :--- | :---: |
-| **F2.1** | **`RunnerMotor2D` (Otomatik Koşu & Rampa)** | Akıcı yatay koşu, 30°-45° kristal rampa tırmanışı, Coyote Time | ⬜ Planlandı |
-| **F2.2** | **`LightTouchInput` & `FlashlightController2D`** | Mobil tek parmak yay sürükleme (-60°/+65°), PC fare uyumu, Odak Lazeri | ⬜ Planlandı |
-| **F2.3** | **Light Weaver Karakter Görseli & Animasyonu** | Neon biyo-zırhlı koşucu, fener kolu pivotu, `RunnerProceduralAnimator` & Trail | ⬜ Planlandı |
+| **F2.1** | **`RunnerMotor2D` (Otomatik Koşu & Rampa)** | Zero-GC rampa teğet tırmanışı (`30°-45°`), Auto Step-Up ve Coyote Time | ✅ Tamamlandı |
+| **F2.2** | **`LightTouchInput` & `FlashlightController2D`** | Mobil yay sürükleme, çakışmasız `W`/`S` klavye, hareketli/sürüklemeli fare & Odak Lazeri | ✅ Tamamlandı |
+| **F2.3** | **Light Weaver Karakter Görseli & Kamera** | Neon vizörlü parçalı koşucu, `RunnerProceduralAnimator`, `TrailRenderer` & `CameraFollow2D` | ✅ Tamamlandı |
 
 ### ⚡ Faz 3: Pil Ekonomisi, Enerji Hücreleri & Prizmatik Mekanikler
 | Görev Kodu | Görev / Özellik | Detay | Durum |
@@ -68,6 +68,15 @@
 ---
 
 ## 📜 Geliştirme Günlüğü (Changelog)
+
+### [2026-11-10] — v0.3.0: Faz 1 Düzeltmeleri + Faz 2 Karakter Fiziği, Kontroller & Oynanabilir Parkur
+- **Faz 1 Düzeltmeleri:**
+  - `CrystalPlatform.cs`: `Phantom` fazında `SpriteRenderer.enabled = false` yapılarak ışıksız kristallerin zifiri karanlıkta %100 görünmez olması sağlandı; 4-noktalı analitik ışık örneklemesi ve 1:1 elmas parlama oranı eklendi.
+  - `LightConeCaster2D.cs`: Altın kenar ışınlı ve pürüzsüz sönümlemeli `volumetric_beam_gradient.png` UV koni mesh'ine yükseltildi.
+  - `LightTouchInput.cs`: Sabit fare imlecinin `W`/`S` ve Ok tuşlarını ezmesi hatası giderildi; mobil dokunmatik, klavye ve aktif fare uyumu sağlandı.
+- **Faz 2 Sistemleri (`RunnerMotor2D`, `FlashlightController2D`, `RunnerProceduralAnimator`, `CameraFollow2D`):**
+  - `RunnerMotor2D`: `Player` ve `HardlightWorld` katman izolasyonuyla Zero-GC otomatik koşu, `34°-38°` kristal rampa tırmanışı ve otomatik basamak atlama kuruldu.
+  - `LightWeaverSetupUtility`: Neon vizörlü koşucu prefab'ı (`PF_LightWeaverRunner.prefab`), ayak altı kıvılcım partikülleri, hız izi ve ~80m çift rotalı kristal parkuru sahneye kalıcı olarak kuruldu.
 
 ### [2026-11-10] — v0.2.0: Faz 1 Çekirdek Işık & Kristalleşme Motoru (Hardlight Engine)
 - **Çekirdek Sistemler:** `ILightReactive`, `LightReactiveRegistry` ve `ObjectPooler` (`IPoolable`) sıfır GC tahsisiyle (Zero-GC) yazıldı.

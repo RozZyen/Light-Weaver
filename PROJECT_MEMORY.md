@@ -1,7 +1,7 @@
 # 🧠 LIGHT WEAVER: Prism Runner - Canlı Proje Hafızası (Cross-Device Memory)
 
 > **Son Güncelleme:** 2026-11-10  
-> **Durum:** Faz 0 — GDD, Mimari Altyapı & GitHub Kurulumu Tamamlandı (Unity 6 & MCP Bekleniyor)  
+> **Durum:** Faz 2 Tamamlandı — Faz 1 Düzeltmeleri, Neon Koşucu Fiziği, Otomatik Rampa Tırmanışı & Kamera Takibi Aktif (Faz 3'e Hazır)  
 > **Cihaz Eşitleme:** Git Push/Pull (`main` dalı) ile Masaüstü & Laptop senkronizasyonu aktif.  
 
 ---
@@ -21,16 +21,17 @@
 ```mermaid
 graph TD
     subgraph Input_UI ["📱 Girdi & Arayüz (UI)"]
-        Touch["LightTouchInput (Tek Parmak Yay & Çift Dokunuş)"] --> Aim["FlashlightController2D"]
+        Touch["LightTouchInput (Tek Parmak Yay, W/S Klavye & Hareketli Fare)"] --> Aim["FlashlightController2D"]
         HUD["LightWeaverHUD (BatteryBar, ScoreCounter, SectorTitle)"]
         Menus["MainMenuUI / PauseModalUI / GameOverReviveUI"]
     end
 
     subgraph Player_System ["🏃‍♂️ Light Weaver Karakteri"]
-        Aim --> Cone["LightConeCaster2D (Zero-GC NonAlloc Tarama & Beam Mesh)"]
-        Motor["RunnerMotor2D (Otomatik Koşu, Rampa Tırmanış, Coyote Time)"]
+        Aim --> Cone["LightConeCaster2D (Zero-GC Tarama & Volümetrik UV Huzme)"]
+        Motor["RunnerMotor2D (Otomatik Koşu, Rampa Teğet Tırmanışı, Auto-Step, Coyote)"]
         Battery["BatterySystem (Tüketim, Şarj, Overcharge & Kritik Fazlar)"]
-        Anim["RunnerProceduralAnimator (Squash & Stretch, Hız İzi)"]
+        Anim["RunnerProceduralAnimator (Adım, Squash & Stretch, Kıvılcım, Trail)"]
+        Cam["CameraFollow2D (İleri Görüş Look-Ahead & Shake)"]
     end
 
     subgraph World_Prisms ["💎 Kristal Dünya & Havuz"]
@@ -82,16 +83,17 @@ graph TD
 ---
 
 ### ✅ 5. Tamamlanan Son Aşamalar
-- [x] **Faz 0.1–0.4:** Master GDD (`Docs/GDD.md`), `PROJECT_MEMORY.md`, GitHub (`RozZyen/Light-Weaver`), Unity 6 (`6000.3.23f1`) ve Unity MCP bağlantısı tamamlandı.
-- [x] **Faz 1 (Çekirdek Işık & Kristalleşme Motoru):**
-  - `ILightReactive.cs` & `LightReactiveRegistry.cs` (Zero-GC merkezi hedef kaydı)
-  - `ObjectPooler.cs` (`IPoolable` tabanlı sıfır tahsisli nesne havuzu)
-  - `LightConeCaster2D.cs` (Prosedürel volümetrik ışık konisi mesh'i + açısal tarama + Odak Lazeri modu)
-  - `CrystalPlatform.cs` (Phantom `%9` $\rightarrow$ Solid `#00F0FF` $\rightarrow$ `0.48s` Afterglow `#B537F2` durum makinesi)
-  - `FlashlightInputPreview.cs` & `LightWeaverPhase1Setup.cs` (Prosedürel fasetli kristal sprite üretimi ve sahne kurulumu)
+- [x] **Faz 0 & Faz 1 (Düzeltmelerle Tamamlandı):**
+  - `CrystalPlatform.cs`: Işık çekildiğinde `0.40s` *Afterglow* sonrası tamamen görünmez (`SpriteRenderer.enabled = false`, `Phantom` tam zifiri karanlık), 4-noktalı analitik kenar ışık yakalama ve 1:1 elmas parlamaları.
+  - `LightConeCaster2D.cs`: Altın kenar ışınlı & neon siyan çekirdekli UV gradyan volümetrik koni mesh'i (`volumetric_beam_gradient.png`).
+- [x] **Faz 2 (Karakter Fiziği, Dikey Tırmanış & Kontroller):**
+  - `LightTouchInput.cs` & `FlashlightController2D.cs`: Mobil yay sürükleme, sabit fare imlecinin klavyeyi ezmesini önleyen akıllı `W`/`S`/Ok tuşu ve sürükle/hareketli fare kontrolü.
+  - `RunnerMotor2D.cs`: Zero-GC `RaycastNonAlloc` tabanlı otomatik koşu, `30°-45°` kristal rampa teğet tırmanışı, otomatik basamak atlama (*Auto Step-Up*), Coyote Time ve boşluk düşüşü yenilemesi.
+  - `RunnerProceduralAnimator.cs` & `CameraFollow2D.cs`: Neon vizörlü parçalı koşucu, adım/süzülme animasyonu, ayak altı kıvılcımları, hız izi (`TrailRenderer`) ve look-ahead kamera takibi.
+  - `LightWeaverSetupUtility.cs`: Katmanlar (`Player`, `HardlightWorld`), sıfır sürtünme materyali ve ~80m kristal rampa test parkuru kuruldu.
 
 ---
 
 ### 🎯 6. Sırada Ne Var? (Next Sprint)
-- [ ] **Faz 2.1:** `RunnerMotor2D` (Otomatik koşu, eğimli kristal rampa tırmanışı, Coyote Time ve boşluğa düşme tespiti).
-- [ ] **Faz 2.2:** Neon koşucu karakterin (Light Weaver) görsel parçaları, `RunnerProceduralAnimator` ve hız izleri (`TrailRenderer`).
+- [ ] **Faz 3.1:** `BatterySystem.cs` (Mesafe/odak bazlı pil tüketimi, Kritik Kor `<%20` titreme + Adrenalin hız bonusu, Overcharge `>%95` gökkuşağı fazı ve *Perfect Weave* `+3%` geri kazanım).
+- [ ] **Faz 3.2:** `EnergyOrb.cs` (`+ENERGY` altıgen batarya hücreleri, fener ışığıyla manyetik çekim) ve `PrismaticJumpPad.cs` (Işıkla şarj olan sıçrama halkaları) + `PrismRelay2D.cs` (Işık kırıcı prizmalar).

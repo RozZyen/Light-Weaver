@@ -285,7 +285,7 @@ GameObject:
   - component: {fileID: 8571761214709155025}
   - component: {fileID: 7312890701445448170}
   - component: {fileID: 2511165107597879450}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PF_CrystalPlatform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -427,9 +427,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d41cafa3e6a67d4582aac7a0bc38291, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.CrystalPlatform
-  solidifyThresholdSeconds: 0.04
-  afterglowDurationSeconds: 0.48
-  phantomColor: {r: 0.1, g: 0.55, b: 1, a: 0.09}
+  solidifyThresholdSeconds: 0.008
+  afterglowDurationSeconds: 0.4
   solidCyanColor: {r: 0, g: 0.94, b: 1, a: 0.96}
   afterglowVioletColor: {r: 0.71, g: 0.22, b: 0.95, a: 0.78}
   rimGlowRenderer: {fileID: 3945210845905256256}

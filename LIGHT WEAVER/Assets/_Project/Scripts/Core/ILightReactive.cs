@@ -3,7 +3,7 @@ using UnityEngine;
 namespace LightWeaver.Core
 {
     /// <summary>
-    /// Faz durumlarını tanımlar: Hayalet (Görünmez), Katılaşmış (Kristal) ve Akkor Soğuma (Afterglow Coyote Time).
+    /// Faz durumlarını tanımlar: Hayalet (Tamamen Görünmez), Katılaşmış (Kristal) ve Akkor Soğuma (Afterglow Coyote Time).
     /// </summary>
     public enum HardlightPhase : byte
     {
@@ -30,12 +30,14 @@ namespace LightWeaver.Core
         HardlightPhase CurrentPhase { get; }
 
         /// <summary>
+        /// Işık konisinin eksenine en yakın yüzey noktasını döndürür (uzun/eğimli platformların uçlarının da
+        /// kesintisiz aydınlanabilmesi için Zero-GC geometrik örnekleme).
+        /// </summary>
+        Vector2 GetClosestLightSamplePoint(Vector2 beamOrigin, Vector2 beamDirection);
+
+        /// <summary>
         /// Fenerin ışık konisi bu nesneye değdiği her karede çağrılır.
         /// </summary>
-        /// <param name="beamOrigin">Işığın çıktığı fener noktası.</param>
-        /// <param name="normalizedIntensity">0..1 arası ışık yoğunluğu (merkeze yakınlık ve pil gücüne göre).</param>
-        /// <param name="isFocusedBeam">Odaklanmış lazer modunda mı?</param>
-        /// <param name="deltaTime">Kare süresi.</param>
         void OnLightExposure(Vector2 beamOrigin, float normalizedIntensity, bool isFocusedBeam, float deltaTime);
     }
 }

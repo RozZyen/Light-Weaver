@@ -7,8 +7,8 @@
 | F1.1 | `ILightReactive` Arayüzü ve Zero-GC `ObjectPooler` Sistemi | Completed | Phase 1 |
 | F1.2 | `LightConeCaster2D` Fener Konisi Mesh ve Açısal Tarama Motoru | Completed | Phase 1 |
 | F1.3 | `CrystalPlatform` (Phantom -> Solid -> Afterglow) ve Prosedürel Kristal Sanat Üreticisi | Completed | Phase 1 |
-| F2.1 | `RunnerMotor2D` (Otomatik Koşu, Eğimli Rampa Tırmanışı, Coyote Time) ve Kontroller | Pending | Phase 2 |
-| F3.1 | `BatterySystem`, `EnergyOrb` (+ENERGY) ve `PrismaticJumpPad` Mekanikleri | Planned | Phase 3 |
+| F2.1 | `RunnerMotor2D` (Otomatik Koşu, Eğimli Rampa Tırmanışı, Coyote Time) ve Kontroller | Completed | Phase 2 |
+| F3.1 | `BatterySystem`, `EnergyOrb` (+ENERGY) ve `PrismaticJumpPad` Mekanikleri | Pending | Phase 3 |
 | F4.1 | `EndlessChunkDirector` (5 Sektör & Sonsuz Boşluk) ve `ShadowHazard` Engelleri | Planned | Phase 4 |
 | F5.1 | Referans Görsel Birebir HUD (`LightWeaverHUD`), Menüler ve Pentatonik ASMR Ses Motoru | Planned | Phase 5 |
 | F6.1 | Mobil Cila, `SafeAreaFit`, `AdManager` / `IAPManager` ve Performans Doğrulaması | Planned | Phase 6 |
