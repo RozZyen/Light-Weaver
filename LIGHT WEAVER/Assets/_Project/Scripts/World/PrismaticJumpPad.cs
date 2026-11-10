@@ -83,6 +83,11 @@ namespace LightWeaver.World
             ApplyPhaseVisuals(HardlightPhase.Phantom, 0f);
         }
 
+        public void SetLaunchVelocity(Vector2 velocity)
+        {
+            launchVelocity = velocity;
+        }
+
         public Vector2 GetClosestLightSamplePoint(Vector2 beamOrigin, Vector2 beamDirection)
         {
             return transform.position;

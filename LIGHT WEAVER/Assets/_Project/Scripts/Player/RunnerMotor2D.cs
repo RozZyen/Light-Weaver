@@ -43,6 +43,7 @@ namespace LightWeaver.Player
 
         private Vector3 _spawnPosition;
         private float _speedMultiplier = 1f;
+        private float _sectorSpeedMultiplier = 1f;
         private bool _isGrounded;
         private bool _wasGroundedLastStep;
         private float _coyoteTimer;
@@ -56,7 +57,7 @@ namespace LightWeaver.Player
         public float CurrentSpeedX => _rb != null ? _rb.linearVelocity.x : 0f;
         public float CurrentSpeedY => _rb != null ? _rb.linearVelocity.y : 0f;
         public float CurrentSlopeAngleDeg => _currentSlopeAngleDeg;
-        public float NormalizedSpeed => baseRunSpeed > 0.01f ? Mathf.Clamp01(CurrentSpeedX / (baseRunSpeed * _speedMultiplier)) : 0f;
+        public float NormalizedSpeed => baseRunSpeed > 0.01f ? Mathf.Clamp01(CurrentSpeedX / (baseRunSpeed * _speedMultiplier * _sectorSpeedMultiplier)) : 0f;
 
         private void Awake()
         {
@@ -86,6 +87,11 @@ namespace LightWeaver.Player
         public void SetSpeedMultiplier(float multiplier)
         {
             _speedMultiplier = Mathf.Clamp(multiplier, 0.2f, 2.5f);
+        }
+
+        public void SetSectorSpeedMultiplier(float multiplier)
+        {
+            _sectorSpeedMultiplier = Mathf.Clamp(multiplier, 0.5f, 2.0f);
         }
 
         public void SetRunning(bool active)
@@ -204,7 +210,7 @@ namespace LightWeaver.Player
 
         private void ApplySlopeAlignedRun(float dt)
         {
-            float targetSpeed = baseRunSpeed * _speedMultiplier;
+            float targetSpeed = baseRunSpeed * _speedMultiplier * _sectorSpeedMultiplier;
             // Yüzey normaline dik sağa doğru teğet vektör (30°-45° kristal rampalarda kayıpsız tırmanış)
             Vector2 slopeTangent = new Vector2(_groundNormal.y, -_groundNormal.x).normalized;
             if (slopeTangent.x < 0f) slopeTangent = -slopeTangent;
@@ -221,40 +227,59 @@ namespace LightWeaver.Player
         private void TryAutoStepUp()
         {
             Bounds b = _capsule.bounds;
-            Vector2 lowOrigin = new Vector2(b.max.x + 0.02f, b.min.y + 0.07f);
-            Vector2 highOrigin = new Vector2(b.max.x + 0.02f, b.min.y + stepUpHeight + 0.14f);
+            Vector2 lowOrigin = new Vector2(b.max.x - 0.04f, b.min.y + 0.05f);
+            Vector2 highOrigin = new Vector2(b.max.x - 0.04f, b.min.y + stepUpHeight + 0.16f);
 
-            int lowHits = Physics2D.Raycast(lowOrigin, Vector2.right, _groundFilter, _raycastHits, 0.30f);
+            int lowHits = Physics2D.Raycast(lowOrigin, Vector2.right, _groundFilter, _raycastHits, 0.34f);
             bool hasLowStepObstacle = false;
+            float obstaclePointX = b.max.x + 0.12f;
             for (int i = 0; i < lowHits; i++)
             {
                 Collider2D col = _raycastHits[i].collider;
-                // Hem dik basamak kenarları hem eğimli rampa burunları (-0.18'den küçük yatay normal) için basamak atla
-                if (col != null && col != _capsule && _raycastHits[i].normal.x < -0.18f)
+                if (col != null && col != _capsule && _raycastHits[i].normal.x < -0.15f)
                 {
                     hasLowStepObstacle = true;
+                    obstaclePointX = _raycastHits[i].point.x + 0.08f;
                     break;
                 }
             }
 
             if (!hasLowStepObstacle) return;
 
-            int highHits = Physics2D.Raycast(highOrigin, Vector2.right, _groundFilter, _raycastHits, 0.36f);
+            int highHits = Physics2D.Raycast(highOrigin, Vector2.right, _groundFilter, _raycastHits, 0.38f);
             for (int i = 0; i < highHits; i++)
             {
                 if (_raycastHits[i].collider != null && _raycastHits[i].collider != _capsule)
                 {
-                    return; // Üstte duvar var, basamak değil
+                    return; // Üstte gerçek bir duvar engeli var
                 }
             }
 
-            // Basamağın/rampanın üzerine pürüzsüzce çık
-            _rb.position += new Vector2(0.08f, stepUpHeight * 0.58f);
+            // Hedef basamağın gerçek üst yüzeyini bulup karakterin tabanını tam üzerine oturt (Zero-Snag)
+            Vector2 topProbeOrigin = new Vector2(obstaclePointX, b.min.y + stepUpHeight + 0.18f);
+            int topHits = Physics2D.Raycast(topProbeOrigin, Vector2.down, _groundFilter, _raycastHits, stepUpHeight + 0.25f);
+            for (int i = 0; i < topHits; i++)
+            {
+                RaycastHit2D hit = _raycastHits[i];
+                if (hit.collider != null && hit.collider != _capsule && hit.normal.y > 0.35f)
+                {
+                    float liftDelta = (hit.point.y + 0.02f) - b.min.y;
+                    if (liftDelta > 0f && liftDelta <= stepUpHeight + 0.12f)
+                    {
+                        _rb.position += new Vector2(0.06f, liftDelta);
+                        if (_rb.linearVelocity.y < 0f)
+                        {
+                            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, 0f);
+                        }
+                    }
+                    break;
+                }
+            }
         }
 
         private void ApplyAirborneMotion(float dt)
         {
-            float targetSpeed = baseRunSpeed * _speedMultiplier;
+            float targetSpeed = baseRunSpeed * _speedMultiplier * _sectorSpeedMultiplier;
             Vector2 vel = _rb.linearVelocity;
             vel.x = Mathf.MoveTowards(vel.x, targetSpeed, airControlAccel * dt);
             vel.y = Mathf.Max(vel.y, maxFallSpeed);

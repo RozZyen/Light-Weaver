@@ -53,6 +53,7 @@ namespace LightWeaver.Player
         private int _perfectWeaveStreak;
         private SpectrumPhase _currentPhase = SpectrumPhase.Normal;
         private bool _isDepleted;
+        private float _hazardInvulnTimer;
 
         public float CurrentBattery => _currentBattery;
         public float MaxBattery => maxBattery;
@@ -93,8 +94,31 @@ namespace LightWeaver.Player
             _spawnTime = Time.time;
             _perfectWeaveStreak = 0;
             _isDepleted = false;
+            _hazardInvulnTimer = 0f;
             EvaluatePhase(forceNotify: true);
             OnBatteryChanged?.Invoke(_currentBattery, maxBattery);
+        }
+
+        public void DrainExternal(float amount)
+        {
+            if (amount <= 0f || _isDepleted) return;
+            _currentBattery = Mathf.Max(0f, _currentBattery - amount);
+            if (_currentBattery <= 0.001f)
+            {
+                _currentBattery = 0f;
+                _isDepleted = true;
+                OnBatteryDepleted?.Invoke();
+            }
+            EvaluatePhase(forceNotify: false);
+            OnBatteryChanged?.Invoke(_currentBattery, maxBattery);
+        }
+
+        public void TakeHazardShock(float batteryPenalty)
+        {
+            if (_hazardInvulnTimer > 0f) return;
+            _hazardInvulnTimer = 0.85f;
+            _perfectWeaveStreak = 0;
+            DrainExternal(batteryPenalty);
         }
 
         public void AddCharge(float amount)
@@ -130,9 +154,18 @@ namespace LightWeaver.Player
             }
         }
 
+        private float _distanceDrainMultiplier = 1.0f;
+
+        public void SetSectorDrainMultiplier(float multiplier)
+        {
+            _distanceDrainMultiplier = Mathf.Clamp(multiplier, 0.5f, 2.5f);
+        }
+
         private void Update()
         {
             float dt = Time.deltaTime;
+            if (_hazardInvulnTimer > 0f) _hazardInvulnTimer -= dt;
+
             if (_isDepleted)
             {
                 ApplyConeVisuals(0f);
@@ -141,7 +174,7 @@ namespace LightWeaver.Player
 
             float distanceTraveled = Mathf.Max(0f, transform.position.x - _startX);
             float distFactor = Mathf.Clamp01(distanceTraveled / Mathf.Max(1f, distanceForMaxDrain));
-            float drainRate = Mathf.Lerp(baseDrainPerSecond, maxDistanceDrainPerSecond, distFactor);
+            float drainRate = Mathf.Lerp(baseDrainPerSecond, maxDistanceDrainPerSecond, distFactor) * _distanceDrainMultiplier;
 
             if (flashlightController != null && flashlightController.IsFocusedBeam)
             {

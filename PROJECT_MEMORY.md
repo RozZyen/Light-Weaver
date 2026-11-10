@@ -1,7 +1,7 @@
 # 🧠 LIGHT WEAVER: Prism Runner - Canlı Proje Hafızası (Cross-Device Memory)
 
 > **Son Güncelleme:** 2026-11-10  
-> **Durum:** Faz 3 Tamamlandı — Pil Ekonomisi, Spektrum Fazları, `+ENERGY` Hücreleri, Sıçrama Halkaları & Prizmalar Kuruldu (Faz 4'e Hazır)  
+> **Durum:** Faz 4 Tamamlandı — Sonsuz Bölüm Üretici (`EndlessChunkDirector`), 5 Sektör Profili, 3 Gölge Tehlikesi (`ShadowHazard`) & `FlashBurst` Aktif (Faz 5'e Hazır)  
 > **Cihaz Eşitleme:** Git Push/Pull (`main` dalı) ile Masaüstü & Laptop senkronizasyonu aktif.  
 
 ---
@@ -28,19 +28,21 @@ graph TD
 
     subgraph Player_System ["🏃‍♂️ Light Weaver Karakteri"]
         Aim --> Cone["LightConeCaster2D (Zero-GC Tarama & Volümetrik UV Huzme)"]
-        Motor["RunnerMotor2D (Otomatik Koşu, Rampa Teğet Tırmanışı, Auto-Step, Coyote)"]
-        Battery["BatterySystem (Tüketim, Overcharge/Ember Fazları, Perfect Weave)"]
+        Motor["RunnerMotor2D (Otomatik Koşu, Rampa Teğet Tırmanışı, Exact Step-Up)"]
+        Battery["BatterySystem (Tüketim, Overcharge/Ember Fazları, Perfect Weave, Hazard Şoku)"]
+        Burst["FlashBurstController (Çift Dokunuş / F / E Şok Dalgası Parry)"]
         Anim["RunnerProceduralAnimator (Adım, Diegetik Sırt Pili, Kıvılcım, Trail)"]
         Cam["CameraFollow2D (İleri Görüş Look-Ahead, Respawn Snap & Shake)"]
     end
 
     subgraph World_Prisms ["💎 Kristal Dünya & Havuz"]
-        Director["EndlessChunkDirector (5 Sektör & Sonsuz Örüntü)"] --> Pool["ObjectPooler (IPoolable)"]
+        Director["EndlessChunkDirector (6 Balistik Chunk, 5 Sektör SO, Geri Dönüşüm)"] --> Pool["ObjectPooler (IPoolable)"]
         Pool --> Platform["CrystalPlatform : ILightReactive (Phantom -> Solid -> Afterglow)"]
         Pool --> JumpPad["PrismaticJumpPad : ILightReactive (Işıkla Şarj Olan Sıçrama Halkası)"]
         Pool --> Orb["EnergyOrb : ILightReactive (+ENERGY Manyetik Şarj Hücresi)"]
         Pool --> Prism["PrismRelay2D : ILightReactive (Çift Huzmeli Işık Kırıcı)"]
-        Pool --> Hazard["ShadowHazard : ILightReactive (UmbraStalker / MovingPillar)"]
+        Pool --> Hazard["ShadowHazard : ILightReactive (MovingPillar / UmbraStalker / VoidLeech)"]
+        Stars["ParallaxStarfield (Sonsuz Uzay Derinliği)"]
     end
 
     subgraph Juice_Services ["✨ ASMR Juice, Ses & Servisler"]
@@ -99,8 +101,15 @@ graph TD
   - `PrismRelay2D.cs`: Fener ışığını çift ikincil huzmeye kırarak kör noktadaki platform/bataryaları aydınlatan elmas prizmalar.
   - `RunnerMotor2D.cs` & `LightWeaverSetupUtility.cs`: Eğimli rampa burunlarında pürüzsüz step-up, kamera respawn snap, diegetik sırt pil göstergesi ve kesintisiz ~70m parkur + 5 yeni prefab kaydedildi.
 
+- [x] **Faz 4 (Sonsuz Bölüm Üretici, 5 Sektör & Gölge Tehlikeleri + Step-Up Düzeltmesi):**
+  - `RunnerMotor2D.cs`: Tam yüzey probe'lu `TryAutoStepUp` (platform eklem yerlerinde takılma tamamen giderildi) + sektörel hız çarpanı (`SetSectorSpeedMultiplier`).
+  - `SectorProfileSO.cs`: Level 1 (*The Silent Abyss*) – Level 5 (*The Singularity Core*, *Level 4 - The Echo Void* dahil) 5 ScriptableObject sektörü oluşturuldu.
+  - `EndlessChunkDirector.cs`: `ObjectPooler` üzerinden 6 balistik-doğrulanmış ritmik chunk (3 irtifa katmanlı Jump Pad çatalı, Prizma köprü, rampa, süzülme, tehlike koridoru) üreten ve geride kalanları geri dönüştüren sonsuz yönetmen.
+  - `ShadowHazard.cs` & `FlashBurstController.cs`: 3 sistemik gölge engeli (`MovingShadowPillar`, ışıktan eriyen `UmbraStalker`, ışık emen `VoidLeech`) + Çift Dokunuş/`F`/`E` ile radyal Parlama Patlaması (Flash-Burst Parry) + `ParallaxStarfield.cs`.
+
 ---
 
 ### 🎯 6. Sırada Ne Var? (Next Sprint)
-- [ ] **Faz 4.1:** `EndlessChunkDirector.cs` (5 Sektör teması ve *Level 4 - The Echo Void* dahil 3 irtifa katmanlı sonsuz bölüm üreticisi + obje havuzu geri dönüşümü).
-- [ ] **Faz 4.2:** `ShadowHazard.cs` (*Umbra Stalker*, *Moving Shadow Pillar* ve *Void Leech* karanlık engelleri).
+- [ ] **Faz 5.1:** Referans görseldeki birebir `LightWeaverHUD` (`BATTERY: 74%` gradyan pil barı, `LEVEL 4 - THE ECHO VOID`, `31,500` skor sayacı, *Perfect Weave* / `+ENERGY` bildirimleri).
+- [ ] **Faz 5.2:** Ana Menü, Sektör Seçimi, Duraklatma (ESC / Pause) ve Oyun Sonu / Solar Canlanma akışı (`ProgressManager`).
+- [ ] **Faz 5.3:** `HarmonicAudioManager.cs` (Do Minör Pentatonik kristal cam/arp ASMR ses sentezleyicisi) + Hit-Stop / görsel cila.

@@ -7,7 +7,7 @@
 
 ## 📊 Genel İlerleme Durumu
 
-- **Aktif Faz:** Faz 3 Tamamlandı — Pil Ekonomisi, `+ENERGY` Hücreleri, Sıçrama Halkaları & Prizma Kırıcıları Aktif (Faz 4 Bekleniyor) 🔋⚡💎
+- **Aktif Faz:** Faz 4 Tamamlandı — Sonsuz Bölüm Üretici, 5 Sektör, 3 Gölge Tehlikesi & Flash-Burst Parry Aktif (Faz 5: HUD, Menüler, ASMR Ses & Görsel Cila Bekleniyor) 🌌⚡👾
 - **Hedef Motor:** Unity 6 (URP 2D) + Unity MCP (`com.coplaydev.unity-mcp`)
 - **Depo Konumu:** `C:\Users\Yusuf\Documents\GitHub\Light-Weaver` (`https://github.com/RozZyen/Light-Weaver`)
 - **Son Güncelleme:** 2026-11-10
@@ -49,8 +49,8 @@
 ### 🌌 Faz 4: Bölüm Üretici (Level 1-5 & Sonsuz Boşluk) + Gölge Tehlikeleri
 | Görev Kodu | Görev / Özellik | Detay | Durum |
 | :---: | :--- | :--- | :---: |
-| **F4.1** | **`EndlessChunkDirector` (3 Katmanlı Akış)** | Alt/Orta/Üst irtifa koridorları, 5 Sektör (*Level 4 - The Echo Void* dahil) | ⬜ Planlandı |
-| **F4.2** | **`ShadowHazard` (Gölge Engelleri)** | Hareketli gölge sütunları, ışıktan eriyen *Umbra Stalker*, ışık emen küreler | ⬜ Planlandı |
+| **F4.1** | **`EndlessChunkDirector` & 5 `SectorProfileSO`** | 6 balistik chunk (3 katmanlı akış), 5 Sektör (*The Echo Void* dahil) ve havuz geri dönüşümü | ✅ Tamamlandı |
+| **F4.2** | **`ShadowHazard` & `FlashBurstController`** | `MovingShadowPillar`, ışıktan eriyen `UmbraStalker`, ışık emen `VoidLeech` & Flash-Burst Parry | ✅ Tamamlandı |
 
 ### 🎨 Faz 5: HUD, Menüler & Pentatonik ASMR Ses Motoru
 | Görev Kodu | Görev / Özellik | Detay | Durum |
@@ -68,6 +68,11 @@
 ---
 
 ## 📜 Geliştirme Günlüğü (Changelog)
+
+### [2026-11-10] — v0.5.0: Faz 4 Sonsuz Bölüm Üretici, 5 Sektör & Gölge Tehlikeleri + Step-Up Düzeltmesi
+- **Sonsuz Üretim & Sektörler (`EndlessChunkDirector.cs`, `SectorProfileSO.cs`):** `ObjectPooler` üzerinden 6 balistik-doğrulanmış chunk (rampa, Jump Pad 3 katman çatalı, Prizma köprü, tehlike koridoru, süzülme) ve Level 1–5 sektör profilleri (`Sector_01..05.asset`) oluşturuldu.
+- **Gölge Engelleri & Parry (`ShadowHazard.cs`, `FlashBurstController.cs`):** `MovingShadowPillar`, ışıktan eriyen `UmbraStalker` ve ışık tutulursa pil emen `VoidLeech` engelleri + Çift Dokunuş/`F`/`E` radyal Flash-Burst şok dalgası eklendi.
+- **Fizik & Çevre (`RunnerMotor2D.cs`, `ParallaxStarfield.cs`):** Basamak üst yüzeyi taramalı `TryAutoStepUp` ile platform eklemlerinde ayak basamama sorunu çözüldü; sonsuz sarmalanan uzay yıldız alanı kuruldu.
 
 ### [2026-11-10] — v0.4.0: Faz 3 Pil Ekonomisi, Enerji Hücreleri, Jump Pad & Prizmalar + Rampa Cila
 - **Faz 3 Sistemleri:**

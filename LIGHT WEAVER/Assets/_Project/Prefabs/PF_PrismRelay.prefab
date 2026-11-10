@@ -105,8 +105,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.PrismRelay2D
   refractionAnglesDeg:
-  - -22
-  - 18
+  - -20
+  - 14
   beamRange: 10.5
   beamHalfAngleDeg: 13
   afterglowDurationSeconds: 0.42
