@@ -77,6 +77,8 @@ namespace LightWeaver.EditorTools
             Sprite batteryGradientSprite = GenerateBatteryGradientFillSprite(Path.Combine(SpritesFolder, "ui_battery_gradient.png"));
             Sprite uiPanelSprite = GenerateRoundedRectSprite(Path.Combine(SpritesFolder, "ui_rounded_panel.png"));
             Sprite stickRingSprite = GenerateHollowRingSprite(Path.Combine(SpritesFolder, "ui_joystick_ring.png"));
+            Sprite highBeamIconSprite = GenerateHighBeamIconSprite(Path.Combine(SpritesFolder, "ui_highbeam_icon.png"));
+            Sprite jumpArrowIconSprite = GenerateJumpArrowIconSprite(Path.Combine(SpritesFolder, "ui_jump_icon.png"));
 
             AssetDatabase.Refresh();
 
@@ -252,7 +254,9 @@ namespace LightWeaver.EditorTools
                 uiPanelSprite,
                 solidBarSprite,
                 stickRingSprite,
-                runnerSparkSprite);
+                runnerSparkSprite,
+                highBeamIconSprite,
+                jumpArrowIconSprite);
 
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             EditorSceneManager.SaveOpenScenes();
@@ -342,7 +346,9 @@ namespace LightWeaver.EditorTools
             Sprite panelSprite,
             Sprite solidSprite,
             Sprite stickRingSprite,
-            Sprite knobDotSprite)
+            Sprite knobDotSprite,
+            Sprite highBeamIconSprite,
+            Sprite jumpArrowIconSprite)
         {
             Font builtinFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
@@ -503,28 +509,52 @@ namespace LightWeaver.EditorTools
             pauseRt.pivot = new Vector2(1f, 1f);
             pauseRt.anchoredPosition = new Vector2(-46f, -40f);
 
-            // Sol Alt: Büyük başparmak JUMP + FOCUS & BURST butonları (Sağ ekran tamamen 360° Fener Nişan Alanı!)
-            Button jumpBtn = CreateNeonButton("MobileJumpBtn", hudRoot.transform, panelSprite, builtinFont, "JUMP\n[SPACE]", 22, new Color(0.0f, 0.72f, 0.88f, 0.44f), Color.white, new Vector2(175f, 128f));
-            RectTransform jmpRt = jumpBtn.GetComponent<RectTransform>();
-            jmpRt.anchorMin = new Vector2(0f, 0f);
-            jmpRt.anchorMax = new Vector2(0f, 0f);
-            jmpRt.pivot = new Vector2(0f, 0f);
-            jmpRt.anchoredPosition = new Vector2(48f, 42f);
+            // Sol Alt: Büyük Başparmak JUMP + Yanında Uzunu Gösteren Fener (LONG BEAM) + Üstte BURST (Sağ ekran tamamen 360° Nişan!)
+            Button jumpBtn = CreateTactileIconButton(
+                "MobileJumpBtn",
+                hudRoot.transform,
+                panelSprite,
+                jumpArrowIconSprite,
+                builtinFont,
+                "JUMP",
+                new Vector2(46f, 38f),
+                new Vector2(168f, 128f),
+                new Vector2(56f, 56f),
+                new Color(0.06f, 0.24f, 0.36f, 0.62f),
+                new Color(0.0f, 0.94f, 1.0f, 0.72f),
+                new Color(0.75f, 0.98f, 1f, 1f),
+                Color.white,
+                out Image _,
+                out Image _,
+                out Text _);
 
-            Button focusBtn = CreateNeonButton("MobileFocusBtn", hudRoot.transform, panelSprite, builtinFont, "FOCUS", 18, new Color(0.75f, 0.52f, 0.10f, 0.42f), Color.white, new Vector2(126f, 76f));
-            RectTransform focRt = focusBtn.GetComponent<RectTransform>();
-            focRt.anchorMin = new Vector2(0f, 0f);
-            focRt.anchorMax = new Vector2(0f, 0f);
-            focRt.pivot = new Vector2(0f, 0f);
-            focRt.anchoredPosition = new Vector2(238f, 98f);
-            EventTrigger focusTrigger = focusBtn.gameObject.AddComponent<EventTrigger>();
+            Button highBeamBtn = CreateTactileIconButton(
+                "MobileHighBeamBtn",
+                hudRoot.transform,
+                panelSprite,
+                highBeamIconSprite,
+                builtinFont,
+                "LONG: OFF",
+                new Vector2(228f, 38f),
+                new Vector2(152f, 128f),
+                new Vector2(72f, 56f),
+                new Color(0.09f, 0.16f, 0.28f, 0.56f),
+                new Color(1.0f, 0.78f, 0.18f, 0.65f),
+                new Color(0.45f, 0.94f, 1.0f, 0.92f),
+                new Color(0.90f, 0.96f, 1.0f, 0.95f),
+                out Image highBeamBgImg,
+                out Image highBeamIconImg,
+                out Text highBeamLabelTxt);
 
-            Button burstBtn = CreateNeonButton("MobileBurstBtn", hudRoot.transform, panelSprite, builtinFont, "BURST", 18, new Color(0.62f, 0.18f, 0.88f, 0.44f), Color.white, new Vector2(126f, 76f));
+            Button burstBtn = CreateNeonButton("MobileBurstBtn", hudRoot.transform, panelSprite, builtinFont, "BURST [F]", 17, new Color(0.32f, 0.12f, 0.48f, 0.56f), Color.white, new Vector2(168f, 52f));
             RectTransform brsRt = burstBtn.GetComponent<RectTransform>();
             brsRt.anchorMin = new Vector2(0f, 0f);
             brsRt.anchorMax = new Vector2(0f, 0f);
             brsRt.pivot = new Vector2(0f, 0f);
-            brsRt.anchoredPosition = new Vector2(238f, 16f);
+            brsRt.anchoredPosition = new Vector2(46f, 180f);
+            Outline burstOutline = burstBtn.gameObject.AddComponent<Outline>();
+            burstOutline.effectColor = new Color(0.76f, 0.30f, 1.0f, 0.65f);
+            burstOutline.effectDistance = new Vector2(2f, -2f);
 
             // Mobil 360° Floating Virtual Stick UI (Sağ elde parmak dokununca çıkar)
             GameObject stickBaseObj = CreateUIObject("FloatingAimStickBase", hudRoot.transform);
@@ -584,8 +614,12 @@ namespace LightWeaver.EditorTools
             hudSo.FindProperty("bannerCanvasGroup").objectReferenceValue = bannerCg;
             hudSo.FindProperty("bannerText").objectReferenceValue = bannerTxt;
             hudSo.FindProperty("mobileJumpButton").objectReferenceValue = jumpBtn;
+            hudSo.FindProperty("mobileHighBeamButton").objectReferenceValue = highBeamBtn;
+            hudSo.FindProperty("mobileHighBeamBg").objectReferenceValue = highBeamBgImg;
+            hudSo.FindProperty("mobileHighBeamIcon").objectReferenceValue = highBeamIconImg;
+            hudSo.FindProperty("mobileHighBeamLabel").objectReferenceValue = highBeamLabelTxt;
             hudSo.FindProperty("mobileBurstButton").objectReferenceValue = burstBtn;
-            hudSo.FindProperty("mobileFocusTrigger").objectReferenceValue = focusTrigger;
+            hudSo.FindProperty("mobileFocusTrigger").objectReferenceValue = null;
             hudSo.ApplyModifiedPropertiesWithoutUndo();
 
             // =================================================================
@@ -819,6 +853,67 @@ namespace LightWeaver.EditorTools
 
             Text txt = CreateUIText("Label", go.transform, font, label, fontSize, FontStyle.Bold, TextAnchor.MiddleCenter, textColor);
             StretchFull(txt.GetComponent<RectTransform>());
+            return btn;
+        }
+
+        private static Button CreateTactileIconButton(
+            string name,
+            Transform parent,
+            Sprite bgSprite,
+            Sprite iconSprite,
+            Font font,
+            string label,
+            Vector2 anchoredPos,
+            Vector2 buttonSize,
+            Vector2 iconSize,
+            Color bgColor,
+            Color outlineColor,
+            Color iconColor,
+            Color textColor,
+            out Image bgImage,
+            out Image iconImage,
+            out Text labelText)
+        {
+            GameObject go = CreateUIObject(name, parent);
+            RectTransform rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(0f, 0f);
+            rt.pivot = new Vector2(0f, 0f);
+            rt.anchoredPosition = anchoredPos;
+            rt.sizeDelta = buttonSize;
+
+            bgImage = go.AddComponent<Image>();
+            bgImage.sprite = bgSprite;
+            bgImage.type = Image.Type.Sliced;
+            bgImage.color = bgColor;
+
+            Outline outline = go.AddComponent<Outline>();
+            outline.effectColor = outlineColor;
+            outline.effectDistance = new Vector2(2.5f, -2.5f);
+
+            Button btn = go.AddComponent<Button>();
+            ColorBlock cb = btn.colors;
+            cb.highlightedColor = new Color(1.12f, 1.12f, 1.12f, 1f);
+            cb.pressedColor = new Color(0.75f, 0.75f, 0.75f, 1f);
+            btn.colors = cb;
+
+            GameObject iconObj = CreateUIObject("Icon", go.transform);
+            RectTransform iconRt = iconObj.GetComponent<RectTransform>();
+            SetAnchoredPos(iconRt, new Vector2(0f, 16f), iconSize);
+            iconImage = iconObj.AddComponent<Image>();
+            iconImage.sprite = iconSprite;
+            iconImage.preserveAspect = true;
+            iconImage.color = iconColor;
+            iconImage.raycastTarget = false;
+
+            labelText = CreateUIText("Label", go.transform, font, label, 18, FontStyle.Bold, TextAnchor.LowerCenter, textColor);
+            RectTransform lblRt = labelText.GetComponent<RectTransform>();
+            lblRt.anchorMin = Vector2.zero;
+            lblRt.anchorMax = new Vector2(1f, 0f);
+            lblRt.pivot = new Vector2(0.5f, 0f);
+            lblRt.anchoredPosition = new Vector2(0f, 12f);
+            lblRt.sizeDelta = new Vector2(-12f, 34f);
+
             return btn;
         }
 
@@ -2305,6 +2400,93 @@ namespace LightWeaver.EditorTools
             }
 
             return AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+        }
+
+        private static Sprite GenerateHighBeamIconSprite(string assetPath)
+        {
+            const int w = 96;
+            const int h = 96;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    float a = 0f;
+
+                    // Sol tarafta fener gövdesi (x: 10..33, y: 38..58) ve genişleyen başlık (x: 33..45)
+                    if (x >= 10 && x <= 33 && y >= 39 && y <= 57)
+                    {
+                        float capDist = x < 16 ? Vector2.Distance(new Vector2(x, y), new Vector2(16, 48)) : 0f;
+                        if (x >= 16 || capDist <= 9.2f) a = 1f;
+                    }
+                    else if (x > 33 && x <= 46)
+                    {
+                        float t = (x - 33f) / 13f;
+                        float halfH = Mathf.Lerp(9.5f, 17f, t);
+                        if (Mathf.Abs(y - 48f) <= halfH) a = 1f;
+                    }
+
+                    // Sağ tarafta 5 adet uzun paralel ışın çizgisi ("uzunu gösteren fener" göstergesi!)
+                    if (x >= 52 && x <= 88)
+                    {
+                        for (int b = -2; b <= 2; b++)
+                        {
+                            float beamY = 48f + b * 10.5f;
+                            float endX = b == 0 ? 88f : (Mathf.Abs(b) == 1 ? 84f : 78f);
+                            if (x <= endX && Mathf.Abs(y - beamY) <= 2.3f)
+                            {
+                                a = Mathf.Max(a, 1f);
+                            }
+                        }
+                    }
+
+                    pixels[y * w + x] = new Color(1f, 1f, 1f, a);
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 100f);
+        }
+
+        private static Sprite GenerateJumpArrowIconSprite(string assetPath)
+        {
+            const int w = 96;
+            const int h = 96;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    float a = 0f;
+                    float dx = Mathf.Abs(x - 48f);
+
+                    // Çift yukarı ok (Double Jump silüeti)
+                    if (y >= 46 && y <= 82 && dx <= 28f)
+                    {
+                        float targetY = 78f - dx * 0.95f;
+                        if (Mathf.Abs(y - targetY) <= 4.2f) a = 1f;
+                    }
+                    if (y >= 24 && y <= 60 && dx <= 24f)
+                    {
+                        float targetY = 56f - dx * 0.95f;
+                        if (Mathf.Abs(y - targetY) <= 3.8f) a = 1f;
+                    }
+
+                    // Zemin çizgisi
+                    if (y >= 16 && y <= 21 && dx <= 28f) a = Mathf.Max(a, 1f);
+
+                    pixels[y * w + x] = new Color(1f, 1f, 1f, a);
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 100f);
         }
 
         #endregion

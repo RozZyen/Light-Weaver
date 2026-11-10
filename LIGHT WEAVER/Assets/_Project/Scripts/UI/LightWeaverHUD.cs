@@ -45,6 +45,10 @@ namespace LightWeaver.UI
 
         [Header("Mobile Touch Action Buttons")]
         [SerializeField] private Button mobileJumpButton;
+        [SerializeField] private Button mobileHighBeamButton;
+        [SerializeField] private Image mobileHighBeamBg;
+        [SerializeField] private Image mobileHighBeamIcon;
+        [SerializeField] private Text mobileHighBeamLabel;
         [SerializeField] private Button mobileBurstButton;
         [SerializeField] private EventTrigger mobileFocusTrigger;
 
@@ -59,9 +63,39 @@ namespace LightWeaver.UI
         {
             if (pauseButton != null && gameFlow != null) pauseButton.onClick.AddListener(gameFlow.TogglePause);
             if (mobileJumpButton != null && runnerMotor != null) mobileJumpButton.onClick.AddListener(runnerMotor.RequestJump);
+            if (mobileHighBeamButton != null) mobileHighBeamButton.onClick.AddListener(HandleHighBeamClicked);
             if (mobileBurstButton != null && flashBurst != null) mobileBurstButton.onClick.AddListener(flashBurst.TryTriggerFlashBurst);
             SetupFocusHoldTrigger();
+            UpdateHighBeamVisual(touchInput != null && touchInput.IsUiFocusToggled);
             if (bannerCanvasGroup != null) bannerCanvasGroup.alpha = 0f;
+        }
+
+        private void HandleHighBeamClicked()
+        {
+            if (touchInput != null) touchInput.ToggleUiFocus();
+        }
+
+        private void UpdateHighBeamVisual(bool isOn)
+        {
+            if (mobileHighBeamBg != null)
+            {
+                mobileHighBeamBg.color = isOn
+                    ? new Color(1.0f, 0.72f, 0.08f, 0.88f)
+                    : new Color(0.09f, 0.16f, 0.28f, 0.56f);
+            }
+            if (mobileHighBeamIcon != null)
+            {
+                mobileHighBeamIcon.color = isOn
+                    ? new Color(1.0f, 0.98f, 0.78f, 1.0f)
+                    : new Color(0.45f, 0.94f, 1.0f, 0.92f);
+            }
+            if (mobileHighBeamLabel != null)
+            {
+                mobileHighBeamLabel.text = isOn ? "LONG: ON" : "LONG: OFF";
+                mobileHighBeamLabel.color = isOn
+                    ? new Color(0.06f, 0.04f, 0.08f, 1.0f)
+                    : new Color(0.90f, 0.96f, 1.0f, 0.95f);
+            }
         }
 
         private void SetupFocusHoldTrigger()
@@ -95,10 +129,12 @@ namespace LightWeaver.UI
                 batterySystem.OnSpectrumPhaseChanged += HandlePhaseChanged;
             }
             if (chunkDirector != null) chunkDirector.OnSectorChanged += HandleSectorChanged;
+            if (touchInput != null) touchInput.OnUiFocusToggledChanged += UpdateHighBeamVisual;
         }
 
         private void OnDisable()
         {
+            if (touchInput != null) touchInput.OnUiFocusToggledChanged -= UpdateHighBeamVisual;
             if (gameFlow != null)
             {
                 gameFlow.OnGameStateChanged -= HandleGameStateChanged;
@@ -119,10 +155,14 @@ namespace LightWeaver.UI
             {
                 hudRoot.SetActive(state == GameState.Playing || state == GameState.Paused || state == GameState.BlessingSelect);
             }
-            if (state == GameState.Playing && batterySystem != null)
+            if (state == GameState.Playing)
             {
-                HandleBatteryChanged(batterySystem.CurrentBattery, batterySystem.MaxBattery);
-                HandlePhaseChanged(batterySystem.CurrentPhase);
+                UpdateHighBeamVisual(touchInput != null && touchInput.IsUiFocusToggled);
+                if (batterySystem != null)
+                {
+                    HandleBatteryChanged(batterySystem.CurrentBattery, batterySystem.MaxBattery);
+                    HandlePhaseChanged(batterySystem.CurrentPhase);
+                }
                 if (chunkDirector != null && chunkDirector.ActiveSector != null) HandleSectorChanged(chunkDirector.ActiveSector);
             }
         }

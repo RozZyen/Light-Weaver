@@ -16,6 +16,7 @@ namespace LightWeaver.Player
     public sealed class LightTouchInput : MonoBehaviour
     {
         public event Action OnFlashBurstTriggered;
+        public event Action<bool> OnUiFocusToggledChanged;
 
         [Header("References")]
         [SerializeField] private FlashlightController2D flashlightController;
@@ -35,6 +36,7 @@ namespace LightWeaver.Player
         private float _targetAngleDeg;
         private bool _mouseAimActive;
         private bool _externalUiFocusHeld;
+        private bool _uiFocusToggled;
 
         private bool _isStickActive;
         private int _aimTouchId = -1;
@@ -42,6 +44,7 @@ namespace LightWeaver.Player
         private float _lastTapTime = -10f;
 
         public float TargetAngleDeg => _targetAngleDeg;
+        public bool IsUiFocusToggled => _uiFocusToggled;
 
         private void Awake()
         {
@@ -65,6 +68,12 @@ namespace LightWeaver.Player
 
         public void SetUiFocusHeld(bool held) => _externalUiFocusHeld = held;
 
+        public void ToggleUiFocus()
+        {
+            _uiFocusToggled = !_uiFocusToggled;
+            OnUiFocusToggledChanged?.Invoke(_uiFocusToggled);
+        }
+
         public void ResetAimToInitial()
         {
             _targetAngleDeg = initialAngleDeg;
@@ -72,6 +81,8 @@ namespace LightWeaver.Player
             _isStickActive = false;
             _aimTouchId = -1;
             _externalUiFocusHeld = false;
+            _uiFocusToggled = false;
+            OnUiFocusToggledChanged?.Invoke(false);
             HideJoystickUi();
             if (flashlightController != null) flashlightController.SetAimInput(_targetAngleDeg, false, snapImmediate: true);
         }
@@ -88,7 +99,7 @@ namespace LightWeaver.Player
                 return;
             }
 
-            bool isFocused = _externalUiFocusHeld;
+            bool isFocused = _externalUiFocusHeld || _uiFocusToggled;
             float dt = Time.deltaTime;
 
             // 1. Klavye (Space Zıplama, WASD/Ok 8-yön 360° Nişan, Shift Focus, F/E Burst)
