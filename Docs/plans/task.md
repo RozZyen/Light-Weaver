@@ -12,4 +12,5 @@
 | F4.1 | `EndlessChunkDirector` (5 Sektör & Sonsuz Boşluk) ve `ShadowHazard` Engelleri | Completed | Phase 4 |
 | F5.1 | Referans Görsel Birebir HUD (`LightWeaverHUD`), Menüler ve Pentatonik ASMR Ses Motoru | Completed | Phase 5 |
 | F5.2 | GDD v2.0 Derin Oynanış (Umbra/Boost/Fragile, Gates, Anchor, Jump, Eclipse, Cards) & Solar Revive Fix | Completed | Phase 5.2 |
+| F5.3 | 360° Fener Rotasyonu, Mobil Çift-Başparmak Floating Stick / Touch Point & VFX/Varyant Cila (v2.1) | Completed | Phase 5.3 |
 | F6.1 | Mobil Cila, `SafeAreaFit`, `AdManager` / `IAPManager` ve Performans Doğrulaması | Pending | Phase 6 |

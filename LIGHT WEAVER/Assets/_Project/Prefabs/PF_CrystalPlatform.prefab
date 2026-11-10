@@ -437,6 +437,10 @@ MonoBehaviour:
   fragileIceColor: {r: 0.78, g: 0.96, b: 1, a: 0.95}
   umbraDarkVioletColor: {r: 0.58, g: 0.12, b: 0.92, a: 0.92}
   afterglowVioletColor: {r: 0.71, g: 0.22, b: 0.95, a: 0.78}
+  standardCrystalSprite: {fileID: 21300000, guid: 519f88a2fbb3bec439d7d9c5e9965808, type: 3}
+  boostCrystalSprite: {fileID: 21300000, guid: 24e87cdf32ea1374e85ae39d92f973ef, type: 3}
+  fragileCrystalSprite: {fileID: 21300000, guid: 2b68e3e4064e26f4f80a5ed5fd720316, type: 3}
+  umbraCrystalSprite: {fileID: 21300000, guid: 308731e52c7ebde47af5924a2d2f9ae6, type: 3}
   rimGlowRenderer: {fileID: 3945210845905256256}
   cornerSparkleLeft: {fileID: 5065252237727746788}
   cornerSparkleRight: {fileID: 3645729102294584984}

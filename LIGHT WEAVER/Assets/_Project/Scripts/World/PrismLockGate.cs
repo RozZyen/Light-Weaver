@@ -18,6 +18,7 @@ namespace LightWeaver.World
         [Header("Lock & Barrier Setup")]
         [SerializeField] private SpriteRenderer diamondLockRenderer;
         [SerializeField] private Transform diamondLockTransform;
+        [SerializeField] private LineRenderer lockTetherLine;
         [SerializeField] private float unlockChargeSeconds = 0.16f;
         [SerializeField] private float barrierPenaltyBattery = 22f;
 
@@ -77,6 +78,10 @@ namespace LightWeaver.World
             {
                 diamondLockTransform.localScale = _baseLockScale;
             }
+            if (lockTetherLine != null)
+            {
+                lockTetherLine.enabled = true;
+            }
         }
 
         public Vector2 GetClosestLightSamplePoint(Vector2 beamOrigin, Vector2 beamDirection)
@@ -120,6 +125,7 @@ namespace LightWeaver.World
             if (_barrierCollider != null) _barrierCollider.enabled = false;
             if (_barrierRenderer != null) _barrierRenderer.enabled = false;
             if (diamondLockRenderer != null) diamondLockRenderer.enabled = false;
+            if (lockTetherLine != null) lockTetherLine.enabled = false;
             OnGateResolved?.Invoke(this, byLightSkill);
         }
 

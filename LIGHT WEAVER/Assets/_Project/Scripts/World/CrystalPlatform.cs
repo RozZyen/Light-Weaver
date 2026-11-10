@@ -38,7 +38,11 @@ namespace LightWeaver.World
         [SerializeField] private Color umbraDarkVioletColor = new Color(0.58f, 0.12f, 0.92f, 0.92f);
         [SerializeField] private Color afterglowVioletColor = new Color(0.71f, 0.22f, 0.95f, 0.78f);
 
-        [Header("Child Sparkle References")]
+        [Header("Variant Sprites & References")]
+        [SerializeField] private Sprite standardCrystalSprite;
+        [SerializeField] private Sprite boostCrystalSprite;
+        [SerializeField] private Sprite fragileCrystalSprite;
+        [SerializeField] private Sprite umbraCrystalSprite;
         [SerializeField] private SpriteRenderer rimGlowRenderer;
         [SerializeField] private Transform cornerSparkleLeft;
         [SerializeField] private Transform cornerSparkleRight;
@@ -96,6 +100,17 @@ namespace LightWeaver.World
         public void SetVariant(CrystalVariant newVariant)
         {
             variant = newVariant;
+            if (_mainRenderer != null)
+            {
+                Sprite targetSprite = variant switch
+                {
+                    CrystalVariant.KineticBoost => boostCrystalSprite != null ? boostCrystalSprite : standardCrystalSprite,
+                    CrystalVariant.FragileShard => fragileCrystalSprite != null ? fragileCrystalSprite : standardCrystalSprite,
+                    CrystalVariant.UmbraBridge => umbraCrystalSprite != null ? umbraCrystalSprite : standardCrystalSprite,
+                    _ => standardCrystalSprite
+                };
+                if (targetSprite != null) _mainRenderer.sprite = targetSprite;
+            }
             ResetToDefaultState();
         }
 

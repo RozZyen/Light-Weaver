@@ -7,7 +7,7 @@
 
 ## 📊 Genel İlerleme Durumu
 
-- **Aktif Faz:** v2.0 Derin Oynanış Revizyonu Tamamlandı — Solar Revive Düzeltildi, Jump/DoubleJump, 4 Kristal Varyantı, Kilitli Kapılar, Foton Kancası, The Eclipse & Yükseltme Kartları Hazır (Faz 6: Monetizasyon Bekleniyor) 🔥🔦🚀
+- **Aktif Faz:** v2.1 (360° Fener Rotasyonu, Mobil Floating Stick / Touch Point Ergonomisi, 4 Ayrı Kristal Dokusu, WorldVfxManager & Paralaks Derinlik Tamamlandı — Faz 6: Monetizasyon Bekleniyor) 🔥🔦📱
 - **Hedef Motor:** Unity 6 (URP 2D) + Unity MCP (`com.coplaydev.unity-mcp`)
 - **Depo Konumu:** `C:\Users\Yusuf\Documents\GitHub\Light-Weaver` (`https://github.com/RozZyen/Light-Weaver`)
 - **Son Güncelleme:** 2026-11-10
@@ -58,6 +58,7 @@
 | **F5.1** | **`LightWeaverHUD` (Referans Birebir HUD)** | Sol üst gradyan pil barı (`BATTERY: 74%`), Sağ üst `LEVEL 4 - THE ECHO VOID` & Skor | ✅ Tamamlandı |
 | **F5.2** | **Menü Akışı & Checkpoint/Revive** | Ana Menü, Sektör Seçimi (`L1..L5`), Duraklatma (ESC/Pause) & `Solar Revive` köprüsü | ✅ Tamamlandı |
 | **F5.3** | **`HarmonicAudioManager` & Görsel Cila** | Prosedürel Do Minör Pentatonik kristal cam/çan ASMR, Hit-Stop, Shake & URP Bloom | ✅ Tamamlandı |
+| **F5.4** | **360° Fener, Mobil Ergonomi & VFX Cila (v2.1)** | Tam 360° huzme + `1:1` ölçek fix, `EnhancedTouch` 360° Floating Stick / Touch Point, `WorldVfxManager` & 4 ayrı kristal görseli | ✅ Tamamlandı |
 
 ### 📱 Faz 6: Mobil Mağaza Hazırlığı, Monetizasyon & Cila
 | Görev Kodu | Görev / Özellik | Detay | Durum |
@@ -68,6 +69,11 @@
 ---
 
 ## 📜 Geliştirme Günlüğü (Changelog)
+
+### [2026-11-10] — v0.8.0: v2.1 360° Fener Rotasyonu, Mobil Çift-Başparmak Kontrolleri & Görsel/VFX Yükseltmesi
+- **360° Tam Özgür Işık & `1:1` Huzme Doğruluğu (`LightConeCaster2D.cs`, `FlashlightController2D.cs`, `LightWeaverSetupUtility.cs`):** `-60°..+65°` açı sınırı kaldırılarak `-180°..+180°` tam 360° yönlendirme açıldı. `FlashlightEmitterTip` üzerindeki `0.34x` ölçek mirasının ışık konisi ve toz partiküllerini küçültme hatası `EmitterCoreGlow` alt nesnesi ayrılarak düzeltildi (`ConeScale=(1,1,1)`, `standardRange=10.5m`, `focusedRange=16.0m`). Kol aynalaması koni ölçeğini bozmadan yalnızca `armVisualTransform` üzerinde yapılıyor.
+- **Mobil Yatay Ergonomi (`LightTouchInput.cs`, `ProgressManager.cs`, `MenuScreensUI.cs`):** Landscape Left/Right kilitlendi. `EnhancedTouch` çoklu-dokunma ID ayrımıyla sol başparmak `JUMP` butonunu kullanırken sağ başparmak **Mod 0 (`AIM: 360 STICK` — Şeffaf 360° Yüzer Joystick)** veya menüdeki `AimModeToggleBtn` ile değiştirilebilen **Mod 1 (`AIM: TOUCH POINT`)** modlarında nişan alabiliyor; PC'de ise tam 360° Fare ve 8-yön `WASD`/Ok desteği sunuluyor.
+- **Görsel Netlik & VFX (`WorldVfxManager.cs`, `CrystalPlatform.cs`, `PrismLockGate.cs`):** 4 kristal türü için 4 ayrı prosedürel sprite, `PrismLockGate` elmas bağlantı `LineRenderer`'ı, Zero-GC `WorldVfxManager` parçacık patlamaları (`WorldBurstParticles`), `BeamDustMotes` ve `VOID HORIZON SILHOUETTES` paralaks monolitleri kuruldu.
 
 ### [2026-11-10] — v0.7.0: GDD v2.0 Derin Mekanik Revizyonu & Solar Revive Düzeltmesi
 - **Bug Fix (`Solar Revive` / `Retry`):** `RunnerMotor2D.ReviveAtPosition` ve `RespawnAtStart` içinde `Physics2D.SyncTransforms()` + `_voidGraceTimer` ve `EndlessChunkDirector.SpawnReviveSafetyBridge` köprü/temizlik düzeltmesi ile yeniden doğuş %100 çalışır hale getirildi ve Play Mode'da test edildi.

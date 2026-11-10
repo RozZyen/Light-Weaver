@@ -14,6 +14,7 @@ namespace LightWeaver.Core
         private const string KeyMusicEnabled = "LW_MUSIC_ENABLED";
         private const string KeySfxEnabled = "LW_SFX_ENABLED";
         private const string KeyHapticsEnabled = "LW_HAPTICS_ENABLED";
+        private const string KeyMobileAimMode = "LW_MOBILE_AIM_MODE"; // 0 = 360 Floating Stick, 1 = Direct Touch
 
         public static int HighScore { get; private set; }
         public static float BestDistanceMeters { get; private set; }
@@ -21,6 +22,7 @@ namespace LightWeaver.Core
         public static bool MusicEnabled { get; private set; } = true;
         public static bool SfxEnabled { get; private set; } = true;
         public static bool HapticsEnabled { get; private set; } = true;
+        public static int MobileAimMode { get; private set; } = 0;
 
         private static bool _loaded;
 
@@ -35,6 +37,15 @@ namespace LightWeaver.Core
             MusicEnabled = PlayerPrefs.GetInt(KeyMusicEnabled, 1) == 1;
             SfxEnabled = PlayerPrefs.GetInt(KeySfxEnabled, 1) == 1;
             HapticsEnabled = PlayerPrefs.GetInt(KeyHapticsEnabled, 1) == 1;
+            MobileAimMode = Mathf.Clamp(PlayerPrefs.GetInt(KeyMobileAimMode, 0), 0, 1);
+        }
+
+        public static void SetMobileAimMode(int mode)
+        {
+            EnsureLoaded();
+            MobileAimMode = Mathf.Clamp(mode, 0, 1);
+            PlayerPrefs.SetInt(KeyMobileAimMode, MobileAimMode);
+            PlayerPrefs.Save();
         }
 
         public static bool TryRecordRunResult(int score, float distanceMeters, int sectorReached)

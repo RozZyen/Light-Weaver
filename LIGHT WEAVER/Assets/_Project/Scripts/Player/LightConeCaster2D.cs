@@ -12,8 +12,8 @@ namespace LightWeaver.Player
     public sealed class LightConeCaster2D : MonoBehaviour
     {
         [Header("Beam Geometry")]
-        [SerializeField] private float standardRange = 12.5f;
-        [SerializeField] private float focusedRange = 18.5f;
+        [SerializeField] private float standardRange = 10.5f;
+        [SerializeField] private float focusedRange = 16.0f;
         [SerializeField] private float standardHalfAngleDeg = 22f;
         [SerializeField] private float focusedHalfAngleDeg = 8.5f;
         [SerializeField] private int arcSegments = 24;
@@ -112,7 +112,8 @@ namespace LightWeaver.Player
 
         public void SetTargetAngle(float angleDeg, bool focused, bool snapImmediate = false)
         {
-            _targetAimAngleDeg = Mathf.Clamp(angleDeg, -60f, 65f);
+            // Tam 360 derece (-180° .. +180°) özgür yönlendirme!
+            _targetAimAngleDeg = Mathf.Repeat(angleDeg + 180f, 360f) - 180f;
             _isFocusedBeam = focused;
             if (snapImmediate)
             {

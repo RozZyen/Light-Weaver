@@ -1,7 +1,7 @@
 # 🧠 LIGHT WEAVER: Prism Runner - Canlı Proje Hafızası (Cross-Device Memory)
 
 > **Son Güncelleme:** 2026-11-10  
-> **Durum:** v2.0 Derin Oynanış Revizyonu Tamamlandı — 4 Kristal Varyantı, Photon Jump/Double-Jump, PrismLockGate, PhotonAnchor, The Eclipse Dalgası, 3'lü Prizma Kartları & Solar Revive Fix (Faz 6'ya Hazır)  
+> **Durum:** v2.1 (360° Fener Rotasyonu, Mobil Çift-Başparmak Floating Stick & Direct Touch, 4 Ayrı Kristal Görseli, Zero-GC Burst VFX & Paralaks Monolitler Tamamlandı — Faz 6'ya Hazır)  
 > **Cihaz Eşitleme:** Git Push/Pull (`main` dalı) ile Masaüstü & Laptop senkronizasyonu aktif.  
 
 ---
@@ -21,9 +21,9 @@
 ```mermaid
 graph TD
     subgraph Input_UI ["📱 Girdi & Arayüz (UI)"]
-        Touch["LightTouchInput (Yay Sürükleme, Space Zıplama, Focus, Burst)"] --> Aim["FlashlightController2D"]
-        Flow["GameFlowManager (Menu/Playing/BlessingSelect/Paused/GameOver)"] --> HUD["LightWeaverHUD (BatteryBar, EclipseBar, JUMP/FOCUS/BURST Mobil Butonlar)"]
-        Flow --> Menus["MenuScreensUI (Sektör Seçimi, 3'lü Prizma Kartı, Pause, SolarRevive)"]
+        Touch["LightTouchInput (360° Floating Stick / Touch Point, EnhancedTouch Multi-Touch, PC Fare/WASD)"] --> Aim["FlashlightController2D"]
+        Flow["GameFlowManager (Menu/Playing/BlessingSelect/Paused/GameOver)"] --> HUD["LightWeaverHUD (BatteryBar, EclipseBar, JUMP/FOCUS/BURST + FloatingStick UI)"]
+        Flow --> Menus["MenuScreensUI (Sektör Seçimi, Aim Mode Toggle, 3'lü Prizma Kartı, Pause, SolarRevive)"]
         Flow --> Upg["PrismUpgradeManager (6 Roguelite Prizma Güçlendirmesi)"]
         Safe["SafeAreaFit (Çentikli Ekran Uyumu)"] -.-> HUD
     end
@@ -49,10 +49,11 @@ graph TD
         Stars["ParallaxStarfield (Sonsuz Uzay Derinliği)"]
     end
 
-    subgraph Juice_Services ["✨ ASMR Juice, Ses & Servisler"]
+    subgraph Juice_Services ["✨ ASMR Juice, VFX, Ses & Servisler"]
         Audio["HarmonicAudioManager (Prosedürel C Minör Pentatonik Cam/Çan ASMR + Space Pad)"]
         Juice["JuiceFeedbackManager (HitStop 0.032s, CameraShake2D, Haptics)"]
-        Progress["ProgressManager (HighScore, BestDist, UnlockedSector, PlayerPrefs)"]
+        Vfx["WorldVfxManager (Zero-GC EmitParams Parçacık Patlamaları & BeamDustMotes)"]
+        Progress["ProgressManager (HighScore, BestDist, UnlockedSector, MobileAimMode, PlayerPrefs)"]
         Ads["AdManager (Faz 6 - Rewarded Solar Revive / 2x Score)"]
     end
 
@@ -122,6 +123,11 @@ graph TD
   - **4 Kristal Varyantı (`CrystalPlatform.cs`):** `Standard`, `KineticBoost` (+%42 hız fırlatması), `FragileShard` (basıldıktan 0.24s sonra parçalanır) ve **Ters Faz `UmbraBridge`** (karanlıkta katıdır, fener ışığı değerse erir — ışığı yukarı/başka yöne kaçırmayı zorunlu kılar!).
   - **Aktif Zıplama & Kanca & Kilitli Kapılar:** `RunnerMotor2D` üzerinde `Space` / Mobil `JUMP` ile Zıplama + Çift Zıplama, `PrismLockGate.cs` (tepesindeki elmas ışıkla vurulup açılan lazer kapıları), `PhotonAnchor.cs` (dev uçurumlar üstünde ışık halatıyla fırlatan kancalar).
   - **The Eclipse & Roguelite Kartlar:** Soldan kovalayan `EclipsePursuitWave.cs` baskı mekaniği ve sektör geçişlerinde zamanı duraklatıp 3 rastgele güçlendirme sunan `PrismUpgradeManager.cs` kuruldu.
+
+- [x] **v2.1 (360° Fener Rotasyonu, Mobil Ergonomi & Görsel/VFX Cila):**
+  - **Tam 360° Fener Rotasyonu:** `LightConeCaster2D` açı kıstırması (`-60°..+65°`) kaldırılarak `-180°..+180°` tam özgür dönüş açıldı; `FlashlightController2D` 90° ötesine dönüldüğünde sadece omuz/kol görselini (`armVisualTransform`) aynalarken `LightConeCaster2D` ve `BeamDustMotes` her açıda `1:1` ölçeğini (`lossyScale=(1,1,1)`) ve birebir fiziksel menzili (`standardRange=10.5m`, `focusedRange=16.0m`) koruyor.
+  - **Mobil Çift-Başparmak Kontrol Mimarisi (`LightTouchInput.cs`, `ProgressManager.MobileAimMode`, `MenuScreensUI`):** Yatay ekran kilidi (`LandscapeLeft`/`LandscapeRight`) + `EnhancedTouch.Touch` çoklu-dokunma ayrımı (`IsPointerOverGameObject(t.touchId)`). Oyuncular Menüdeki `AimModeToggleBtn` ile **Mod 0 (`AIM: 360 STICK` — Şeffaf 360° Yüzer Joystick)** veya **Mod 1 (`AIM: TOUCH POINT` — Ekrana Doğrudan Nişan)** arasında geçiş yapabiliyor.
+  - **Görsel Netlik & VFX (`WorldVfxManager.cs`, `CrystalPlatform.cs`, `PrismLockGate.cs`, `LightWeaverSetupUtility.cs`):** 4 kristal varyantına 4 ayrı prosedürel sprite (`crystal_standard`, `crystal_boost`, `crystal_fragile`, `crystal_umbra`), `PrismLockGate` elmas bağlantı hattı (`LineRenderer`), Zero-GC `WorldVfxManager` parçacık patlamaları (`WorldBurstParticles`), `BeamDustMotes` ve `VOID HORIZON SILHOUETTES` paralaks monolitleri eklendi.
 
 ---
 

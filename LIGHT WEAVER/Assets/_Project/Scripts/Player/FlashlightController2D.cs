@@ -9,6 +9,7 @@ namespace LightWeaver.Player
     public sealed class FlashlightController2D : MonoBehaviour
     {
         [SerializeField] private Transform armPivot;
+        [SerializeField] private Transform armVisualTransform;
         [SerializeField] private LightConeCaster2D coneCaster;
 
         public float CurrentAimAngleDeg => coneCaster != null ? coneCaster.CurrentAimAngleDeg : 0f;
@@ -55,7 +56,18 @@ namespace LightWeaver.Player
         {
             if (armPivot != null && coneCaster != null)
             {
-                armPivot.rotation = Quaternion.Euler(0f, 0f, coneCaster.CurrentAimAngleDeg);
+                float angle = coneCaster.CurrentAimAngleDeg;
+                armPivot.rotation = Quaternion.Euler(0f, 0f, angle);
+                armPivot.localScale = Vector3.one;
+
+                // 360° geriye çevrildiğinde yalnızca kol sprite'ını aynala; LightConeCaster2D ölçeğini (1,1,1) koru!
+                if (armVisualTransform != null)
+                {
+                    float norm = Mathf.Repeat(angle + 180f, 360f) - 180f;
+                    float flipSign = Mathf.Abs(norm) > 90f ? -1f : 1f;
+                    Vector3 s = armVisualTransform.localScale;
+                    armVisualTransform.localScale = new Vector3(Mathf.Abs(s.x) * flipSign, Mathf.Abs(s.y), s.z);
+                }
             }
         }
     }

@@ -32,6 +32,8 @@ namespace LightWeaver.UI
         [SerializeField] private Text musicToggleLabel;
         [SerializeField] private Button sfxToggleButton;
         [SerializeField] private Text sfxToggleLabel;
+        [SerializeField] private Button aimModeToggleButton;
+        [SerializeField] private Text aimModeToggleLabel;
 
         [Header("Pause Controls")]
         [SerializeField] private Button resumeButton;
@@ -99,6 +101,7 @@ namespace LightWeaver.UI
 
             if (musicToggleButton != null) musicToggleButton.onClick.AddListener(ToggleMusic);
             if (sfxToggleButton != null) sfxToggleButton.onClick.AddListener(ToggleSfx);
+            if (aimModeToggleButton != null) aimModeToggleButton.onClick.AddListener(ToggleMobileAimMode);
 
             if (sectorSelectButtons != null)
             {
@@ -175,11 +178,19 @@ namespace LightWeaver.UI
             RefreshAudioLabels();
         }
 
+        private void ToggleMobileAimMode()
+        {
+            int nextMode = ProgressManager.MobileAimMode == 0 ? 1 : 0;
+            ProgressManager.SetMobileAimMode(nextMode);
+            RefreshAudioLabels();
+        }
+
         private void RefreshAudioLabels()
         {
             ProgressManager.EnsureLoaded();
             if (musicToggleLabel != null) musicToggleLabel.text = ProgressManager.MusicEnabled ? "MUSIC: ON" : "MUSIC: OFF";
             if (sfxToggleLabel != null) sfxToggleLabel.text = ProgressManager.SfxEnabled ? "ASMR SFX: ON" : "ASMR SFX: OFF";
+            if (aimModeToggleLabel != null) aimModeToggleLabel.text = ProgressManager.MobileAimMode == 0 ? "AIM: 360 STICK" : "AIM: TOUCH POINT";
         }
 
         private void HandleGameStateChanged(GameState state)

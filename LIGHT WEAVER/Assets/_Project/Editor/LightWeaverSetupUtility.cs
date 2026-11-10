@@ -18,9 +18,8 @@ using UnityEngine.UI;
 namespace LightWeaver.EditorTools
 {
     /// <summary>
-    /// Light Weaver v2.0 (GDD v2.0): 4 Kristal Varyantı, PrismLockGate, PhotonAnchor Kancası,
-    /// The Eclipse Takip Dalgası, 3'lü Prizma Yükseltme Kartları, Mobil JUMP/FOCUS/BURST butonları,
-    /// Solar Revive düzeltmesi, ASMR Ses Motoru ve URP Bloom sahnesini deterministik olarak inşa eder.
+    /// Light Weaver v2.1 (360° Aim + Mobile Floating Stick + 4 Görsel Kristal Varyantı +
+    /// WorldVfxManager + Parallax Horizon + Landscape Mobil Ayarları) sahnesini kurar.
     /// </summary>
     public static class LightWeaverSetupUtility
     {
@@ -33,15 +32,20 @@ namespace LightWeaver.EditorTools
         private const int PlayerLayer = 6;
         private const int HardlightWorldLayer = 7;
 
-        [MenuItem("LightWeaver/Build Complete Game Scene (v2.0 Deep Mechanics)")]
+        [MenuItem("LightWeaver/Build Complete Game Scene (360 Aim & Mobile Ready)")]
         public static void BuildPlayableScene()
         {
             EnsureDirectories();
             EnsureProjectLayers();
+            ConfigureMobileLandscapeSettings();
             PhysicsMaterial2D zeroFrictionMat = CreateOrLoadZeroFrictionMaterial();
 
-            // 1. Prosedürel Sprite Üretimi
-            Sprite crystalTileSprite = GenerateCrystalPlatformSprite(Path.Combine(SpritesFolder, "prism_crystal_block.png"));
+            // 1. Prosedürel Sprite Üretimi (4 Kristal Varyantı + Koşucu + UI + VFX)
+            Sprite crystalStandardSprite = GenerateCrystalPlatformSprite(Path.Combine(SpritesFolder, "prism_crystal_block.png"));
+            Sprite crystalBoostSprite = GenerateBoostCrystalSprite(Path.Combine(SpritesFolder, "crystal_boost.png"));
+            Sprite crystalFragileSprite = GenerateFragileCrystalSprite(Path.Combine(SpritesFolder, "crystal_fragile.png"));
+            Sprite crystalUmbraSprite = GenerateUmbraCrystalSprite(Path.Combine(SpritesFolder, "crystal_umbra.png"));
+
             Sprite rimGlowSprite = GenerateCrystalRimSprite(Path.Combine(SpritesFolder, "prism_crystal_rim.png"));
             Sprite starburstSprite = GenerateStarburstSprite(Path.Combine(SpritesFolder, "diamond_starburst.png"));
             Sprite emitterCoreSprite = GenerateEmitterCoreSprite(Path.Combine(SpritesFolder, "flashlight_emitter_core.png"));
@@ -64,14 +68,15 @@ namespace LightWeaver.EditorTools
             Sprite voidLeechSprite = GenerateVoidLeechSprite(Path.Combine(SpritesFolder, "void_leech.png"));
             Sprite burstRingSprite = GenerateHollowRingSprite(Path.Combine(SpritesFolder, "flash_burst_ring.png"));
 
-            // v2.0 Derin Mekanik Sprite'ları
             Sprite gateBarrierSprite = GenerateLaserBarrierSprite(Path.Combine(SpritesFolder, "prism_gate_barrier.png"));
             Sprite anchorRingSprite = GeneratePhotonAnchorSprite(Path.Combine(SpritesFolder, "photon_anchor_ring.png"));
             Sprite eclipseWallSprite = GenerateEclipseWaveSprite(Path.Combine(SpritesFolder, "eclipse_wave_wall.png"));
+            Sprite voidMonolithSprite = GenerateHorizonMonolithSprite(Path.Combine(SpritesFolder, "void_horizon_monolith.png"));
 
             Sprite batteryOutlineSprite = GenerateBatteryFrameSprite(Path.Combine(SpritesFolder, "ui_battery_frame.png"));
             Sprite batteryGradientSprite = GenerateBatteryGradientFillSprite(Path.Combine(SpritesFolder, "ui_battery_gradient.png"));
             Sprite uiPanelSprite = GenerateRoundedRectSprite(Path.Combine(SpritesFolder, "ui_rounded_panel.png"));
+            Sprite stickRingSprite = GenerateHollowRingSprite(Path.Combine(SpritesFolder, "ui_joystick_ring.png"));
 
             AssetDatabase.Refresh();
 
@@ -100,6 +105,7 @@ namespace LightWeaver.EditorTools
             DestroyExistingIfFound("=== LIGHT WEAVER SYSTEMS ===");
             DestroyExistingIfFound("=== LIGHT WEAVER RUNNER ===");
             DestroyExistingIfFound("=== VOID STARFIELD ===");
+            DestroyExistingIfFound("=== VOID HORIZON SILHOUETTES ===");
             DestroyExistingIfFound("=== THE ECLIPSE WAVE ===");
             DestroyExistingIfFound("=== LIGHT WEAVER POSTPROCESS ===");
             DestroyExistingIfFound("=== LIGHT WEAVER UI CANVAS ===");
@@ -107,8 +113,8 @@ namespace LightWeaver.EditorTools
 
             SetupPostProcessVolume();
 
-            // 3. Tüm Havuz Prefab'ları
-            GameObject platPrefab = SaveCrystalPrefab(crystalTileSprite, rimGlowSprite, starburstSprite);
+            // 3. Havuz Prefab'ları
+            GameObject platPrefab = SaveCrystalPrefab(crystalStandardSprite, crystalBoostSprite, crystalFragileSprite, crystalUmbraSprite, rimGlowSprite, starburstSprite);
             GameObject orbPrefab = SaveOrbPrefab("PF_EnergyOrb.prefab", false, hexFrameSprite, lightningBoltSprite, heroAuraSprite);
             GameObject superOrbPrefab = SaveOrbPrefab("PF_EnergyOrb_Super.prefab", true, hexFrameSprite, lightningBoltSprite, heroAuraSprite);
             GameObject jumpPadPrefab = SaveJumpPadPrefab(jumpRingSprite, jumpCoreSprite);
@@ -145,10 +151,11 @@ namespace LightWeaver.EditorTools
             mainCam.transform.position = new Vector3(runnerGo.transform.position.x + 4.6f, runnerGo.transform.position.y + 0.9f, -10f);
             PrefabUtility.SaveAsPrefabAsset(runnerGo, Path.Combine(PrefabsFolder, "PF_LightWeaverRunner.prefab"));
 
-            // 5. Sonsuz Yıldız Alanı
+            // 5. Sonsuz Yıldız Alanı & Uzak Monolit Silüetleri
             BuildInfiniteStarfield(mainCam.transform, runnerSparkSprite);
+            BuildHorizonSilhouettes(mainCam.transform, voidMonolithSprite);
 
-            // 6. Merkezi Sistemler & Eclipse Takip Dalgası
+            // 6. Merkezi Sistemler + WorldVfxManager + Eclipse Dalgası
             GameObject systemsRoot = new GameObject("=== LIGHT WEAVER SYSTEMS ===");
             ObjectPooler pooler = systemsRoot.AddComponent<ObjectPooler>();
             EndlessChunkDirector director = systemsRoot.AddComponent<EndlessChunkDirector>();
@@ -156,6 +163,17 @@ namespace LightWeaver.EditorTools
             GameFlowManager gameFlow = systemsRoot.AddComponent<GameFlowManager>();
             HarmonicAudioManager audioMgr = systemsRoot.AddComponent<HarmonicAudioManager>();
             JuiceFeedbackManager juiceMgr = systemsRoot.AddComponent<JuiceFeedbackManager>();
+            WorldVfxManager worldVfx = systemsRoot.AddComponent<WorldVfxManager>();
+
+            // Zero-GC Global Burst ParticleSystem
+            GameObject vfxObj = new GameObject("WorldBurstParticles");
+            vfxObj.transform.SetParent(systemsRoot.transform, false);
+            ParticleSystem burstPs = CreateGlobalBurstParticleSystem(vfxObj, runnerSparkSprite);
+            SerializedObject vfxSo = new SerializedObject(worldVfx);
+            vfxSo.FindProperty("runnerMotor").objectReferenceValue = motor;
+            vfxSo.FindProperty("batterySystem").objectReferenceValue = battery;
+            vfxSo.FindProperty("burstParticleSystem").objectReferenceValue = burstPs;
+            vfxSo.ApplyModifiedPropertiesWithoutUndo();
 
             GameObject eclipseGo = new GameObject("=== THE ECLIPSE WAVE ===");
             eclipseGo.transform.localScale = new Vector3(5.2f, 18.0f, 1f);
@@ -218,7 +236,7 @@ namespace LightWeaver.EditorTools
             juiceSo.FindProperty("batterySystem").objectReferenceValue = battery;
             juiceSo.ApplyModifiedPropertiesWithoutUndo();
 
-            // 7. EventSystem & UI Canvas (HUD + Mobil Butonlar + Kart Seçimi + Solar Revive)
+            // 7. EventSystem & UI Canvas (360° Floating Stick UI + Mobil Butonlar + Aim Mod Seçimi)
             BuildEventSystem();
             BuildUICanvas(
                 gameFlow,
@@ -232,11 +250,46 @@ namespace LightWeaver.EditorTools
                 batteryOutlineSprite,
                 batteryGradientSprite,
                 uiPanelSprite,
-                solidBarSprite);
+                solidBarSprite,
+                stickRingSprite,
+                runnerSparkSprite);
 
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             EditorSceneManager.SaveOpenScenes();
-            Debug.Log("[LightWeaver Setup] v2.0 Deep Mechanics Built: Solar Revive fixed, Jump/DoubleJump, Umbra/Boost/Fragile Crystals, PrismGate, PhotonAnchor, Eclipse Wave & Upgrade Cards!");
+            Debug.Log("[LightWeaver Setup] v2.1 Complete: 360° Aim, Floating Mobile Stick, 4 Distinct Crystal Variants, Burst VFX & Parallax Depth Built!");
+        }
+
+        private static void ConfigureMobileLandscapeSettings()
+        {
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
+            PlayerSettings.allowedAutorotateToPortrait = false;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = true;
+        }
+
+        private static ParticleSystem CreateGlobalBurstParticleSystem(GameObject target, Sprite dotSprite)
+        {
+            ParticleSystem ps = target.AddComponent<ParticleSystem>();
+            var main = ps.main;
+            main.playOnAwake = false;
+            main.loop = false;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.gravityModifier = 0.55f;
+            main.maxParticles = 250;
+
+            var emission = ps.emission;
+            emission.enabled = false;
+
+            var renderer = target.GetComponent<ParticleSystemRenderer>();
+            renderer.sortingOrder = 22;
+            Shader shader = Shader.Find("Sprites/Default");
+            if (shader != null)
+            {
+                Material mat = new Material(shader) { mainTexture = dotSprite.texture };
+                renderer.sharedMaterial = mat;
+            }
+            return ps;
         }
 
         private static void SetupPostProcessVolume()
@@ -252,8 +305,8 @@ namespace LightWeaver.EditorTools
             if (!profile.TryGet(out Bloom bloom)) bloom = profile.Add<Bloom>(true);
             bloom.active = true;
             bloom.threshold.Override(0.75f);
-            bloom.intensity.Override(0.72f);
-            bloom.scatter.Override(0.64f);
+            bloom.intensity.Override(0.75f);
+            bloom.scatter.Override(0.65f);
 
             if (!profile.TryGet(out Vignette vignette)) vignette = profile.Add<Vignette>(true);
             vignette.active = true;
@@ -287,7 +340,9 @@ namespace LightWeaver.EditorTools
             Sprite batteryOutlineSprite,
             Sprite batteryGradientSprite,
             Sprite panelSprite,
-            Sprite solidSprite)
+            Sprite solidSprite,
+            Sprite stickRingSprite,
+            Sprite knobDotSprite)
         {
             Font builtinFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
@@ -353,7 +408,6 @@ namespace LightWeaver.EditorTools
             batTextRt.anchoredPosition = new Vector2(2f, -48f);
             batTextRt.sizeDelta = new Vector2(300f, 32f);
 
-            // Flash-Burst Bar
             GameObject burstBg = CreateUIObject("FlashBurstBarBg", batContainer.transform);
             RectTransform burstBgRt = burstBg.GetComponent<RectTransform>();
             burstBgRt.anchorMin = new Vector2(0f, 1f);
@@ -381,7 +435,6 @@ namespace LightWeaver.EditorTools
             burstLblRt.anchoredPosition = new Vector2(2f, -95f);
             burstLblRt.sizeDelta = new Vector2(260f, 20f);
 
-            // Eclipse Proximity Warning Bar
             GameObject eclipseBg = CreateUIObject("EclipseBarBg", batContainer.transform);
             RectTransform ecBgRt = eclipseBg.GetComponent<RectTransform>();
             ecBgRt.anchorMin = new Vector2(0f, 1f);
@@ -409,7 +462,6 @@ namespace LightWeaver.EditorTools
             ecLblRt.anchoredPosition = new Vector2(2f, -131f);
             ecLblRt.sizeDelta = new Vector2(260f, 20f);
 
-            // Sağ Üst Skor & Sektör
             GameObject scoreContainer = CreateUIObject("ScorePanel", hudRoot.transform);
             RectTransform scoreRt = scoreContainer.GetComponent<RectTransform>();
             scoreRt.anchorMin = new Vector2(1f, 1f);
@@ -451,28 +503,51 @@ namespace LightWeaver.EditorTools
             pauseRt.pivot = new Vector2(1f, 1f);
             pauseRt.anchoredPosition = new Vector2(-46f, -40f);
 
-            // Alt Köşeler: Mobil & PC Ergonomik Eylem Butonları (JUMP [Space], FOCUS [Shift/RClick], BURST [F])
-            Button jumpBtn = CreateNeonButton("MobileJumpBtn", hudRoot.transform, panelSprite, builtinFont, "JUMP\n[SPACE]", 20, new Color(0.0f, 0.72f, 0.88f, 0.42f), Color.white, new Vector2(150f, 110f));
+            // Sol Alt: Büyük başparmak JUMP + FOCUS & BURST butonları (Sağ ekran tamamen 360° Fener Nişan Alanı!)
+            Button jumpBtn = CreateNeonButton("MobileJumpBtn", hudRoot.transform, panelSprite, builtinFont, "JUMP\n[SPACE]", 22, new Color(0.0f, 0.72f, 0.88f, 0.44f), Color.white, new Vector2(175f, 128f));
             RectTransform jmpRt = jumpBtn.GetComponent<RectTransform>();
             jmpRt.anchorMin = new Vector2(0f, 0f);
             jmpRt.anchorMax = new Vector2(0f, 0f);
             jmpRt.pivot = new Vector2(0f, 0f);
             jmpRt.anchoredPosition = new Vector2(48f, 42f);
 
-            Button focusBtn = CreateNeonButton("MobileFocusBtn", hudRoot.transform, panelSprite, builtinFont, "FOCUS\n[SHIFT]", 18, new Color(0.75f, 0.52f, 0.10f, 0.40f), Color.white, new Vector2(130f, 92f));
+            Button focusBtn = CreateNeonButton("MobileFocusBtn", hudRoot.transform, panelSprite, builtinFont, "FOCUS", 18, new Color(0.75f, 0.52f, 0.10f, 0.42f), Color.white, new Vector2(126f, 76f));
             RectTransform focRt = focusBtn.GetComponent<RectTransform>();
-            focRt.anchorMin = new Vector2(1f, 0f);
-            focRt.anchorMax = new Vector2(1f, 0f);
-            focRt.pivot = new Vector2(1f, 0f);
-            focRt.anchoredPosition = new Vector2(-196f, 42f);
+            focRt.anchorMin = new Vector2(0f, 0f);
+            focRt.anchorMax = new Vector2(0f, 0f);
+            focRt.pivot = new Vector2(0f, 0f);
+            focRt.anchoredPosition = new Vector2(238f, 98f);
             EventTrigger focusTrigger = focusBtn.gameObject.AddComponent<EventTrigger>();
 
-            Button burstBtn = CreateNeonButton("MobileBurstBtn", hudRoot.transform, panelSprite, builtinFont, "BURST\n[F]", 18, new Color(0.62f, 0.18f, 0.88f, 0.42f), Color.white, new Vector2(130f, 92f));
+            Button burstBtn = CreateNeonButton("MobileBurstBtn", hudRoot.transform, panelSprite, builtinFont, "BURST", 18, new Color(0.62f, 0.18f, 0.88f, 0.44f), Color.white, new Vector2(126f, 76f));
             RectTransform brsRt = burstBtn.GetComponent<RectTransform>();
-            brsRt.anchorMin = new Vector2(1f, 0f);
-            brsRt.anchorMax = new Vector2(1f, 0f);
-            brsRt.pivot = new Vector2(1f, 0f);
-            brsRt.anchoredPosition = new Vector2(-48f, 42f);
+            brsRt.anchorMin = new Vector2(0f, 0f);
+            brsRt.anchorMax = new Vector2(0f, 0f);
+            brsRt.pivot = new Vector2(0f, 0f);
+            brsRt.anchoredPosition = new Vector2(238f, 16f);
+
+            // Mobil 360° Floating Virtual Stick UI (Sağ elde parmak dokununca çıkar)
+            GameObject stickBaseObj = CreateUIObject("FloatingAimStickBase", hudRoot.transform);
+            RectTransform stickBaseRt = stickBaseObj.GetComponent<RectTransform>();
+            stickBaseRt.sizeDelta = new Vector2(190f, 190f);
+            Image stickBaseImg = stickBaseObj.AddComponent<Image>();
+            stickBaseImg.sprite = stickRingSprite;
+            stickBaseImg.color = new Color(0.0f, 0.94f, 1.0f, 0.38f);
+            stickBaseImg.raycastTarget = false;
+
+            GameObject stickKnobObj = CreateUIObject("FloatingAimStickKnob", stickBaseObj.transform);
+            RectTransform stickKnobRt = stickKnobObj.GetComponent<RectTransform>();
+            stickKnobRt.sizeDelta = new Vector2(68f, 68f);
+            Image stickKnobImg = stickKnobObj.AddComponent<Image>();
+            stickKnobImg.sprite = knobDotSprite;
+            stickKnobImg.color = new Color(0.25f, 0.98f, 1.0f, 0.85f);
+            stickKnobImg.raycastTarget = false;
+            stickBaseObj.SetActive(false);
+
+            SerializedObject touchSo = new SerializedObject(touchInput);
+            touchSo.FindProperty("joystickBaseRect").objectReferenceValue = stickBaseRt;
+            touchSo.FindProperty("joystickKnobRect").objectReferenceValue = stickKnobRt;
+            touchSo.ApplyModifiedPropertiesWithoutUndo();
 
             // Orta-Üst Bildirim Bandı
             GameObject bannerObj = CreateUIObject("BannerOverlay", hudRoot.transform);
@@ -514,40 +589,43 @@ namespace LightWeaver.EditorTools
             hudSo.ApplyModifiedPropertiesWithoutUndo();
 
             // =================================================================
-            // 2. ANA MENÜ
+            // 2. ANA MENÜ (360° Kontroller & Mobil Aim Modu Seçimi Dahil)
             // =================================================================
-            GameObject mainMenuPanel = CreateModalCard("MainMenuPanel", safeRoot.transform, panelSprite, new Vector2(820f, 670f), new Color(0.03f, 0.05f, 0.11f, 0.90f));
+            GameObject mainMenuPanel = CreateModalCard("MainMenuPanel", safeRoot.transform, panelSprite, new Vector2(860f, 690f), new Color(0.03f, 0.05f, 0.11f, 0.90f));
             Text titleTxt = CreateUIText("Title", mainMenuPanel.transform, builtinFont, "LIGHT WEAVER", 62, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.0f, 0.94f, 1.0f, 1f));
-            SetAnchoredPos(titleTxt.rectTransform, new Vector2(0f, 240f), new Vector2(720f, 76f));
+            SetAnchoredPos(titleTxt.rectTransform, new Vector2(0f, 250f), new Vector2(720f, 76f));
 
-            Text subTxt = CreateUIText("Subtitle", mainMenuPanel.transform, builtinFont, "AIM: MOUSE / W-S   •   JUMP: SPACE   •   FOCUS: R-CLICK   •   BURST: F", 17, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.85f, 0.92f, 1f, 0.88f));
-            SetAnchoredPos(subTxt.rectTransform, new Vector2(0f, 182f), new Vector2(760f, 34f));
+            Text subTxt = CreateUIText("Subtitle", mainMenuPanel.transform, builtinFont, "360° LIGHT AIM: MOUSE / WASD / STICK  •  JUMP: SPACE  •  BURST: F", 17, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.85f, 0.92f, 1f, 0.88f));
+            SetAnchoredPos(subTxt.rectTransform, new Vector2(0f, 192f), new Vector2(800f, 34f));
 
             Text bestTxt = CreateUIText("BestScoreText", mainMenuPanel.transform, builtinFont, "BEST: 0   |   0m", 22, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.84f, 0.18f, 1f));
-            SetAnchoredPos(bestTxt.rectTransform, new Vector2(0f, 126f), new Vector2(640f, 36f));
+            SetAnchoredPos(bestTxt.rectTransform, new Vector2(0f, 138f), new Vector2(640f, 36f));
 
             Button[] sectorBtns = new Button[5];
             for (int i = 0; i < 5; i++)
             {
                 Button sBtn = CreateNeonButton($"SectorBtn_{i + 1}", mainMenuPanel.transform, panelSprite, builtinFont, $"L{i + 1}", 22, new Color(0.10f, 0.16f, 0.28f, 0.85f), Color.white, new Vector2(96f, 52f));
-                SetAnchoredPos(sBtn.GetComponent<RectTransform>(), new Vector2((i - 2) * 112f, 52f), new Vector2(96f, 52f));
+                SetAnchoredPos(sBtn.GetComponent<RectTransform>(), new Vector2((i - 2) * 112f, 62f), new Vector2(96f, 52f));
                 sectorBtns[i] = sBtn;
             }
 
             Text secInfoTxt = CreateUIText("SelectedSectorInfo", mainMenuPanel.transform, builtinFont, "LEVEL 1 - THE SILENT ABYSS", 20, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.0f, 0.94f, 1.0f, 0.95f));
-            SetAnchoredPos(secInfoTxt.rectTransform, new Vector2(0f, -2f), new Vector2(620f, 32f));
+            SetAnchoredPos(secInfoTxt.rectTransform, new Vector2(0f, 6f), new Vector2(620f, 32f));
 
             Button playBtn = CreateNeonButton("PlayButton", mainMenuPanel.transform, panelSprite, builtinFont, "PLAY", 34, new Color(0.0f, 0.82f, 0.95f, 1f), new Color(0.02f, 0.05f, 0.10f, 1f), new Vector2(360f, 82f));
-            SetAnchoredPos(playBtn.GetComponent<RectTransform>(), new Vector2(0f, -92f), new Vector2(360f, 82f));
+            SetAnchoredPos(playBtn.GetComponent<RectTransform>(), new Vector2(0f, -82f), new Vector2(360f, 82f));
 
-            Button musicBtn = CreateNeonButton("MusicToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "MUSIC: ON", 20, new Color(0.10f, 0.16f, 0.28f, 0.9f), Color.white, new Vector2(210f, 54f));
-            SetAnchoredPos(musicBtn.GetComponent<RectTransform>(), new Vector2(-118f, -210f), new Vector2(210f, 54f));
+            Button musicBtn = CreateNeonButton("MusicToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "MUSIC: ON", 19, new Color(0.10f, 0.16f, 0.28f, 0.9f), Color.white, new Vector2(215f, 54f));
+            SetAnchoredPos(musicBtn.GetComponent<RectTransform>(), new Vector2(-240f, -205f), new Vector2(215f, 54f));
 
-            Button sfxBtn = CreateNeonButton("SfxToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "ASMR SFX: ON", 20, new Color(0.10f, 0.16f, 0.28f, 0.9f), Color.white, new Vector2(210f, 54f));
-            SetAnchoredPos(sfxBtn.GetComponent<RectTransform>(), new Vector2(118f, -210f), new Vector2(210f, 54f));
+            Button sfxBtn = CreateNeonButton("SfxToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "ASMR SFX: ON", 19, new Color(0.10f, 0.16f, 0.28f, 0.9f), Color.white, new Vector2(215f, 54f));
+            SetAnchoredPos(sfxBtn.GetComponent<RectTransform>(), new Vector2(0f, -205f), new Vector2(215f, 54f));
+
+            Button aimBtn = CreateNeonButton("AimModeToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "AIM: 360 STICK", 19, new Color(0.10f, 0.20f, 0.34f, 0.9f), new Color(0.45f, 0.96f, 1f, 1f), new Vector2(230f, 54f));
+            SetAnchoredPos(aimBtn.GetComponent<RectTransform>(), new Vector2(245f, -205f), new Vector2(230f, 54f));
 
             // =================================================================
-            // 3. PAUSE MODAL
+            // 3. PAUSE, GAME OVER & BLESSING CARDS
             // =================================================================
             GameObject pausePanel = CreateModalCard("PausePanel", safeRoot.transform, panelSprite, new Vector2(520f, 440f), new Color(0.03f, 0.05f, 0.11f, 0.94f));
             Text pauseTitle = CreateUIText("PauseTitle", pausePanel.transform, builtinFont, "PAUSED", 46, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.0f, 0.94f, 1.0f, 1f));
@@ -563,9 +641,6 @@ namespace LightWeaver.EditorTools
             SetAnchoredPos(pauseMenuBtn.GetComponent<RectTransform>(), new Vector2(0f, -125f), new Vector2(300f, 56f));
             pausePanel.SetActive(false);
 
-            // =================================================================
-            // 4. GAME OVER & SOLAR REVIVE MODAL
-            // =================================================================
             GameObject gameOverPanel = CreateModalCard("GameOverPanel", safeRoot.transform, panelSprite, new Vector2(640f, 520f), new Color(0.04f, 0.03f, 0.09f, 0.94f));
             Text goTitle = CreateUIText("GameOverTitle", gameOverPanel.transform, builtinFont, "LOST IN THE VOID", 42, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.22f, 0.40f, 1f));
             SetAnchoredPos(goTitle.rectTransform, new Vector2(0f, 185f), new Vector2(560f, 58f));
@@ -590,9 +665,6 @@ namespace LightWeaver.EditorTools
             SetAnchoredPos(goMenuBtn.GetComponent<RectTransform>(), new Vector2(114f, -142f), new Vector2(210f, 62f));
             gameOverPanel.SetActive(false);
 
-            // =================================================================
-            // 5. SEKTÖR ARASI 3'LÜ PRİZMA YÜKSELTME KARTLARI (BLESSING SELECT)
-            // =================================================================
             GameObject blessingPanel = CreateModalCard("BlessingPanel", safeRoot.transform, panelSprite, new Vector2(1120f, 520f), new Color(0.03f, 0.05f, 0.12f, 0.95f));
             Text blessHdr = CreateUIText("BlessingHeader", blessingPanel.transform, builtinFont, "SECTOR CLEARED! CHOOSE A PRISM BLESSING", 34, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.0f, 0.96f, 1.0f, 1f));
             SetAnchoredPos(blessHdr.rectTransform, new Vector2(0f, 185f), new Vector2(960f, 52f));
@@ -618,7 +690,6 @@ namespace LightWeaver.EditorTools
             }
             blessingPanel.SetActive(false);
 
-            // MenuScreensUI Bağlantısı
             MenuScreensUI menus = canvasGo.AddComponent<MenuScreensUI>();
             SerializedObject menuSo = new SerializedObject(menus);
             menuSo.FindProperty("gameFlow").objectReferenceValue = gameFlow;
@@ -638,6 +709,8 @@ namespace LightWeaver.EditorTools
             menuSo.FindProperty("musicToggleLabel").objectReferenceValue = musicBtn.GetComponentInChildren<Text>();
             menuSo.FindProperty("sfxToggleButton").objectReferenceValue = sfxBtn;
             menuSo.FindProperty("sfxToggleLabel").objectReferenceValue = sfxBtn.GetComponentInChildren<Text>();
+            menuSo.FindProperty("aimModeToggleButton").objectReferenceValue = aimBtn;
+            menuSo.FindProperty("aimModeToggleLabel").objectReferenceValue = aimBtn.GetComponentInChildren<Text>();
 
             menuSo.FindProperty("resumeButton").objectReferenceValue = resumeBtn;
             menuSo.FindProperty("pauseRestartButton").objectReferenceValue = pauseRestartBtn;
@@ -891,23 +964,34 @@ namespace LightWeaver.EditorTools
             GameObject emitterTip = new GameObject("FlashlightEmitterTip");
             emitterTip.transform.SetParent(flashlightArmPivot.transform, false);
             emitterTip.transform.localPosition = new Vector3(0.48f, 0f, 0f);
+            emitterTip.transform.localScale = Vector3.one;
 
-            SpriteRenderer emitterSr = emitterTip.AddComponent<SpriteRenderer>();
+            GameObject emitterCoreObj = new GameObject("EmitterCoreGlow");
+            emitterCoreObj.transform.SetParent(emitterTip.transform, false);
+            emitterCoreObj.transform.localScale = new Vector3(0.34f, 0.34f, 1f);
+            SpriteRenderer emitterSr = emitterCoreObj.AddComponent<SpriteRenderer>();
             emitterSr.sprite = emitterCoreSprite;
             emitterSr.color = new Color(1f, 0.96f, 0.72f, 0.95f);
             emitterSr.sortingOrder = 21;
-            emitterTip.transform.localScale = new Vector3(0.34f, 0.34f, 1f);
 
             GameObject coneObj = new GameObject("LightConeCaster2D");
             coneObj.transform.SetParent(emitterTip.transform, false);
+            coneObj.transform.localScale = Vector3.one;
             LightConeCaster2D coneCaster = coneObj.AddComponent<LightConeCaster2D>();
             SerializedObject coneSo = new SerializedObject(coneCaster);
             coneSo.FindProperty("beamGradientTexture").objectReferenceValue = beamGradientTex;
             coneSo.ApplyModifiedPropertiesWithoutUndo();
 
+            // Huzme içi parlayan toz partikülleri (gerçek 1:1 dünya ölçeğinde)
+            GameObject beamMotes = new GameObject("BeamDustMotes");
+            beamMotes.transform.SetParent(coneObj.transform, false);
+            beamMotes.transform.localPosition = new Vector3(3.8f, 0f, 0f);
+            CreateBeamDustParticleSystem(beamMotes, sparkSprite);
+
             FlashlightController2D flashlightCtrl = flashlightArmPivot.AddComponent<FlashlightController2D>();
             SerializedObject ctrlSo = new SerializedObject(flashlightCtrl);
             ctrlSo.FindProperty("armPivot").objectReferenceValue = flashlightArmPivot.transform;
+            ctrlSo.FindProperty("armVisualTransform").objectReferenceValue = frontArmSpriteObj.transform;
             ctrlSo.FindProperty("coneCaster").objectReferenceValue = coneCaster;
             ctrlSo.ApplyModifiedPropertiesWithoutUndo();
 
@@ -1016,12 +1100,32 @@ namespace LightWeaver.EditorTools
             var renderer = target.GetComponent<ParticleSystemRenderer>();
             renderer.sortingOrder = 16;
             Shader shader = Shader.Find("Sprites/Default");
-            if (shader != null)
-            {
-                Material mat = new Material(shader) { mainTexture = sparkSprite.texture };
-                renderer.sharedMaterial = mat;
-            }
+            if (shader != null) renderer.sharedMaterial = new Material(shader) { mainTexture = sparkSprite.texture };
             return ps;
+        }
+
+        private static void CreateBeamDustParticleSystem(GameObject target, Sprite dotSprite)
+        {
+            ParticleSystem ps = target.AddComponent<ParticleSystem>();
+            var main = ps.main;
+            main.startLifetime = 0.85f;
+            main.startSpeed = 0.35f;
+            main.startSize = new ParticleSystem.MinMaxCurve(0.04f, 0.10f);
+            main.startColor = new Color(0.85f, 0.98f, 1.0f, 0.45f);
+            main.simulationSpace = ParticleSystemSimulationSpace.Local;
+            main.maxParticles = 28;
+
+            var emission = ps.emission;
+            emission.rateOverTime = 18f;
+
+            var shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(7.0f, 2.2f, 0.1f);
+
+            var renderer = target.GetComponent<ParticleSystemRenderer>();
+            renderer.sortingOrder = 11;
+            Shader shader = Shader.Find("Sprites/Default");
+            if (shader != null) renderer.sharedMaterial = new Material(shader) { mainTexture = dotSprite.texture };
         }
 
         private static TrailRenderer CreateRunnerSpeedTrail(GameObject target)
@@ -1078,14 +1182,39 @@ namespace LightWeaver.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static GameObject SaveCrystalPrefab(Sprite bodySprite, Sprite rimSprite, Sprite starSprite)
+        private static void BuildHorizonSilhouettes(Transform camTransform, Sprite monolithSprite)
+        {
+            GameObject root = new GameObject("=== VOID HORIZON SILHOUETTES ===");
+            Random.InitState(108);
+            for (int i = 0; i < 14; i++)
+            {
+                GameObject pillar = new GameObject($"HorizonMonolith_{i:00}");
+                pillar.transform.SetParent(root.transform, false);
+                pillar.transform.position = new Vector3(-16f + i * 2.6f, Random.Range(-5.5f, -2.5f), 4f);
+                pillar.transform.localScale = new Vector3(Random.Range(1.2f, 2.5f), Random.Range(5.0f, 11.0f), 1f);
+
+                SpriteRenderer sr = pillar.AddComponent<SpriteRenderer>();
+                sr.sprite = monolithSprite;
+                sr.color = new Color(0.09f, 0.17f, 0.34f, Random.Range(0.38f, 0.58f));
+                sr.sortingOrder = -15;
+            }
+
+            ParallaxStarfield parallax = root.AddComponent<ParallaxStarfield>();
+            SerializedObject so = new SerializedObject(parallax);
+            so.FindProperty("cameraTransform").objectReferenceValue = camTransform;
+            so.FindProperty("fieldWidth").floatValue = 36f;
+            so.FindProperty("parallaxFactor").floatValue = 0.65f;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static GameObject SaveCrystalPrefab(Sprite stdSprite, Sprite boostSprite, Sprite fragileSprite, Sprite umbraSprite, Sprite rimSprite, Sprite starSprite)
         {
             GameObject go = new GameObject("PF_CrystalPlatform");
             go.layer = HardlightWorldLayer;
             go.transform.localScale = new Vector3(2.4f, 0.52f, 1f);
 
             SpriteRenderer mainSr = go.AddComponent<SpriteRenderer>();
-            mainSr.sprite = bodySprite;
+            mainSr.sprite = stdSprite;
             mainSr.sortingOrder = 5;
 
             BoxCollider2D col = go.AddComponent<BoxCollider2D>();
@@ -1115,6 +1244,10 @@ namespace LightWeaver.EditorTools
 
             CrystalPlatform plat = go.AddComponent<CrystalPlatform>();
             SerializedObject platSo = new SerializedObject(plat);
+            platSo.FindProperty("standardCrystalSprite").objectReferenceValue = stdSprite;
+            platSo.FindProperty("boostCrystalSprite").objectReferenceValue = boostSprite;
+            platSo.FindProperty("fragileCrystalSprite").objectReferenceValue = fragileSprite;
+            platSo.FindProperty("umbraCrystalSprite").objectReferenceValue = umbraSprite;
             platSo.FindProperty("rimGlowRenderer").objectReferenceValue = rimSr;
             platSo.FindProperty("cornerSparkleLeft").objectReferenceValue = leftSparkle.transform;
             platSo.FindProperty("cornerSparkleRight").objectReferenceValue = rightSparkle.transform;
@@ -1264,19 +1397,33 @@ namespace LightWeaver.EditorTools
             col.isTrigger = true;
             col.size = new Vector2(0.85f, 1.0f);
 
-            // Tepedeki Elmas Kilit Anahtarı
             GameObject lockObj = new GameObject("DiamondLockSwitch");
             lockObj.transform.SetParent(go.transform, false);
             lockObj.transform.localPosition = new Vector3(0f, 0.72f, 0f);
-            lockObj.transform.localScale = new Vector3(1.75f, 0.32f, 1f); // Ebeveyn ölçeği (0.62, 3.4) telafisi -> ~1.08 x 1.08 kare!
+            lockObj.transform.localScale = new Vector3(1.75f, 0.32f, 1f);
             SpriteRenderer lockSr = lockObj.AddComponent<SpriteRenderer>();
             lockSr.sprite = lockDiamondSprite;
             lockSr.sortingOrder = 19;
+
+            // Bariyer ile Elmas Kilit arasındaki bağlantı ışığı
+            LineRenderer linkLine = go.AddComponent<LineRenderer>();
+            linkLine.useWorldSpace = false;
+            linkLine.positionCount = 2;
+            linkLine.SetPosition(0, new Vector3(0f, 0.45f, 0f));
+            linkLine.SetPosition(1, new Vector3(0f, 0.72f, 0f));
+            linkLine.startWidth = 0.08f;
+            linkLine.endWidth = 0.08f;
+            linkLine.sortingOrder = 17;
+            Shader shader = Shader.Find("Sprites/Default");
+            if (shader != null) linkLine.sharedMaterial = new Material(shader);
+            linkLine.startColor = new Color(1.0f, 0.22f, 0.48f, 0.9f);
+            linkLine.endColor = new Color(0.0f, 0.96f, 1.0f, 0.95f);
 
             PrismLockGate gate = go.AddComponent<PrismLockGate>();
             SerializedObject so = new SerializedObject(gate);
             so.FindProperty("diamondLockRenderer").objectReferenceValue = lockSr;
             so.FindProperty("diamondLockTransform").objectReferenceValue = lockObj.transform;
+            so.FindProperty("lockTetherLine").objectReferenceValue = linkLine;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, Path.Combine(PrefabsFolder, "PF_PrismLockGate.prefab"));
@@ -1292,7 +1439,6 @@ namespace LightWeaver.EditorTools
             SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = anchorSprite;
             sr.sortingOrder = 18;
-
             go.AddComponent<PhotonAnchor>();
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, Path.Combine(PrefabsFolder, "PF_PhotonAnchor.prefab"));
@@ -1354,7 +1500,160 @@ namespace LightWeaver.EditorTools
             if (existing != null) Object.DestroyImmediate(existing);
         }
 
-        #region Procedural High-Craft Art & UI Generators
+        #region Procedural High-Craft Art & Variant Generators
+
+        private static Sprite GenerateCrystalPlatformSprite(string assetPath)
+        {
+            const int w = 256;
+            const int h = 96;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    float diag1 = Mathf.Abs((nx - ny * 0.45f) - 0.18f);
+                    float diag2 = Mathf.Abs((nx + ny * 0.45f) - 0.82f);
+                    float diag3 = Mathf.Abs((nx - ny * 0.35f) - 0.55f);
+                    float centerFacet = Mathf.Abs(ny - 0.62f);
+
+                    bool isTopEdge = y >= h - 5;
+                    bool isSideEdge = x < 4 || x >= w - 4 || y < 4;
+                    bool isFacetLine = diag1 < 0.012f || diag2 < 0.012f || diag3 < 0.012f || centerFacet < 0.016f;
+
+                    Color c;
+                    if (isTopEdge) c = new Color(0.95f, 1.0f, 1.0f, 1f);
+                    else if (isSideEdge) c = new Color(0.65f, 0.96f, 1.0f, 0.98f);
+                    else if (isFacetLine) c = new Color(0.70f, 0.96f, 1.0f, 0.90f);
+                    else
+                    {
+                        Color topTint = new Color(0.15f, 0.86f, 1.0f, 0.80f);
+                        Color midTint = new Color(0.12f, 0.52f, 0.95f, 0.72f);
+                        Color bottomTint = new Color(0.54f, 0.20f, 0.92f, 0.70f);
+                        c = ny > 0.5f ? Color.Lerp(midTint, topTint, (ny - 0.5f) * 2f) : Color.Lerp(bottomTint, midTint, ny * 2f);
+                    }
+                    pixels[y * w + x] = c;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 256f);
+        }
+
+        private static Sprite GenerateBoostCrystalSprite(string assetPath)
+        {
+            const int w = 256;
+            const int h = 96;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                float chevronShift = Mathf.Abs(ny - 0.5f) * 0.22f;
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    bool isBorder = y >= h - 5 || y < 4 || x < 4 || x >= w - 4;
+                    float chevronRepeat = Mathf.Repeat((nx - chevronShift) * 4.5f, 1f);
+                    bool isChevron = chevronRepeat < 0.25f && ny > 0.2f && ny < 0.8f;
+
+                    if (isBorder) pixels[y * w + x] = new Color(1.0f, 0.96f, 0.55f, 1f);
+                    else if (isChevron) pixels[y * w + x] = new Color(1.0f, 0.92f, 0.35f, 0.98f);
+                    else pixels[y * w + x] = Color.Lerp(new Color(0.05f, 0.65f, 0.55f, 0.78f), new Color(0.15f, 0.98f, 0.72f, 0.85f), ny);
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 256f);
+        }
+
+        private static Sprite GenerateFragileCrystalSprite(string assetPath)
+        {
+            const int w = 256;
+            const int h = 96;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    bool isBorder = y >= h - 4 || y < 4 || x < 4 || x >= w - 4;
+                    float crack = Mathf.Abs(Mathf.Sin(nx * 18f + ny * 9f) * 0.12f - (ny - 0.5f));
+                    bool isCrack = crack < 0.024f || Mathf.Abs(nx - 0.35f) < 0.012f || Mathf.Abs(nx - 0.70f) < 0.012f;
+
+                    if (isBorder) pixels[y * w + x] = new Color(0.92f, 0.98f, 1f, 0.96f);
+                    else if (isCrack) pixels[y * w + x] = new Color(1f, 1f, 1f, 0.92f);
+                    else pixels[y * w + x] = new Color(0.65f, 0.88f, 1.0f, 0.58f);
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 256f);
+        }
+
+        private static Sprite GenerateUmbraCrystalSprite(string assetPath)
+        {
+            const int w = 256;
+            const int h = 96;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    bool isBorder = y >= h - 5 || y < 4 || x < 4 || x >= w - 4;
+                    float stripe = Mathf.Repeat((nx * 5f) + (ny * 1.4f), 1f);
+                    bool isHazardStripe = stripe < 0.24f;
+
+                    if (isBorder) pixels[y * w + x] = new Color(1.0f, 0.22f, 0.72f, 1f);
+                    else if (isHazardStripe) pixels[y * w + x] = new Color(0.75f, 0.14f, 0.95f, 0.88f);
+                    else pixels[y * w + x] = new Color(0.14f, 0.03f, 0.24f, 0.92f);
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 256f);
+        }
+
+        private static Sprite GenerateHorizonMonolithSprite(string assetPath)
+        {
+            const int w = 64;
+            const int h = 128;
+            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+
+            for (int y = 0; y < h; y++)
+            {
+                float ny = (float)y / (h - 1);
+                for (int x = 0; x < w; x++)
+                {
+                    float nx = (float)x / (w - 1);
+                    bool isEdge = x < 2 || x >= w - 2 || y >= h - 3;
+                    float alpha = Mathf.Clamp01(ny * 0.85f);
+                    pixels[y * w + x] = isEdge
+                        ? new Color(0.15f, 0.48f, 0.75f, alpha)
+                        : new Color(0.05f, 0.09f, 0.18f, alpha * 0.9f);
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return SaveAndImportSprite(tex, assetPath, 64f);
+        }
 
         private static Sprite GenerateLaserBarrierSprite(string assetPath)
         {
@@ -1421,12 +1720,9 @@ namespace LightWeaver.EditorTools
                 float edgeWave = Mathf.Sin(ny * Mathf.PI * 6f) * 0.06f;
                 for (int x = 0; x < w; x++)
                 {
-                    float nx = (float)x / (w - 1); // 0 sol, 1 sağ ateş kenarı
+                    float nx = (float)x / (w - 1);
                     float front = 0.88f + edgeWave;
-                    if (nx > front)
-                    {
-                        pixels[y * w + x] = Color.clear;
-                    }
+                    if (nx > front) pixels[y * w + x] = Color.clear;
                     else
                     {
                         float distFromFront = front - nx;
@@ -1443,48 +1739,6 @@ namespace LightWeaver.EditorTools
             tex.SetPixels(pixels);
             tex.Apply();
             return SaveAndImportSprite(tex, assetPath, 128f);
-        }
-
-        private static Sprite GenerateCrystalPlatformSprite(string assetPath)
-        {
-            const int w = 256;
-            const int h = 96;
-            Texture2D tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
-            Color[] pixels = new Color[w * h];
-
-            for (int y = 0; y < h; y++)
-            {
-                float ny = (float)y / (h - 1);
-                for (int x = 0; x < w; x++)
-                {
-                    float nx = (float)x / (w - 1);
-                    float diag1 = Mathf.Abs((nx - ny * 0.45f) - 0.18f);
-                    float diag2 = Mathf.Abs((nx + ny * 0.45f) - 0.82f);
-                    float diag3 = Mathf.Abs((nx - ny * 0.35f) - 0.55f);
-                    float centerFacet = Mathf.Abs(ny - 0.62f);
-
-                    bool isTopEdge = y >= h - 5;
-                    bool isSideEdge = x < 4 || x >= w - 4 || y < 4;
-                    bool isFacetLine = diag1 < 0.012f || diag2 < 0.012f || diag3 < 0.012f || centerFacet < 0.016f;
-
-                    Color c;
-                    if (isTopEdge) c = new Color(0.95f, 1.0f, 1.0f, 1.0f);
-                    else if (isSideEdge) c = new Color(0.65f, 0.96f, 1.0f, 0.98f);
-                    else if (isFacetLine) c = new Color(0.70f, 0.96f, 1.0f, 0.90f);
-                    else
-                    {
-                        Color topTint = new Color(0.15f, 0.86f, 1.0f, 0.80f);
-                        Color midTint = new Color(0.12f, 0.52f, 0.95f, 0.72f);
-                        Color bottomTint = new Color(0.54f, 0.20f, 0.92f, 0.70f);
-                        c = ny > 0.5f ? Color.Lerp(midTint, topTint, (ny - 0.5f) * 2f) : Color.Lerp(bottomTint, midTint, ny * 2f);
-                    }
-                    pixels[y * w + x] = c;
-                }
-            }
-
-            tex.SetPixels(pixels);
-            tex.Apply();
-            return SaveAndImportSprite(tex, assetPath, 256f);
         }
 
         private static Sprite GenerateCrystalRimSprite(string assetPath)

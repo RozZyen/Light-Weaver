@@ -1,23 +1,23 @@
-# 🔦 LIGHT WEAVER: Prism Runner — Master Game Design Document (GDD v2.0)
+# 🔦 LIGHT WEAVER: Prism Runner — Master Game Design Document (GDD v2.1)
 
 > **Proje Kodu:** `LIGHT_WEAVER`  
-> **Sürüm:** `v2.0.0-deep-mechanics` (Gelişmiş Sistemik Oynanış Revizyonu)  
+> **Sürüm:** `v2.1.0-360-mobile-ready` (360° Tam Fener + Mobil Yatay Çift-Başparmak Ergonomisi + VFX Cila)  
 > **Hedef Motor:** Unity 6 (`6000.3.23f1`, Universal Render Pipeline - URP 2D)  
-> **Hedef Platformlar:** Mobil (Android & iOS — 60/120 FPS Zero-GC) + PC  
-> **Geliştirme Metodolojisi:** 6 Evrensel DDA Sütunu, Aktif Çift-El / Tek-Parmak Ergonomisi, Sıfır Tahsis (Zero-GC)  
+> **Hedef Platformlar:** Mobil (Android & iOS Landscape — 60/120 FPS Zero-GC) + PC  
+> **Geliştirme Metodolojisi:** 6 Evrensel DDA Sütunu, Çoklu-Dokunma Ayrımı (`EnhancedTouch`), Sıfır Tahsis (Zero-GC)  
 
 ---
 
-## 📌 1. VİZYON DEĞİŞİMİ & OYUN KİMLİĞİ (Neden v2.0?)
+## 📌 1. VİZYON DEĞİŞİMİ & OYUN KİMLİĞİ (Neden v2.0 / v2.1?)
 
-İlk prototip yalnızca "feneri aşağıda tutup dümdüz koşma" riskini taşıyordu. **GDD v2.0**, oyuncunun fenerini **sürekli yukarı, aşağı, ileri ve karanlığa çekmeye** zorlayan, pasif izlemeyi **aktif refleks, bulmaca ve aksiyona** dönüştüren derin sistemik mimariyi tanımlar.
+İlk prototip yalnızca "feneri aşağıda tutup dümdüz koşma" ve kısıtlı açıya kilitlenme riskini taşıyordu. **GDD v2.0 & v2.1**, oyuncunun fenerini **tam 360 derece (-180° .. +180°) özgürce** yukarı, aşağı, ileri ve arkaya çevirebildiği; pasif izlemeyi **aktif refleks, bulmaca ve aksiyona** dönüştüren derin sistemik mimariyi ve telefon ergonomisini tanımlar.
 
 | Alan | Detay |
 | :--- | :--- |
 | **Oyun Adı** | **LIGHT WEAVER: Prism Runner** |
 | **Tür (Genre)** | 2D Sistemik Işık Platformeri & Taktiksel Sonsuz Koşucu (*Active Hardlight Action-Runner*) |
-| **Temel Kanca (The Rule-Breaker Hook)** | **Dünya Zifiri Karanlıktır — Ama Her Işık İyi Değildir!**<br>• Siyan kristaller ışığınla katılaşır; ancak **Ters Faz (*Umbra*) Köprüleri** ışığın değdiğinde **erir** (üzerinden geçerken ışığı yukarı/başka yöne kaçırman gerekir!).<br>• Önünü kesen **Karanlık Kilit Kapılarını** açmak için ışığını kapının tepesindeki elmasa odaklamalısın.<br>• Zemini olmayan devasa uçurumlardan geçmek için havadaki **Foton Çapalarına (*Photon Anchor*)** ışık tutup sallanmalısın! |
-| **Kontrol Şeması** | **PC:** `Fare` / `W-S` (Fener Açısı) · `Space` (Zıpla / Çift Zıpla) · `Sağ Tık` / `Shift` (Odak Lazeri) · `F`/`E` (Flash-Burst)<br>**Mobil:** Sağ alan sürükleme (Fener Açısı) · Sol alt `JUMP` butonu · Sağ alt `FOCUS` / `BURST` butonları + Çift Dokunuş |
+| **Temel Kanca (The Rule-Breaker Hook)** | **Dünya Zifiri Karanlıktır — Ama Her Işık İyi Değildir!**<br>• Siyan kristaller ışığınla katılaşır; ancak **Ters Faz (*Umbra*) Köprüleri** ışığın değdiğinde **erir** (üzerinden geçerken ışığı 360° döndürüp yukarıya/arkaya kaçırman gerekir!).<br>• Önünü kesen **Karanlık Kilit Kapılarını** açmak için ışığını kapının tepesindeki elmasa odaklamalısın (`LineRenderer` enerji halatıyla bağlı).<br>• Zemini olmayan devasa uçurumlardan geçmek için havadaki **Foton Çapalarına (*Photon Anchor*)** ışık tutup sallanmalısın! |
+| **Kontrol Şeması (360° PC & Mobil)** | **PC:** `Fare` (Tam 360° imleç takibi) · `W/A/S/D` veya `Ok Tuşları` (8-Yön 360° nişan) · `Space` (Zıpla / Çift Zıpla) · `Sağ Tık` / `Shift` (Odak Lazeri) · `F`/`E` (Flash-Burst)<br>**Mobil Yatay (Landscape Ergonomisi):** `EnhancedTouch` Çoklu-Dokunma ayrımıyla:<br>• **Sol Başparmak:** Sol alt `JUMP` butonu (Zıplama + Havada Çift Zıplama)<br>• **Sağ Başparmak (2 Tercihli Mod):**<br>  — **Mod 0 (`AIM: 360 STICK` — Varsayılan):** Sağ alanda dokunulan noktada açılan şeffaf **360° Sanal Joystick** (`FloatingAimStickBase/Knob`). Parmağın hedefi ve kristalleri kapatmaz; merkeze göre kaydırma yönü anlık 360° fener açısını belirler, eşiği geçince otomatik *Odak Lazeri* açılır!<br>  — **Mod 1 (`AIM: TOUCH POINT`):** Dokunulan dünya noktasına doğrudan 360° ışık yöneltme.<br>• **Hızlı Aksiyonlar:** Sağ alt `FOCUS` / `BURST` butonları + Çift Dokunuş Flash-Burst. (Menüdeki `AimModeToggleBtn` ile kalıcı olarak `PlayerPrefs` üzerinden değiştirilir). |
 | **Baskı Mekaniği** | **The Eclipse (Hiçlik Dalgası):** Ekranın solundan kovalayan canlı mor-kızıl karanlık dalgası. Yavaşlarsan seni yutar; Hız Kristalleri ve üst rotalarla onu geri püskürtürsün. |
 | **Roguelite Derinliği** | Her sektör geçişinde zaman yavaşlar ve oyuncu 3 rastgele **Prizma Yükseltmesi (*Prism Blessing*)** kartından birini seçer! |
 
