@@ -82,13 +82,16 @@ graph TD
 ---
 
 ### ✅ 5. Tamamlanan Son Aşamalar
-- [x] **Faz 0.1:** Kapsamlı Master GDD (`Docs/GDD.md`) 6 DDA sütunu ve referans görsel analizine göre hazırlandı.
-- [x] **Faz 0.2:** `PROJECT_MEMORY.md`, `Docs/PROJECT_TRACKER.md`, `Docs/plans/task.md`, `.gitignore` ve `.gitattributes` oluşturuldu.
-- [x] **Faz 0.3:** Proje `C:\Users\Yusuf\Documents\GitHub\Light-Weaver` klasörüne taşındı ve GitHub (`RozZyen/Light-Weaver`) uzak deposuna bağlandı.
-- [x] **Faz 0.4:** Unity 6 (`6000.3.23f1`, URP 2D) projesi `LIGHT WEAVER/` altında oluşturuldu ve `Packages/manifest.json` içine `com.coplaydev.unity-mcp` paketi eklendi.
+- [x] **Faz 0.1–0.4:** Master GDD (`Docs/GDD.md`), `PROJECT_MEMORY.md`, GitHub (`RozZyen/Light-Weaver`), Unity 6 (`6000.3.23f1`) ve Unity MCP bağlantısı tamamlandı.
+- [x] **Faz 1 (Çekirdek Işık & Kristalleşme Motoru):**
+  - `ILightReactive.cs` & `LightReactiveRegistry.cs` (Zero-GC merkezi hedef kaydı)
+  - `ObjectPooler.cs` (`IPoolable` tabanlı sıfır tahsisli nesne havuzu)
+  - `LightConeCaster2D.cs` (Prosedürel volümetrik ışık konisi mesh'i + açısal tarama + Odak Lazeri modu)
+  - `CrystalPlatform.cs` (Phantom `%9` $\rightarrow$ Solid `#00F0FF` $\rightarrow$ `0.48s` Afterglow `#B537F2` durum makinesi)
+  - `FlashlightInputPreview.cs` & `LightWeaverPhase1Setup.cs` (Prosedürel fasetli kristal sprite üretimi ve sahne kurulumu)
 
 ---
 
 ### 🎯 6. Sırada Ne Var? (Next Sprint)
-- [ ] **Faz 1.1:** Kullanıcının Unity Editor'de MCP bağlantısını başlatması sonrası `ILightReactive`, `ObjectPooler` ve Zero-GC `LightConeCaster2D` (fener konisi + açısal tarama) sistemlerinin yazılması.
-- [ ] **Faz 1.2:** `CrystalPlatform` (Phantom $\rightarrow$ Solid $\rightarrow$ Afterglow) ve prosedürel neon-kristal görsel üreticisinin kurulması.
+- [ ] **Faz 2.1:** `RunnerMotor2D` (Otomatik koşu, eğimli kristal rampa tırmanışı, Coyote Time ve boşluğa düşme tespiti).
+- [ ] **Faz 2.2:** Neon koşucu karakterin (Light Weaver) görsel parçaları, `RunnerProceduralAnimator` ve hız izleri (`TrailRenderer`).

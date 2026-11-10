@@ -7,7 +7,7 @@
 
 ## 📊 Genel İlerleme Durumu
 
-- **Aktif Faz:** Faz 0 — Mimari Tasarım, GDD & GitHub Kurulumu Tamamlandı (Unity 6 Projesi & MCP Bağlantısı Bekleniyor) 🔦💎
+- **Aktif Faz:** Faz 1 Tamamlandı — Çekirdek Işık Konisi & Kristalleşen Platform Motoru Sahnede Kuruldu (Faz 2'ye Hazır) 🔦💎
 - **Hedef Motor:** Unity 6 (URP 2D) + Unity MCP (`com.coplaydev.unity-mcp`)
 - **Depo Konumu:** `C:\Users\Yusuf\Documents\GitHub\Light-Weaver` (`https://github.com/RozZyen/Light-Weaver`)
 - **Son Güncelleme:** 2026-11-10
@@ -27,10 +27,10 @@
 ### 🔦 Faz 1: Çekirdek Işık & Kristalleşme Motoru (Core Hardlight Engine)
 | Görev Kodu | Görev / Özellik | Detay | Durum |
 | :---: | :--- | :--- | :---: |
-| **F1.1** | **`ILightReactive` & `ObjectPooler`** | Zero-GC nesne havuzu ve ışığa duyarlı varlık arayüzü | ⬜ Planlandı |
-| **F1.2** | **`LightConeCaster2D` (Fener Konisi)** | Prosedürel ışık huzmesi mesh'i + `OverlapCircleNonAlloc` açısal tarama | ⬜ Planlandı |
-| **F1.3** | **`CrystalPlatform` Durum Makinesi** | Phantom (%8 iz) $\rightarrow$ Solid (Neon Kristal) $\rightarrow$ 0.45s Afterglow $\rightarrow$ Çözülme | ⬜ Planlandı |
-| **F1.4** | **Prosedürel Neon-Kristal Sanat Üreticisi** | Fasetli kristal platformlar, elmas parlamaları ve fener huzmesi dokuları | ⬜ Planlandı |
+| **F1.1** | **`ILightReactive` & `ObjectPooler`** | Zero-GC nesne havuzu ve `LightReactiveRegistry` merkezi kayıt sistemi | ✅ Tamamlandı |
+| **F1.2** | **`LightConeCaster2D` (Fener Konisi)** | Prosedürel ışık huzmesi mesh'i + açısal tarama + Odak Lazeri (Focus Beam) | ✅ Tamamlandı |
+| **F1.3** | **`CrystalPlatform` Durum Makinesi** | Phantom (%9 iz) $\rightarrow$ Solid (Neon Kristal) $\rightarrow$ 0.48s Afterglow $\rightarrow$ Çözülme | ✅ Tamamlandı |
+| **F1.4** | **Prosedürel Neon-Kristal Sanat Üreticisi** | Fasetli kristal platformlar, elmas parlamaları ve `PF_CrystalPlatform.prefab` | ✅ Tamamlandı |
 
 ### 🏃‍♂️ Faz 2: Karakter Fiziği, Dikey Tırmanış & Kontroller
 | Görev Kodu | Görev / Özellik | Detay | Durum |
@@ -68,6 +68,12 @@
 ---
 
 ## 📜 Geliştirme Günlüğü (Changelog)
+
+### [2026-11-10] — v0.2.0: Faz 1 Çekirdek Işık & Kristalleşme Motoru (Hardlight Engine)
+- **Çekirdek Sistemler:** `ILightReactive`, `LightReactiveRegistry` ve `ObjectPooler` (`IPoolable`) sıfır GC tahsisiyle (Zero-GC) yazıldı.
+- **Volümetrik Fener Konisi (`LightConeCaster2D`):** Altın çekirdekten neon siyana (`#00F0FF`) ve prizmatik eflatuna (`#B537F2`) uzanan dinamik mesh ve açısal hedef tarayıcı kuruldu. Sağ tık / ikinci parmak ile daralan Odak Lazeri (`Focus Beam`) eklendi.
+- **Kristal Platform (`CrystalPlatform`):** Hayalet fazdan (`Phantom`) katı kristale (`Solid` + `BoxCollider2D` aktif) geçiş, Squash & Stretch büyüme tepkisi, köşe elmas parlamaları ve ışık çekildiğinde `0.48s` süren Akkor Soğuma (`Afterglow`) mekaniği tamamlandı.
+- **Sahne & Sanat (`LightWeaverPhase1Setup`):** Prosedürel fasetli kristal dokuları (`prism_crystal_block.png`, `diamond_starburst.png`), `PF_CrystalPlatform.prefab` ve referans görseldeki kademeli kristal rampa dizilimi sahneye kalıcı olarak inşa edildi.
 
 ### [2026-11-10] — v0.1.0: Proje Başlangıcı, Master GDD & GitHub Kurulumu
 - **GDD (`Docs/GDD.md`):** Referans konsept görseli ve oyun özeti temel alınarak 6 DDA sütunlu (Hardlight Crystallization, Gaze Dilemma, Tri-Layer Altitude, Pentatonic ASMR, Spectrum Shift, Just-in-Time Weave) kapsamlı tasarım dokümanı oluşturuldu.
