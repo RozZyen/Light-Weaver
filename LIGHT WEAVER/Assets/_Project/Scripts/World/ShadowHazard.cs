@@ -33,10 +33,10 @@ namespace LightWeaver.World
         [SerializeField] private float oscillationSpeed = 2.1f;
         [SerializeField] private float stalkerDriftSpeed = 1.35f;
 
-        [Header("Visual Colors")]
-        [SerializeField] private Color pillarColor = new Color(0.18f, 0.04f, 0.28f, 0.96f);
-        [SerializeField] private Color stalkerColor = new Color(0.95f, 0.14f, 0.34f, 0.94f);
-        [SerializeField] private Color leechColor = new Color(0.55f, 0.08f, 0.85f, 0.96f);
+        [Header("Visual Colors (Natural Painted Tint)")]
+        [SerializeField] private Color pillarColor = Color.white;
+        [SerializeField] private Color stalkerColor = Color.white;
+        [SerializeField] private Color leechColor = Color.white;
 
         private Collider2D _collider;
         private SpriteRenderer _renderer;
@@ -65,6 +65,8 @@ namespace LightWeaver.World
 
         private void OnEnable()
         {
+            _originPosition = transform.position;
+            _phaseOffset = (_originPosition.x * 0.55f) % (Mathf.PI * 2f);
             LightReactiveRegistry.Register(this);
             RunnerMotor2D.OnAnyRunnerRespawned += ResetHazard;
             ResetHazard();

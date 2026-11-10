@@ -63,8 +63,11 @@ namespace LightWeaver.Player
 
             if (forearmPivot != null)
             {
-                // 2-eklemli doğal uzanış: omuz açının ~%56'sını alır, önkol dirsekten hedefi tam tutar!
-                float shoulderDeg = Mathf.Clamp(angle * 0.56f, -64f, 64f);
+                // 2-eklemli modüler kol: dikey üst kol (-Y yönlü sprite) 0°'de hafif öne (+14°), +105°'de +132°, -105°'de -24° eğilir;
+                // önkol ise dirsekten hedef fener açısını birebir kilitler!
+                float shoulderDeg = angle >= 0f
+                    ? Mathf.Lerp(14f, 132f, Mathf.InverseLerp(0f, 105f, angle))
+                    : Mathf.Lerp(14f, -26f, Mathf.InverseLerp(0f, -105f, angle));
                 armPivot.rotation = Quaternion.Euler(0f, 0f, shoulderDeg);
                 forearmPivot.rotation = Quaternion.Euler(0f, 0f, angle);
             }

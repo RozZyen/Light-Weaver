@@ -81,12 +81,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 19
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 61fa7472d754a9846b9e30cabf998571, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0c8a71b23825b5d4488a5e1d41d45b40, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.99333334, y: 1.0066667}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -176,7 +176,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 16
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 646cfac041e739c4c9a0cd95fd7260c4, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 934fb3ab778a0134bbdd58fdcbb9597e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -313,8 +313,8 @@ LineRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 0.21960784, b: 0.47843137, a: 0.9019608}
-      key1: {r: 0, g: 0.9607843, b: 1, a: 0.9490196}
+      key0: {r: 0.9490196, g: 0.34117648, b: 0.23921569, a: 0.8784314}
+      key1: {r: 1, g: 0.8392157, b: 0.32156864, a: 0.9607843}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}

@@ -80,21 +80,21 @@ namespace LightWeaver.UI
             if (mobileHighBeamBg != null)
             {
                 mobileHighBeamBg.color = isOn
-                    ? new Color(1.0f, 0.72f, 0.08f, 0.88f)
-                    : new Color(0.09f, 0.16f, 0.28f, 0.56f);
+                    ? new Color(1.0f, 0.88f, 0.52f, 1.0f)
+                    : new Color(0.85f, 0.85f, 0.90f, 0.92f);
             }
             if (mobileHighBeamIcon != null)
             {
                 mobileHighBeamIcon.color = isOn
-                    ? new Color(1.0f, 0.98f, 0.78f, 1.0f)
-                    : new Color(0.45f, 0.94f, 1.0f, 0.92f);
+                    ? new Color(1.0f, 0.88f, 0.30f, 1.0f)
+                    : new Color(0.78f, 0.88f, 0.92f, 0.95f);
             }
             if (mobileHighBeamLabel != null)
             {
                 mobileHighBeamLabel.text = isOn ? "LONG: ON" : "LONG: OFF";
                 mobileHighBeamLabel.color = isOn
-                    ? new Color(0.06f, 0.04f, 0.08f, 1.0f)
-                    : new Color(0.90f, 0.96f, 1.0f, 0.95f);
+                    ? new Color(1.0f, 0.86f, 0.28f, 1.0f)
+                    : new Color(0.94f, 0.88f, 0.76f, 0.95f);
             }
         }
 

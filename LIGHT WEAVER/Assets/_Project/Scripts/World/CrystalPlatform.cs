@@ -32,13 +32,14 @@ namespace LightWeaver.World
         [SerializeField] private float umbraMeltCooldown = 0.65f;
 
         [Header("Visual Palette (Egypt Mystery Sandstone & Scarab)")]
-        [SerializeField] private Color solidCyanColor = new Color(1.0f, 0.96f, 0.86f, 0.98f);
-        [SerializeField] private Color boostGoldCyanColor = new Color(0.55f, 1.0f, 0.88f, 0.98f);
-        [SerializeField] private Color fragileIceColor = new Color(1.0f, 0.92f, 0.78f, 0.96f);
-        [SerializeField] private Color umbraDarkVioletColor = new Color(0.76f, 0.36f, 0.95f, 0.94f);
-        [SerializeField] private Color afterglowVioletColor = new Color(0.78f, 0.56f, 0.32f, 0.72f);
+        [SerializeField] private Color solidCyanColor = Color.white;
+        [SerializeField] private Color boostGoldCyanColor = new Color(0.96f, 1.0f, 0.98f, 1f);
+        [SerializeField] private Color fragileIceColor = new Color(1.0f, 0.98f, 0.95f, 1f);
+        [SerializeField] private Color umbraDarkVioletColor = new Color(0.95f, 0.88f, 1.0f, 0.98f);
+        [SerializeField] private Color afterglowVioletColor = new Color(0.82f, 0.65f, 0.44f, 0.72f);
 
         [Header("Variant Sprites & References")]
+        [SerializeField] private SpriteRenderer visualRenderer;
         [SerializeField] private Sprite standardCrystalSprite;
         [SerializeField] private Sprite boostCrystalSprite;
         [SerializeField] private Sprite fragileCrystalSprite;
@@ -69,7 +70,7 @@ namespace LightWeaver.World
         private void Awake()
         {
             _boxCollider = GetComponent<BoxCollider2D>();
-            _mainRenderer = GetComponent<SpriteRenderer>();
+            _mainRenderer = visualRenderer != null ? visualRenderer : GetComponent<SpriteRenderer>();
             _baseLocalScale = transform.localScale;
             ResetToDefaultState();
         }

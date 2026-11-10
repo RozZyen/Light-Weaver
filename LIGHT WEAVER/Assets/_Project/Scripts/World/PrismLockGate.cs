@@ -67,12 +67,12 @@ namespace LightWeaver.World
             if (_barrierRenderer != null)
             {
                 _barrierRenderer.enabled = true;
-                _barrierRenderer.color = new Color(1.0f, 0.16f, 0.42f, 0.88f);
+                _barrierRenderer.color = Color.white;
             }
             if (diamondLockRenderer != null)
             {
                 diamondLockRenderer.enabled = true;
-                diamondLockRenderer.color = new Color(0.0f, 0.94f, 1.0f, 1f);
+                diamondLockRenderer.color = Color.white;
             }
             if (diamondLockTransform != null)
             {

@@ -26,8 +26,8 @@ namespace LightWeaver.World
         [SerializeField] private SpriteRenderer innerBoltRenderer;
         [SerializeField] private float bobAmplitude = 0.22f;
         [SerializeField] private float bobFrequency = 2.4f;
-        [SerializeField] private Color standardFrameColor = new Color(0.0f, 0.94f, 1.0f, 0.92f);
-        [SerializeField] private Color superFrameColor = new Color(1.0f, 0.82f, 0.12f, 0.98f);
+        [SerializeField] private Color standardFrameColor = Color.white;
+        [SerializeField] private Color superFrameColor = new Color(1.0f, 0.94f, 0.72f, 1f);
 
         private CircleCollider2D _triggerCollider;
         private SpriteRenderer _frameRenderer;
@@ -57,6 +57,8 @@ namespace LightWeaver.World
 
         private void OnEnable()
         {
+            _originPosition = transform.position;
+            _bobPhase = (_originPosition.x * 0.7f) % (Mathf.PI * 2f);
             LightReactiveRegistry.Register(this);
             RunnerMotor2D.OnAnyRunnerRespawned += ResetOrbState;
             ResetOrbState();

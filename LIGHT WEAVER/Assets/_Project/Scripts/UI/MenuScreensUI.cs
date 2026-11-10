@@ -152,8 +152,8 @@ namespace LightWeaver.UI
                     if (img != null)
                     {
                         img.color = i == selectedIndex
-                            ? new Color(0.95f, 0.74f, 0.22f, 0.95f)
-                            : new Color(0.16f, 0.13f, 0.12f, 0.88f);
+                            ? new Color(1.0f, 0.88f, 0.45f, 1.0f)
+                            : new Color(0.62f, 0.60f, 0.66f, 0.92f);
                     }
                 }
             }
