@@ -8,11 +8,11 @@
 
 ### 📌 1. Temel Proje Kimliği & Hedef
 - **Proje:** LIGHT WEAVER: Prism Runner
-- **Motor / Teknoloji:** Unity 6 (`6000.x`, URP 2D)
+- **Motor / Teknoloji:** Unity 6 (`6000.3.23f1`, URP 2D)
 - **Hedef Platform:** Mobil (Android & iOS — 60/120 FPS Zero-GC) + PC Editör Kontrolleri
 - **Tür & Mekanik:** 2D Endless Light-Runner / Hardlight Platformer (Fener ışığıyla boşluğu kristalleştirme)
-- **Aktif Çalışma Dizini:** `C:/Users/Yusuf/Documents/GitHub/Light-Weaver`
-- **Tasarım & Takip Referansları:** `Docs/GDD.md`, `Docs/PROJECT_TRACKER.md`, `docs/plans/task.md`
+- **Aktif Çalışma Dizini:** `C:/Users/Yusuf/Documents/GitHub/Light-Weaver` (Unity projesi: `LIGHT WEAVER/`)
+- **Tasarım & Takip Referansları:** `Docs/GDD.md`, `Docs/PROJECT_TRACKER.md`, `Docs/plans/task.md`
 
 ---
 
@@ -83,12 +83,12 @@ graph TD
 
 ### ✅ 5. Tamamlanan Son Aşamalar
 - [x] **Faz 0.1:** Kapsamlı Master GDD (`Docs/GDD.md`) 6 DDA sütunu ve referans görsel analizine göre hazırlandı.
-- [x] **Faz 0.2:** `PROJECT_MEMORY.md`, `Docs/PROJECT_TRACKER.md`, `docs/plans/task.md`, `.gitignore` ve `.gitattributes` oluşturuldu.
+- [x] **Faz 0.2:** `PROJECT_MEMORY.md`, `Docs/PROJECT_TRACKER.md`, `Docs/plans/task.md`, `.gitignore` ve `.gitattributes` oluşturuldu.
 - [x] **Faz 0.3:** Proje `C:\Users\Yusuf\Documents\GitHub\Light-Weaver` klasörüne taşındı ve GitHub (`RozZyen/Light-Weaver`) uzak deposuna bağlandı.
+- [x] **Faz 0.4:** Unity 6 (`6000.3.23f1`, URP 2D) projesi `LIGHT WEAVER/` altında oluşturuldu ve `Packages/manifest.json` içine `com.coplaydev.unity-mcp` paketi eklendi.
 
 ---
 
 ### 🎯 6. Sırada Ne Var? (Next Sprint)
-- [ ] **Faz 0.4:** Kullanıcının Unity 6 projesini oluşturmasının ardından `Packages/manifest.json` içine `com.coplaydev.unity-mcp` paketinin eklenmesi ve MCP bağlantısının doğrulanması.
-- [ ] **Faz 1.1:** `ILightReactive`, `ObjectPooler` ve Zero-GC `LightConeCaster2D` (fener konisi + açısal tarama) sistemlerinin yazılması.
+- [ ] **Faz 1.1:** Kullanıcının Unity Editor'de MCP bağlantısını başlatması sonrası `ILightReactive`, `ObjectPooler` ve Zero-GC `LightConeCaster2D` (fener konisi + açısal tarama) sistemlerinin yazılması.
 - [ ] **Faz 1.2:** `CrystalPlatform` (Phantom $\rightarrow$ Solid $\rightarrow$ Afterglow) ve prosedürel neon-kristal görsel üreticisinin kurulması.

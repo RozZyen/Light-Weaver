@@ -22,7 +22,7 @@
 | **F0.1** | **Master GDD Hazırlığı (`Docs/GDD.md`)** | 6 DDA Sütunu, Bakış Açısı İkilemi, 5 Sektör, Sanat & ASMR Ses Biblosu | ✅ Tamamlandı |
 | **F0.2** | **Proje Hafızası & Git Kalkanı** | `PROJECT_MEMORY.md`, `.gitignore`, `.gitattributes`, `README.md` | ✅ Tamamlandı |
 | **F0.3** | **GitHub Bağlantısı & Taşıma** | `Documents\GitHub\Light-Weaver` dizinine aktarım ve `RozZyen/Light-Weaver` push | ✅ Tamamlandı |
-| **F0.4** | **Unity 6 & Unity MCP Entegrasyonu** | `Packages/manifest.json` içine `com.coplaydev.unity-mcp` eklenmesi ve köprü testi | ⏳ Bekliyor |
+| **F0.4** | **Unity 6 & Unity MCP Entegrasyonu** | `Packages/manifest.json` içine `com.coplaydev.unity-mcp` eklenmesi ve köprü testi | ✅ Tamamlandı |
 
 ### 🔦 Faz 1: Çekirdek Işık & Kristalleşme Motoru (Core Hardlight Engine)
 | Görev Kodu | Görev / Özellik | Detay | Durum |
