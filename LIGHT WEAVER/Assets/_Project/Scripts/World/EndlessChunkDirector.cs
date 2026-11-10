@@ -7,9 +7,9 @@ using UnityEngine;
 namespace LightWeaver.World
 {
     /// <summary>
-    /// 5 Sektör (Level 1..5, The Echo Void dahil) boyunca balistik olarak doğrulanmış
-    /// 3 irtifa katmanlı kristal yolları, bataryaları, sıçrama halkalarını, prizmaları ve gölge engellerini
-    /// ObjectPooler üzerinden Zero-GC olarak üreten ve geride kalanları geri dönüştüren sonsuz bölüm yönetmeni.
+    /// 8 farklı sistemik chunk örüntüsü (Prism Lock Gate, Umbra Inversion Köprüsü, Photon Anchor
+    /// Kanca Uçurumu, Kırılgan Cam Koşusu, Boost Rampa, Sıçrama Çatalı, Prizma Köprü, Tehlike Koridoru)
+    /// üreten ve geride kalanları ObjectPooler'a iade eden bölüm yönetmeni.
     /// </summary>
     public sealed class EndlessChunkDirector : MonoBehaviour
     {
@@ -21,6 +21,8 @@ namespace LightWeaver.World
         public const string PoolShadowPillar = "ShadowPillar";
         public const string PoolUmbraStalker = "UmbraStalker";
         public const string PoolVoidLeech = "VoidLeech";
+        public const string PoolPrismGate = "PrismLockGate";
+        public const string PoolPhotonAnchor = "PhotonAnchor";
 
         public event Action<SectorProfileSO> OnSectorChanged;
 
@@ -40,17 +42,19 @@ namespace LightWeaver.World
         [SerializeField] private GameObject shadowPillarPrefab;
         [SerializeField] private GameObject umbraStalkerPrefab;
         [SerializeField] private GameObject voidLeechPrefab;
+        [SerializeField] private GameObject prismGatePrefab;
+        [SerializeField] private GameObject photonAnchorPrefab;
 
         [Header("5 Sector Profiles (Level 1..5)")]
         [SerializeField] private SectorProfileSO[] sectors;
         [SerializeField] private int startingSectorIndex = 0;
 
         [Header("Streaming Window")]
-        [SerializeField] private float spawnHorizonAhead = 42f;
+        [SerializeField] private float spawnHorizonAhead = 46f;
         [SerializeField] private float despawnBehindDistance = 18f;
         [SerializeField] private float platformThickness = 0.52f;
 
-        private readonly List<GameObject> _activeObjects = new List<GameObject>(128);
+        private readonly List<GameObject> _activeObjects = new List<GameObject>(160);
         private float _cursorX;
         private float _cursorTopY;
         private float _runStartX;
@@ -92,14 +96,16 @@ namespace LightWeaver.World
         private void RegisterAllPools()
         {
             if (pooler == null) return;
-            if (crystalPlatformPrefab != null) pooler.RegisterPool(PoolCrystalPlatform, crystalPlatformPrefab, 42);
-            if (energyOrbPrefab != null) pooler.RegisterPool(PoolEnergyOrb, energyOrbPrefab, 20);
-            if (energyOrbSuperPrefab != null) pooler.RegisterPool(PoolEnergyOrbSuper, energyOrbSuperPrefab, 10);
+            if (crystalPlatformPrefab != null) pooler.RegisterPool(PoolCrystalPlatform, crystalPlatformPrefab, 48);
+            if (energyOrbPrefab != null) pooler.RegisterPool(PoolEnergyOrb, energyOrbPrefab, 24);
+            if (energyOrbSuperPrefab != null) pooler.RegisterPool(PoolEnergyOrbSuper, energyOrbSuperPrefab, 12);
             if (jumpPadPrefab != null) pooler.RegisterPool(PoolJumpPad, jumpPadPrefab, 8);
             if (prismRelayPrefab != null) pooler.RegisterPool(PoolPrismRelay, prismRelayPrefab, 6);
             if (shadowPillarPrefab != null) pooler.RegisterPool(PoolShadowPillar, shadowPillarPrefab, 8);
             if (umbraStalkerPrefab != null) pooler.RegisterPool(PoolUmbraStalker, umbraStalkerPrefab, 10);
             if (voidLeechPrefab != null) pooler.RegisterPool(PoolVoidLeech, voidLeechPrefab, 8);
+            if (prismGatePrefab != null) pooler.RegisterPool(PoolPrismGate, prismGatePrefab, 8);
+            if (photonAnchorPrefab != null) pooler.RegisterPool(PoolPhotonAnchor, photonAnchorPrefab, 8);
         }
 
         public void SetStartingSector(int sectorIdx)
@@ -112,8 +118,20 @@ namespace LightWeaver.World
         public void SpawnReviveSafetyBridge(float centerX, float topY)
         {
             if (pooler == null) return;
-            float width = 7.0f;
-            float startX = centerX - 1.5f;
+
+            // Yeniden doğuş noktası civarındaki tüm aktif nesneleri ve ileriyi temizleyip sıfırdan güvenli köprü kur
+            for (int i = _activeObjects.Count - 1; i >= 0; i--)
+            {
+                GameObject obj = _activeObjects[i];
+                if (obj != null && obj.transform.position.x >= centerX - 6f)
+                {
+                    pooler.Despawn(obj);
+                    _activeObjects.RemoveAt(i);
+                }
+            }
+
+            float width = 9.5f;
+            float startX = centerX - 2.2f;
             Vector3 pos = new Vector3(startX + width * 0.5f, topY - platformThickness * 0.5f, 0f);
             GameObject go = pooler.Spawn(PoolCrystalPlatform, pos, Quaternion.identity);
             if (go != null)
@@ -122,17 +140,14 @@ namespace LightWeaver.World
                 if (go.TryGetComponent(out CrystalPlatform plat))
                 {
                     plat.OnSpawnedFromPool();
-                    plat.OnLightExposure(pos, 1.0f, true, 0.2f);
+                    plat.ForceGraceSolid(2.4f);
                 }
                 _activeObjects.Add(go);
             }
 
-            if (_cursorX < startX + width)
-            {
-                _cursorX = startX + width;
-                _cursorTopY = topY;
-                FillHorizon();
-            }
+            _cursorX = startX + width;
+            _cursorTopY = topY;
+            FillHorizon();
         }
 
         public void ResetWorldFromStart()
@@ -238,11 +253,10 @@ namespace LightWeaver.World
 
         private void SpawnOpeningRunway()
         {
-            // İlk 9 metre kesintisiz düz başlangıç pisti + kolay rampa
-            SpawnFlatCrystal(_cursorX, _cursorTopY, 5.4f);
+            SpawnCrystal(_cursorX, _cursorTopY, 5.4f, CrystalVariant.Standard);
             _cursorX += 5.2f;
             SpawnOrb(_cursorX + 1.8f, _cursorTopY + 1.7f, false);
-            SpawnSlopedCrystal(_cursorX, _cursorTopY, 4.6f, 22f, out float endX, out float endTopY);
+            SpawnSlopedCrystal(_cursorX, _cursorTopY, 4.4f, 20f, CrystalVariant.Standard, out float endX, out float endTopY);
             _cursorX = endX;
             _cursorTopY = endTopY;
         }
@@ -254,170 +268,186 @@ namespace LightWeaver.World
 
             switch (pattern)
             {
-                case 0: SpawnChunkFlatPulse(); break;
+                case 0: SpawnChunkFlatBoost(); break;
                 case 1: SpawnChunkClimbRamp(); break;
                 case 2: SpawnChunkJumpCanopyFork(); break;
-                case 3: SpawnChunkPrismBridge(); break;
-                case 4: SpawnChunkHazardGauntlet(); break;
-                default: SpawnChunkDescentGlide(); break;
+                case 3: SpawnChunkPrismGateBreach(); break;
+                case 4: SpawnChunkUmbraInversion(); break;
+                case 5: SpawnChunkPhotonAnchorAbyss(); break;
+                case 6: SpawnChunkFragileSprint(); break;
+                default: SpawnChunkHazardGauntlet(); break;
             }
         }
 
         private int PickNextPattern()
         {
-            // Yükseklik kontrolü — sonsuz dünyanın kameradan çok yukarı/aşağı kaçmasını önler
-            if (_cursorTopY > 3.6f) return 5;  // Aşağı süzülme (DescentGlide)
-            if (_cursorTopY < -1.8f) return 1; // Yukarı tırmanma (ClimbRamp)
+            // Yükseklik kontrolü
+            if (_cursorTopY > 3.6f) return 0; // Aşağı adım
+            if (_cursorTopY < -1.8f) return 1; // Yukarı tırmanış
 
-            float hazardChance = _activeSector != null ? _activeSector.hazardFrequency : 0.25f;
-            float prismChance = _activeSector != null ? _activeSector.prismRelayFrequency : 0.20f;
-            float roll = UnityEngine.Random.value;
+            int sectorNum = _activeSector != null ? _activeSector.sectorNumber : 1;
 
-            if (roll < prismChance && _chunkSequenceIndex > 2) return 3;
-            if (roll < prismChance + hazardChance && _chunkSequenceIndex > 1) return 4;
+            // İlk birkaç chunk sonrası zorunlu yön değiştirme mekaniklerini yoğunlaştır!
+            if (_chunkSequenceIndex % 6 == 2) return 3; // PrismLockGate (Yukarı kilidi vur!)
+            if (_chunkSequenceIndex % 6 == 4) return 4; // UmbraBridge (Işığı kaçır yoksa düşersin!)
+            if (_chunkSequenceIndex % 6 == 5 && sectorNum >= 1) return 5; // PhotonAnchorAbyss (Işık kancasıyla uçurum aş!)
 
-            int[] rhythmicCycle = { 0, 1, 2, 5 };
-            return rhythmicCycle[(_chunkSequenceIndex + UnityEngine.Random.Range(0, 2)) % rhythmicCycle.Length];
+            int[] cycle = sectorNum >= 2
+                ? new[] { 0, 1, 2, 3, 4, 5, 6, 7 }
+                : new[] { 0, 1, 2, 3, 4, 5, 7 };
+            return cycle[(_chunkSequenceIndex + UnityEngine.Random.Range(0, 3)) % cycle.Length];
         }
 
-        private void SpawnChunkFlatPulse()
+        private void SpawnChunkFlatBoost()
         {
-            SpawnFlatCrystal(_cursorX - 0.15f, _cursorTopY, 4.4f);
-            float midX = _cursorX + 2.2f;
-            if (ShouldSpawnOrb()) SpawnOrb(midX, _cursorTopY + 1.85f, false);
+            SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 4.2f, CrystalVariant.Standard);
+            float boostX = _cursorX + 4.0f + 1.35f;
+            float boostY = _cursorTopY - 0.55f;
+            SpawnCrystal(boostX, boostY, 3.6f, CrystalVariant.KineticBoost); // Hız akımı!
+            SpawnOrb(boostX + 2.0f, boostY + 2.2f, false);
 
-            // 1.35m güvenli boşluk sonrası -0.55m alçak platform (balistik iniş garantili)
-            float nextX = _cursorX + 4.25f + 1.35f;
-            float nextY = _cursorTopY - 0.55f;
-            SpawnFlatCrystal(nextX, nextY, 4.2f);
-
-            if (ShouldSpawnHazard(0.55f))
-            {
-                SpawnHazard(nextX + 2.5f, nextY + 1.15f, ShadowHazardType.UmbraStalker);
-            }
-
-            _cursorX = nextX + 4.2f;
-            _cursorTopY = nextY;
+            _cursorX = boostX + 3.6f;
+            _cursorTopY = boostY;
         }
 
         private void SpawnChunkClimbRamp()
         {
-            // Kısa düz giriş + 30° kristal tırmanış rampası + pürüzsüz düz çıkış
-            SpawnFlatCrystal(_cursorX - 0.15f, _cursorTopY, 3.0f);
+            SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 3.0f, CrystalVariant.Standard);
             float rampStartX = _cursorX + 2.75f;
-            SpawnSlopedCrystal(rampStartX, _cursorTopY, 4.8f, 30f, out float endX, out float endTopY);
+            SpawnSlopedCrystal(rampStartX, _cursorTopY, 4.8f, 30f, CrystalVariant.Standard, out float endX, out float endTopY);
             SpawnOrb((rampStartX + endX) * 0.5f, (_cursorTopY + endTopY) * 0.5f + 1.6f, false);
 
-            SpawnFlatCrystal(endX - 0.15f, endTopY - 0.08f, 3.6f);
+            SpawnCrystal(endX - 0.15f, endTopY - 0.08f, 3.6f, CrystalVariant.KineticBoost);
             _cursorX = endX + 3.45f;
             _cursorTopY = endTopY - 0.08f;
         }
 
         private void SpawnChunkJumpCanopyFork()
         {
-            // 3 İrtifa Katmanlı Çatallanma: JumpPad -> Starlight Canopy vs Alt Abyss Edge
-            SpawnFlatCrystal(_cursorX - 0.15f, _cursorTopY, 3.8f);
-            SpawnJumpPad(_cursorX + 3.1f, _cursorTopY + 0.24f, new Vector2(8.5f, 13.4f));
+            SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 3.8f, CrystalVariant.Standard);
+            SpawnJumpPad(_cursorX + 3.1f, _cursorTopY + 0.24f, new Vector2(8.6f, 13.5f));
 
-            // Üst Canopy Rotası (+2.6m yüksek)
             float canopyX = _cursorX + 6.4f;
             float canopyY = _cursorTopY + 2.65f;
             SpawnOrb(_cursorX + 5.1f, _cursorTopY + 3.2f, true);
-            SpawnFlatCrystal(canopyX, canopyY, 4.6f);
+            SpawnCrystal(canopyX, canopyY, 4.8f, CrystalVariant.KineticBoost);
 
-            // Alt Güvenli Rota (-2.4m aşağı, JumpPad kaçırılırsa kurtarma rotası)
             float lowX = _cursorX + 4.8f;
             float lowY = _cursorTopY - 2.35f;
-            SpawnFlatCrystal(lowX, lowY, 4.4f);
+            SpawnCrystal(lowX, lowY, 4.4f, CrystalVariant.Standard);
             SpawnOrb(lowX + 2.1f, lowY + 1.45f, false);
-            SpawnSlopedCrystal(lowX + 4.25f, lowY, 4.4f, 24f, out float lowEndX, out float lowEndY);
+            SpawnSlopedCrystal(lowX + 4.25f, lowY, 4.4f, 24f, CrystalVariant.Standard, out float lowEndX, out float lowEndY);
 
-            // Her iki rota da ileri birleşim köprüsüne bağlanır
-            float mergeX = Mathf.Max(canopyX + 5.4f, lowEndX + 1.1f);
+            float mergeX = Mathf.Max(canopyX + 5.5f, lowEndX + 1.1f);
             float mergeY = lowEndY - 0.45f;
-            SpawnFlatCrystal(mergeX, mergeY, 4.8f);
+            SpawnCrystal(mergeX, mergeY, 4.6f, CrystalVariant.Standard);
 
-            _cursorX = mergeX + 4.8f;
+            _cursorX = mergeX + 4.6f;
             _cursorTopY = mergeY;
         }
 
-        private void SpawnChunkPrismBridge()
+        private void SpawnChunkPrismGateBreach()
         {
-            // Prizma Kırıcı Köprüsü
-            SpawnFlatCrystal(_cursorX - 0.15f, _cursorTopY, 3.8f);
-            SpawnPrismRelay(_cursorX + 3.2f, _cursorTopY + 2.4f);
+            // Yolu kesen Elmas Kilitli Bariyer -> Feneri YUKARI kilide tutmadan geçersen çarpıp sendelersin!
+            SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 7.6f, CrystalVariant.Standard);
+            SpawnPrismGate(_cursorX + 5.6f, _cursorTopY + 1.65f);
+            SpawnOrb(_cursorX + 6.6f, _cursorTopY + 2.6f, true);
 
-            float bridgeX = _cursorX + 5.1f;
-            float bridgeY = _cursorTopY - 0.50f;
-            SpawnFlatCrystal(bridgeX, bridgeY, 5.2f);
-            SpawnOrb(bridgeX + 2.5f, bridgeY + 2.45f, true);
+            _cursorX += 7.45f;
+        }
 
-            _cursorX = bridgeX + 5.2f;
-            _cursorTopY = bridgeY;
+        private void SpawnChunkUmbraInversion()
+        {
+            // TERS KURAL: Feneri aşağıda tutmaya devam edersen Umbra Köprüsü ERİR! Işığı yukarı kaldırarak geç!
+            SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 3.4f, CrystalVariant.Standard);
+            float umbraX = _cursorX + 3.35f;
+            SpawnCrystal(umbraX, _cursorTopY, 5.4f, CrystalVariant.UmbraBridge);
+            SpawnOrb(umbraX + 2.6f, _cursorTopY + 2.8f, true); // Yukarı ışık tutarken yakalanacak yüksek batarya!
+
+            float exitX = umbraX + 5.5f;
+            SpawnCrystal(exitX, _cursorTopY, 3.6f, CrystalVariant.Standard);
+            _cursorX = exitX + 3.6f;
+        }
+
+        private void SpawnChunkPhotonAnchorAbyss()
+        {
+            // DEV UÇURUM (Zemin yok!) -> Yukarıdaki PhotonAnchor'a fener tutarak ışık kancasıyla karşıya fırlat!
+            SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 3.8f, CrystalVariant.Standard);
+            float anchorX = _cursorX + 5.8f;
+            float anchorY = _cursorTopY + 3.8f;
+            SpawnPhotonAnchor(anchorX, anchorY);
+            SpawnOrb(anchorX + 2.4f, _cursorTopY + 2.9f, true);
+
+            float landX = _cursorX + 10.6f;
+            float landY = _cursorTopY - 0.2f;
+            SpawnCrystal(landX, landY, 5.4f, CrystalVariant.KineticBoost);
+
+            _cursorX = landX + 5.4f;
+            _cursorTopY = landY;
+        }
+
+        private void SpawnChunkFragileSprint()
+        {
+            // Kırılgan Cam basamakları: basınca 0.24s sonra kırılır -> sürekli zıplama veya hız ister!
+            SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 3.0f, CrystalVariant.Standard);
+            float x1 = _cursorX + 3.8f;
+            float y1 = _cursorTopY - 0.35f;
+            SpawnCrystal(x1, y1, 2.8f, CrystalVariant.FragileShard);
+            SpawnOrb(x1 + 1.4f, y1 + 1.9f, false);
+
+            float x2 = x1 + 4.1f;
+            float y2 = y1 - 0.35f;
+            SpawnCrystal(x2, y2, 2.8f, CrystalVariant.FragileShard);
+
+            float x3 = x2 + 4.1f;
+            float y3 = y2 - 0.35f;
+            SpawnCrystal(x3, y3, 4.0f, CrystalVariant.Standard);
+
+            _cursorX = x3 + 4.0f;
+            _cursorTopY = y3;
         }
 
         private void SpawnChunkHazardGauntlet()
         {
-            SpawnFlatCrystal(_cursorX - 0.15f, _cursorTopY, 5.8f);
+            SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 6.2f, CrystalVariant.Standard);
 
-            float hazardRoll = UnityEngine.Random.value;
-            if (hazardRoll < 0.36f)
+            float roll = UnityEngine.Random.value;
+            if (roll < 0.35f)
             {
-                // Hareketli Gölge Sütunu (zamanlamalı geçiş / Flash-Burst dondurma)
-                SpawnHazard(_cursorX + 3.1f, _cursorTopY + 1.55f, ShadowHazardType.MovingShadowPillar);
+                SpawnHazard(_cursorX + 3.2f, _cursorTopY + 1.55f, ShadowHazardType.MovingShadowPillar);
             }
-            else if (hazardRoll < 0.72f)
+            else if (roll < 0.70f)
             {
-                // Void Leech: Yolun üstünde asılı durur -> oyuncu ışığı aşağı eğip yolu yakmalı ama leech'i aydınlatmamalı!
-                SpawnHazard(_cursorX + 3.0f, _cursorTopY + 2.4f, ShadowHazardType.VoidLeech);
-                SpawnOrb(_cursorX + 4.6f, _cursorTopY + 1.1f, false);
+                SpawnHazard(_cursorX + 3.1f, _cursorTopY + 2.4f, ShadowHazardType.VoidLeech);
+                SpawnOrb(_cursorX + 4.8f, _cursorTopY + 1.15f, false);
             }
             else
             {
-                // İki Umbra Stalker: Feneri üzerine tutup eriterek +batarya al!
-                SpawnHazard(_cursorX + 3.8f, _cursorTopY + 1.1f, ShadowHazardType.UmbraStalker);
+                SpawnHazard(_cursorX + 4.0f, _cursorTopY + 1.1f, ShadowHazardType.UmbraStalker);
             }
 
-            float nextX = _cursorX + 6.9f;
+            float nextX = _cursorX + 7.2f;
             float nextY = _cursorTopY - 0.50f;
-            SpawnFlatCrystal(nextX, nextY, 4.2f);
+            SpawnCrystal(nextX, nextY, 4.2f, CrystalVariant.Standard);
             _cursorX = nextX + 4.2f;
             _cursorTopY = nextY;
         }
 
-        private void SpawnChunkDescentGlide()
-        {
-            SpawnSlopedCrystal(_cursorX - 0.15f, _cursorTopY, 5.0f, -15f, out float endX, out float endTopY);
-            SpawnOrb((_cursorX + endX) * 0.5f, (_cursorTopY + endTopY) * 0.5f + 1.4f, false);
-            SpawnFlatCrystal(endX - 0.15f, endTopY, 4.0f);
-
-            _cursorX = endX + 3.85f;
-            _cursorTopY = endTopY;
-        }
-
-        private bool ShouldSpawnOrb()
-        {
-            float chance = _activeSector != null ? _activeSector.orbDensity : 0.75f;
-            return UnityEngine.Random.value <= chance;
-        }
-
-        private bool ShouldSpawnHazard(float scale)
-        {
-            float chance = _activeSector != null ? _activeSector.hazardFrequency * scale : 0.2f;
-            return UnityEngine.Random.value <= chance;
-        }
-
-        private void SpawnFlatCrystal(float startX, float topY, float width)
+        private void SpawnCrystal(float startX, float topY, float width, CrystalVariant variant)
         {
             Vector3 pos = new Vector3(startX + width * 0.5f, topY - platformThickness * 0.5f, 0f);
             GameObject go = pooler.Spawn(PoolCrystalPlatform, pos, Quaternion.identity);
             if (go == null) return;
             go.transform.localScale = new Vector3(width, platformThickness, 1f);
-            if (go.TryGetComponent(out CrystalPlatform plat)) plat.OnSpawnedFromPool();
+            if (go.TryGetComponent(out CrystalPlatform plat))
+            {
+                plat.OnSpawnedFromPool();
+                plat.SetVariant(variant);
+            }
             _activeObjects.Add(go);
         }
 
-        private void SpawnSlopedCrystal(float startX, float startTopY, float length, float angleDeg, out float endX, out float endTopY)
+        private void SpawnSlopedCrystal(float startX, float startTopY, float length, float angleDeg, CrystalVariant variant, out float endX, out float endTopY)
         {
             float rad = angleDeg * Mathf.Deg2Rad;
             float cos = Mathf.Cos(rad);
@@ -433,7 +463,11 @@ namespace LightWeaver.World
             GameObject go = pooler.Spawn(PoolCrystalPlatform, new Vector3(cx, cy, 0f), Quaternion.Euler(0f, 0f, angleDeg));
             if (go == null) return;
             go.transform.localScale = new Vector3(length, platformThickness, 1f);
-            if (go.TryGetComponent(out CrystalPlatform plat)) plat.OnSpawnedFromPool();
+            if (go.TryGetComponent(out CrystalPlatform plat))
+            {
+                plat.OnSpawnedFromPool();
+                plat.SetVariant(variant);
+            }
             _activeObjects.Add(go);
         }
 
@@ -452,9 +486,15 @@ namespace LightWeaver.World
             _activeObjects.Add(go);
         }
 
-        private void SpawnPrismRelay(float x, float y)
+        private void SpawnPrismGate(float x, float y)
         {
-            GameObject go = pooler.Spawn(PoolPrismRelay, new Vector3(x, y, 0f), Quaternion.identity);
+            GameObject go = pooler.Spawn(PoolPrismGate, new Vector3(x, y, 0f), Quaternion.identity);
+            if (go != null) _activeObjects.Add(go);
+        }
+
+        private void SpawnPhotonAnchor(float x, float y)
+        {
+            GameObject go = pooler.Spawn(PoolPhotonAnchor, new Vector3(x, y, 0f), Quaternion.identity);
             if (go != null) _activeObjects.Add(go);
         }
 

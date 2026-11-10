@@ -1,11 +1,13 @@
 using System;
+using LightWeaver.World;
 using UnityEngine;
 
 namespace LightWeaver.Player
 {
     /// <summary>
-    /// Light Weaver karakterinin sıfır tahsisli (Zero-GC) 2D otomatik koşu, eğimli kristal rampa
-    /// tırmanışı (30°-45°), otomatik basamak atlama ve boşluğa düşme fizik motoru.
+    /// Light Weaver karakterinin sıfır tahsisli (Zero-GC) 2D otomatik koşu, aktif Zıplama/Çift Zıplama,
+    /// KineticBoost hız fırlatması, sendeleme (Stumble), eğimli kristal rampa tırmanışı ve
+    /// güvenli Solar Revive fizik motoru.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
     public sealed class RunnerMotor2D : MonoBehaviour
@@ -13,16 +15,24 @@ namespace LightWeaver.Player
         public static event Action OnAnyRunnerRespawned;
 
         public event Action<float> OnRunnerLanded;
+        public event Action<bool> OnRunnerJumped; // (isDoubleJump)
+        public event Action<float> OnKineticBoostActivated;
         public event Action OnRunnerFellIntoVoid;
         public event Action OnRunnerRespawned;
 
         [Header("Movement & Climbing")]
-        [SerializeField] private float baseRunSpeed = 6.6f;
-        [SerializeField] private float acceleration = 26f;
-        [SerializeField] private float airControlAccel = 14f;
+        [SerializeField] private float baseRunSpeed = 6.8f;
+        [SerializeField] private float acceleration = 28f;
+        [SerializeField] private float airControlAccel = 16f;
         [SerializeField] private float maxSlopeAngleDeg = 52f;
-        [SerializeField] private float stepUpHeight = 0.45f;
-        [SerializeField] private float coyoteTimeDuration = 0.12f;
+        [SerializeField] private float stepUpHeight = 0.48f;
+        [SerializeField] private float coyoteTimeDuration = 0.13f;
+
+        [Header("Photon Jump & Double Jump")]
+        [SerializeField] private float jumpVelocity = 11.4f;
+        [SerializeField] private float doubleJumpVelocity = 10.4f;
+        [SerializeField] private float doubleJumpBatteryCost = 3.5f;
+        [SerializeField] private float jumpBufferDuration = 0.13f;
 
         [Header("Gravity & Void Limits")]
         [SerializeField] private float gravityScale = 2.6f;
@@ -37,6 +47,7 @@ namespace LightWeaver.Player
         private Rigidbody2D _rb;
         private CapsuleCollider2D _capsule;
         private LightTouchInput _touchInput;
+        private BatterySystem _batterySystem;
 
         private readonly RaycastHit2D[] _raycastHits = new RaycastHit2D[4];
         private ContactFilter2D _groundFilter;
@@ -44,16 +55,30 @@ namespace LightWeaver.Player
         private Vector3 _spawnPosition;
         private float _speedMultiplier = 1f;
         private float _sectorSpeedMultiplier = 1f;
+        private float _boostSpeedMultiplier = 1f;
+        private float _boostTimer;
+        private float _stumbleTimer;
+
+        private float _jumpPowerBonusMultiplier = 1f;
+        private bool _freeDoubleJump;
+
         private bool _isGrounded;
         private bool _wasGroundedLastStep;
+        private Collider2D _lastGroundCollider;
+        private CrystalPlatform _lastGroundPlatform;
+
         private float _coyoteTimer;
+        private float _jumpBufferTimer;
+        private bool _hasDoubleJump;
         private Vector2 _groundNormal = Vector2.up;
         private float _currentSlopeAngleDeg;
         private float _externalJumpLockTimer;
+        private float _voidGraceTimer;
         private bool _isRunning = true;
 
         public bool IsGrounded => _isGrounded;
         public bool IsOnCoyoteTime => !_isGrounded && _coyoteTimer > 0f;
+        public bool IsBoosting => _boostTimer > 0f;
         public float CurrentSpeedX => _rb != null ? _rb.linearVelocity.x : 0f;
         public float CurrentSpeedY => _rb != null ? _rb.linearVelocity.y : 0f;
         public float CurrentSlopeAngleDeg => _currentSlopeAngleDeg;
@@ -64,6 +89,7 @@ namespace LightWeaver.Player
             _rb = GetComponent<Rigidbody2D>();
             _capsule = GetComponent<CapsuleCollider2D>();
             _touchInput = GetComponent<LightTouchInput>();
+            _batterySystem = GetComponent<BatterySystem>();
             _spawnPosition = transform.position;
 
             _rb.gravityScale = gravityScale;
@@ -79,19 +105,19 @@ namespace LightWeaver.Player
             };
         }
 
-        public void SetSpawnPoint(Vector3 pos)
+        public void SetSpawnPoint(Vector3 pos) => _spawnPosition = pos;
+        public void SetSpeedMultiplier(float multiplier) => _speedMultiplier = Mathf.Clamp(multiplier, 0.2f, 2.5f);
+        public void SetSectorSpeedMultiplier(float multiplier) => _sectorSpeedMultiplier = Mathf.Clamp(multiplier, 0.5f, 2.0f);
+        public void SetJumpBlessing(float powerMult, bool freeDoubleJump)
         {
-            _spawnPosition = pos;
+            _jumpPowerBonusMultiplier = Mathf.Clamp(powerMult, 0.8f, 1.6f);
+            _freeDoubleJump = freeDoubleJump;
         }
 
-        public void SetSpeedMultiplier(float multiplier)
+        public void ResetBlessings()
         {
-            _speedMultiplier = Mathf.Clamp(multiplier, 0.2f, 2.5f);
-        }
-
-        public void SetSectorSpeedMultiplier(float multiplier)
-        {
-            _sectorSpeedMultiplier = Mathf.Clamp(multiplier, 0.5f, 2.0f);
+            _jumpPowerBonusMultiplier = 1f;
+            _freeDoubleJump = false;
         }
 
         public void SetRunning(bool active)
@@ -108,24 +134,26 @@ namespace LightWeaver.Player
             }
         }
 
-        public void SetAutoRespawnOnVoidFall(bool enabled)
+        public void SetAutoRespawnOnVoidFall(bool enabled) => autoRespawnOnVoidFall = enabled;
+
+        public void RequestJump()
         {
-            autoRespawnOnVoidFall = enabled;
+            if (!_isRunning) return;
+            _jumpBufferTimer = jumpBufferDuration;
         }
 
-        public void ReviveAtPosition(Vector3 worldPos)
+        public void ApplyKineticBoost(float multiplier, float durationSeconds)
         {
-            if (_rb == null) return;
-            _rb.simulated = true;
-            _rb.position = worldPos;
-            _rb.linearVelocity = Vector2.zero;
-            _isGrounded = false;
-            _coyoteTimer = 0f;
-            _externalJumpLockTimer = 0f;
-            if (_touchInput != null)
-            {
-                _touchInput.ResetAimToInitial();
-            }
+            _boostSpeedMultiplier = Mathf.Max(_boostSpeedMultiplier, multiplier);
+            _boostTimer = Mathf.Max(_boostTimer, durationSeconds);
+            OnKineticBoostActivated?.Invoke(durationSeconds);
+        }
+
+        public void ApplyStumbleSlow(float durationSeconds)
+        {
+            _stumbleTimer = Mathf.Max(_stumbleTimer, durationSeconds);
+            _boostTimer = 0f;
+            _boostSpeedMultiplier = 1f;
         }
 
         public void ApplyExternalImpulse(Vector2 impulseVelocity)
@@ -133,22 +161,46 @@ namespace LightWeaver.Player
             if (_rb == null) return;
             _isGrounded = false;
             _coyoteTimer = 0f;
+            _hasDoubleJump = true;
             _externalJumpLockTimer = 0.14f;
             _rb.linearVelocity = new Vector2(Mathf.Max(_rb.linearVelocity.x, impulseVelocity.x), impulseVelocity.y);
+        }
+
+        public void ReviveAtPosition(Vector3 worldPos)
+        {
+            if (_rb == null) return;
+            _rb.simulated = true;
+            transform.position = worldPos;
+            _rb.position = worldPos;
+            Physics2D.SyncTransforms();
+
+            _rb.linearVelocity = Vector2.zero;
+            _isGrounded = false;
+            _coyoteTimer = 0f;
+            _hasDoubleJump = true;
+            _externalJumpLockTimer = 0f;
+            _voidGraceTimer = 1.25f;
+            _stumbleTimer = 0f;
+            if (_touchInput != null) _touchInput.ResetAimToInitial();
         }
 
         public void RespawnAtStart()
         {
             if (_rb == null) return;
+            transform.position = _spawnPosition;
             _rb.position = _spawnPosition;
+            Physics2D.SyncTransforms();
+
             _rb.linearVelocity = Vector2.zero;
             _isGrounded = false;
             _coyoteTimer = 0f;
+            _hasDoubleJump = true;
             _externalJumpLockTimer = 0f;
-            if (_touchInput != null)
-            {
-                _touchInput.ResetAimToInitial();
-            }
+            _voidGraceTimer = 0.6f;
+            _boostTimer = 0f;
+            _boostSpeedMultiplier = 1f;
+            _stumbleTimer = 0f;
+            if (_touchInput != null) _touchInput.ResetAimToInitial();
             OnRunnerRespawned?.Invoke();
             OnAnyRunnerRespawned?.Invoke();
         }
@@ -158,10 +210,16 @@ namespace LightWeaver.Player
             if (!_isRunning || _rb == null) return;
 
             float dt = Time.fixedDeltaTime;
-            if (_externalJumpLockTimer > 0f)
+            if (_externalJumpLockTimer > 0f) _externalJumpLockTimer -= dt;
+            if (_voidGraceTimer > 0f) _voidGraceTimer -= dt;
+            if (_jumpBufferTimer > 0f) _jumpBufferTimer -= dt;
+
+            if (_boostTimer > 0f)
             {
-                _externalJumpLockTimer -= dt;
+                _boostTimer -= dt;
+                if (_boostTimer <= 0f) _boostSpeedMultiplier = 1f;
             }
+            if (_stumbleTimer > 0f) _stumbleTimer -= dt;
 
             float preVelocityY = _rb.linearVelocity.y;
             DetectGround();
@@ -175,23 +233,74 @@ namespace LightWeaver.Player
             if (_isGrounded)
             {
                 _coyoteTimer = coyoteTimeDuration;
+                _hasDoubleJump = true;
+            }
+            else
+            {
+                _coyoteTimer = Mathf.Max(0f, _coyoteTimer - dt);
+            }
+
+            // Zıplama / Çift Zıplama Tüketimi
+            if (_jumpBufferTimer > 0f)
+            {
+                if (_isGrounded || _coyoteTimer > 0f)
+                {
+                    ExecuteJump(isDoubleJump: false);
+                }
+                else if (_hasDoubleJump && CanPayDoubleJumpCost())
+                {
+                    ExecuteJump(isDoubleJump: true);
+                }
+            }
+
+            if (_isGrounded)
+            {
                 ApplySlopeAlignedRun(dt);
                 TryAutoStepUp();
             }
             else
             {
-                _coyoteTimer = Mathf.Max(0f, _coyoteTimer - dt);
                 ApplyAirborneMotion(dt);
             }
 
-            if (transform.position.y < voidFallY)
+            if (_voidGraceTimer <= 0f && transform.position.y < voidFallY)
             {
                 OnRunnerFellIntoVoid?.Invoke();
-                if (autoRespawnOnVoidFall)
+                if (autoRespawnOnVoidFall) RespawnAtStart();
+            }
+        }
+
+        private bool CanPayDoubleJumpCost()
+        {
+            if (_freeDoubleJump || _batterySystem == null) return true;
+            return _batterySystem.CurrentBattery > doubleJumpBatteryCost + 1f;
+        }
+
+        private void ExecuteJump(bool isDoubleJump)
+        {
+            _jumpBufferTimer = 0f;
+            _coyoteTimer = 0f;
+            _isGrounded = false;
+            _externalJumpLockTimer = 0.10f;
+
+            if (isDoubleJump)
+            {
+                _hasDoubleJump = false;
+                if (!_freeDoubleJump && _batterySystem != null)
                 {
-                    RespawnAtStart();
+                    _batterySystem.DrainExternal(doubleJumpBatteryCost);
                 }
             }
+
+            float vy = (isDoubleJump ? doubleJumpVelocity : jumpVelocity) * _jumpPowerBonusMultiplier;
+            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, vy);
+            OnRunnerJumped?.Invoke(isDoubleJump);
+        }
+
+        private float GetEffectiveTargetSpeed()
+        {
+            float stumbleMult = _stumbleTimer > 0f ? 0.45f : 1.0f;
+            return baseRunSpeed * _speedMultiplier * _sectorSpeedMultiplier * _boostSpeedMultiplier * stumbleMult;
         }
 
         private void DetectGround()
@@ -212,6 +321,7 @@ namespace LightWeaver.Player
             bool foundValidGround = false;
             Vector2 bestNormal = Vector2.up;
             float bestAngle = 0f;
+            Collider2D hitCol = null;
 
             for (int i = 0; i < hitCount; i++)
             {
@@ -224,6 +334,7 @@ namespace LightWeaver.Player
                     foundValidGround = true;
                     bestNormal = hit.normal;
                     bestAngle = angle;
+                    hitCol = hit.collider;
                     break;
                 }
             }
@@ -231,12 +342,29 @@ namespace LightWeaver.Player
             _isGrounded = foundValidGround;
             _groundNormal = bestNormal;
             _currentSlopeAngleDeg = bestAngle;
+
+            if (foundValidGround && hitCol != null)
+            {
+                if (hitCol != _lastGroundCollider)
+                {
+                    _lastGroundCollider = hitCol;
+                    hitCol.TryGetComponent(out _lastGroundPlatform);
+                }
+                if (_lastGroundPlatform != null)
+                {
+                    _lastGroundPlatform.NotifyRunnerSteppedOn(this);
+                }
+            }
+            else
+            {
+                _lastGroundCollider = null;
+                _lastGroundPlatform = null;
+            }
         }
 
         private void ApplySlopeAlignedRun(float dt)
         {
-            float targetSpeed = baseRunSpeed * _speedMultiplier * _sectorSpeedMultiplier;
-            // Yüzey normaline dik sağa doğru teğet vektör (30°-45° kristal rampalarda kayıpsız tırmanış)
+            float targetSpeed = GetEffectiveTargetSpeed();
             Vector2 slopeTangent = new Vector2(_groundNormal.y, -_groundNormal.x).normalized;
             if (slopeTangent.x < 0f) slopeTangent = -slopeTangent;
 
@@ -244,9 +372,7 @@ namespace LightWeaver.Player
             float currentSpeedAlongSlope = Vector2.Dot(currentVel, slopeTangent);
             float nextSpeed = Mathf.MoveTowards(currentSpeedAlongSlope, targetSpeed, acceleration * dt);
 
-            // Rampa zirvesinden sıçramayı engellemek için hafif aşağı yüzey yapışma kuvveti
-            Vector2 desiredVel = slopeTangent * nextSpeed - _groundNormal * 1.15f;
-            _rb.linearVelocity = desiredVel;
+            _rb.linearVelocity = slopeTangent * nextSpeed - _groundNormal * 1.15f;
         }
 
         private void TryAutoStepUp()
@@ -274,13 +400,9 @@ namespace LightWeaver.Player
             int highHits = Physics2D.Raycast(highOrigin, Vector2.right, _groundFilter, _raycastHits, 0.38f);
             for (int i = 0; i < highHits; i++)
             {
-                if (_raycastHits[i].collider != null && _raycastHits[i].collider != _capsule)
-                {
-                    return; // Üstte gerçek bir duvar engeli var
-                }
+                if (_raycastHits[i].collider != null && _raycastHits[i].collider != _capsule) return;
             }
 
-            // Hedef basamağın gerçek üst yüzeyini bulup karakterin tabanını tam üzerine oturt (Zero-Snag)
             Vector2 topProbeOrigin = new Vector2(obstaclePointX, b.min.y + stepUpHeight + 0.18f);
             int topHits = Physics2D.Raycast(topProbeOrigin, Vector2.down, _groundFilter, _raycastHits, stepUpHeight + 0.25f);
             for (int i = 0; i < topHits; i++)
@@ -292,10 +414,7 @@ namespace LightWeaver.Player
                     if (liftDelta > 0f && liftDelta <= stepUpHeight + 0.12f)
                     {
                         _rb.position += new Vector2(0.06f, liftDelta);
-                        if (_rb.linearVelocity.y < 0f)
-                        {
-                            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, 0f);
-                        }
+                        if (_rb.linearVelocity.y < 0f) _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, 0f);
                     }
                     break;
                 }
@@ -304,7 +423,7 @@ namespace LightWeaver.Player
 
         private void ApplyAirborneMotion(float dt)
         {
-            float targetSpeed = baseRunSpeed * _speedMultiplier * _sectorSpeedMultiplier;
+            float targetSpeed = GetEffectiveTargetSpeed();
             Vector2 vel = _rb.linearVelocity;
             vel.x = Mathf.MoveTowards(vel.x, targetSpeed, airControlAccel * dt);
             vel.y = Mathf.Max(vel.y, maxFallSpeed);

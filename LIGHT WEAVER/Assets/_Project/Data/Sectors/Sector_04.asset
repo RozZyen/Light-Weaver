@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 4
   sectorName: THE ECHO VOID
-  sectorDistanceMeters: 140
+  sectorDistanceMeters: 135
   voidBackgroundColor: {r: 0.018, g: 0.03, b: 0.062, a: 1}
   sectorAccentColor: {r: 0, g: 0.96, b: 0.92, a: 1}
   sectorSecondaryColor: {r: 1, g: 0.78, b: 0.18, a: 1}
@@ -22,4 +22,4 @@ MonoBehaviour:
   batteryDrainMultiplier: 1.28
   hazardFrequency: 0.44
   prismRelayFrequency: 0.28
-  orbDensity: 0.82
+  orbDensity: 0.85

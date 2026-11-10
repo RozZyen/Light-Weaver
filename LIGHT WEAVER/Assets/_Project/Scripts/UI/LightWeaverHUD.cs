@@ -3,32 +3,36 @@ using LightWeaver.Core;
 using LightWeaver.Player;
 using LightWeaver.World;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace LightWeaver.UI
 {
     /// <summary>
-    /// Referans görseldeki birebir HUD yerleşimini (Sol üst gradyan pil barı + 'BATTERY: 74%',
-    /// Sağ üst 'LEVEL 4 - THE ECHO VOID' + '31,500' skor sayacı, Flash-Burst durumu ve bildirim bandı)
-    /// sıfır gereksiz string tahsisiyle (Zero-GC dirty check) yönetir.
+    /// Referans görseldeki birebir HUD + Eclipse Tehlike Barı + Mobil Dokunmatik Eylem Butonları
+    /// (JUMP, FOCUS, BURST) yönetimini Zero-GC dirty-check ile sağlar.
     /// </summary>
     public sealed class LightWeaverHUD : MonoBehaviour
     {
         [Header("Core References")]
         [SerializeField] private GameFlowManager gameFlow;
+        [SerializeField] private RunnerMotor2D runnerMotor;
+        [SerializeField] private LightTouchInput touchInput;
         [SerializeField] private BatterySystem batterySystem;
         [SerializeField] private FlashBurstController flashBurst;
         [SerializeField] private EndlessChunkDirector chunkDirector;
+        [SerializeField] private EclipsePursuitWave eclipseWave;
 
         [Header("HUD Containers & Controls")]
         [SerializeField] private GameObject hudRoot;
         [SerializeField] private Button pauseButton;
 
-        [Header("Top-Left Battery Telemetry")]
+        [Header("Top-Left Battery & Eclipse")]
         [SerializeField] private Image batteryFillImage;
         [SerializeField] private Text batteryPercentText;
         [SerializeField] private Image flashBurstFillImage;
         [SerializeField] private Text flashBurstLabel;
+        [SerializeField] private Image eclipseDangerFillImage;
 
         [Header("Top-Right Sector & Score")]
         [SerializeField] private Text sectorTitleText;
@@ -39,6 +43,11 @@ namespace LightWeaver.UI
         [SerializeField] private CanvasGroup bannerCanvasGroup;
         [SerializeField] private Text bannerText;
 
+        [Header("Mobile Touch Action Buttons")]
+        [SerializeField] private Button mobileJumpButton;
+        [SerializeField] private Button mobileBurstButton;
+        [SerializeField] private EventTrigger mobileFocusTrigger;
+
         private int _lastBatteryPercent = -1;
         private int _lastScore = -1;
         private int _lastSectorNum = -1;
@@ -48,11 +57,28 @@ namespace LightWeaver.UI
 
         private void Awake()
         {
-            if (pauseButton != null && gameFlow != null)
-            {
-                pauseButton.onClick.AddListener(gameFlow.TogglePause);
-            }
+            if (pauseButton != null && gameFlow != null) pauseButton.onClick.AddListener(gameFlow.TogglePause);
+            if (mobileJumpButton != null && runnerMotor != null) mobileJumpButton.onClick.AddListener(runnerMotor.RequestJump);
+            if (mobileBurstButton != null && flashBurst != null) mobileBurstButton.onClick.AddListener(flashBurst.TryTriggerFlashBurst);
+            SetupFocusHoldTrigger();
             if (bannerCanvasGroup != null) bannerCanvasGroup.alpha = 0f;
+        }
+
+        private void SetupFocusHoldTrigger()
+        {
+            if (mobileFocusTrigger == null || touchInput == null) return;
+
+            var downEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
+            downEntry.callback.AddListener(_ => touchInput.SetUiFocusHeld(true));
+            mobileFocusTrigger.triggers.Add(downEntry);
+
+            var upEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
+            upEntry.callback.AddListener(_ => touchInput.SetUiFocusHeld(false));
+            mobileFocusTrigger.triggers.Add(upEntry);
+
+            var exitEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
+            exitEntry.callback.AddListener(_ => touchInput.SetUiFocusHeld(false));
+            mobileFocusTrigger.triggers.Add(exitEntry);
         }
 
         private void OnEnable()
@@ -68,10 +94,7 @@ namespace LightWeaver.UI
                 batterySystem.OnBatteryChanged += HandleBatteryChanged;
                 batterySystem.OnSpectrumPhaseChanged += HandlePhaseChanged;
             }
-            if (chunkDirector != null)
-            {
-                chunkDirector.OnSectorChanged += HandleSectorChanged;
-            }
+            if (chunkDirector != null) chunkDirector.OnSectorChanged += HandleSectorChanged;
         }
 
         private void OnDisable()
@@ -87,45 +110,33 @@ namespace LightWeaver.UI
                 batterySystem.OnBatteryChanged -= HandleBatteryChanged;
                 batterySystem.OnSpectrumPhaseChanged -= HandlePhaseChanged;
             }
-            if (chunkDirector != null)
-            {
-                chunkDirector.OnSectorChanged -= HandleSectorChanged;
-            }
+            if (chunkDirector != null) chunkDirector.OnSectorChanged -= HandleSectorChanged;
         }
 
         private void HandleGameStateChanged(GameState state)
         {
             if (hudRoot != null)
             {
-                hudRoot.SetActive(state == GameState.Playing || state == GameState.Paused);
+                hudRoot.SetActive(state == GameState.Playing || state == GameState.Paused || state == GameState.BlessingSelect);
             }
             if (state == GameState.Playing && batterySystem != null)
             {
                 HandleBatteryChanged(batterySystem.CurrentBattery, batterySystem.MaxBattery);
                 HandlePhaseChanged(batterySystem.CurrentPhase);
-                if (chunkDirector != null && chunkDirector.ActiveSector != null)
-                {
-                    HandleSectorChanged(chunkDirector.ActiveSector);
-                }
+                if (chunkDirector != null && chunkDirector.ActiveSector != null) HandleSectorChanged(chunkDirector.ActiveSector);
             }
         }
 
         private void HandleBatteryChanged(float current, float max)
         {
             float norm = max > 0.01f ? Mathf.Clamp01(current / max) : 0f;
-            if (batteryFillImage != null)
-            {
-                batteryFillImage.fillAmount = norm;
-            }
+            if (batteryFillImage != null) batteryFillImage.fillAmount = norm;
 
             int pct = Mathf.Clamp(Mathf.RoundToInt(norm * 100f), 0, 100);
             if (pct != _lastBatteryPercent)
             {
                 _lastBatteryPercent = pct;
-                if (batteryPercentText != null)
-                {
-                    batteryPercentText.text = $"BATTERY: {pct}%";
-                }
+                if (batteryPercentText != null) batteryPercentText.text = $"BATTERY: {pct}%";
             }
         }
 
@@ -193,7 +204,6 @@ namespace LightWeaver.UI
         {
             float dt = Time.unscaledDeltaTime;
 
-            // Kritik Pil Nabız Efekti (<%20)
             if (batteryPercentText != null && _lastBatteryPercent >= 0)
             {
                 if (_lastBatteryPercent < 20)
@@ -207,7 +217,6 @@ namespace LightWeaver.UI
                 }
             }
 
-            // Flash-Burst Dolum Çubuğu
             if (flashBurst != null && flashBurstFillImage != null)
             {
                 float ready = flashBurst.CooldownNormalized;
@@ -220,7 +229,13 @@ namespace LightWeaver.UI
                 }
             }
 
-            // Skor Punch Animasyonu
+            if (eclipseWave != null && eclipseDangerFillImage != null)
+            {
+                float danger = eclipseWave.DangerNormalized;
+                eclipseDangerFillImage.fillAmount = danger;
+                eclipseDangerFillImage.color = Color.Lerp(new Color(0.65f, 0.22f, 1f, 0.85f), new Color(1.0f, 0.14f, 0.36f, 1f), danger);
+            }
+
             if (_scorePunchTimer > 0f && scoreValueText != null)
             {
                 _scorePunchTimer = Mathf.Max(0f, _scorePunchTimer - dt);
@@ -229,7 +244,6 @@ namespace LightWeaver.UI
                 scoreValueText.transform.localScale = new Vector3(s, s, 1f);
             }
 
-            // Bildirim Bandı Sönümlemesi
             if (_bannerTimer > 0f && bannerCanvasGroup != null)
             {
                 _bannerTimer -= dt;

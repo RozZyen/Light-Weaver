@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 1
   sectorName: THE SILENT ABYSS
-  sectorDistanceMeters: 100
+  sectorDistanceMeters: 90
   voidBackgroundColor: {r: 0.02, g: 0.027, b: 0.051, a: 1}
   sectorAccentColor: {r: 0, g: 0.94, b: 1, a: 1}
   sectorSecondaryColor: {r: 0.35, g: 0.55, b: 1, a: 1}
   runSpeedMultiplier: 1
   batteryDrainMultiplier: 0.85
-  hazardFrequency: 0.12
+  hazardFrequency: 0.14
   prismRelayFrequency: 0.15
-  orbDensity: 0.82
+  orbDensity: 0.85

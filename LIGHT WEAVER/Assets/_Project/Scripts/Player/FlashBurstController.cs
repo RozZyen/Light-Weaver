@@ -29,9 +29,17 @@ namespace LightWeaver.Player
 
         private float _cooldownTimer;
         private float _ringAnimTimer;
+        private float _cooldownMultiplier = 1.0f;
 
         public float CooldownRemaining => _cooldownTimer;
-        public float CooldownNormalized => cooldownSeconds > 0.01f ? Mathf.Clamp01(1f - (_cooldownTimer / cooldownSeconds)) : 1f;
+        public float CooldownNormalized => (cooldownSeconds * _cooldownMultiplier) > 0.01f
+            ? Mathf.Clamp01(1f - (_cooldownTimer / (cooldownSeconds * _cooldownMultiplier)))
+            : 1f;
+
+        public void SetCooldownMultiplier(float mult)
+        {
+            _cooldownMultiplier = Mathf.Clamp(mult, 0.25f, 1.5f);
+        }
 
         private void Awake()
         {
@@ -64,7 +72,7 @@ namespace LightWeaver.Player
             if (_cooldownTimer > 0f || batterySystem == null || batterySystem.CurrentBattery <= batteryCost) return;
 
             batterySystem.DrainExternal(batteryCost);
-            _cooldownTimer = cooldownSeconds;
+            _cooldownTimer = cooldownSeconds * _cooldownMultiplier;
             _ringAnimTimer = ringAnimDuration;
 
             Vector2 origin = transform.position;
@@ -84,7 +92,15 @@ namespace LightWeaver.Player
                 {
                     hazard.ApplyFlashBurstEffect();
                 }
-                else if (reactive is CrystalPlatform || reactive is PrismaticJumpPad)
+                else if (reactive is PrismLockGate gate)
+                {
+                    gate.ForceUnlockByBurst();
+                }
+                else if (reactive is CrystalPlatform plat && plat.Variant != CrystalVariant.UmbraBridge)
+                {
+                    plat.OnLightExposure(origin, 1.0f, true, 0.25f);
+                }
+                else if (reactive is PrismaticJumpPad)
                 {
                     reactive.OnLightExposure(origin, 1.0f, true, 0.25f);
                 }

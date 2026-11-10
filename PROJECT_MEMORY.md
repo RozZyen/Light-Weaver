@@ -1,7 +1,7 @@
 # 🧠 LIGHT WEAVER: Prism Runner - Canlı Proje Hafızası (Cross-Device Memory)
 
 > **Son Güncelleme:** 2026-11-10  
-> **Durum:** Faz 5 Tamamlandı — Referans Görsel HUD, Ana Menü/Pause/Solar Revive, Pentatonik ASMR Ses, Juice & URP Bloom Görsel Cilası Aktif (Faz 6'ya Hazır)  
+> **Durum:** v2.0 Derin Oynanış Revizyonu Tamamlandı — 4 Kristal Varyantı, Photon Jump/Double-Jump, PrismLockGate, PhotonAnchor, The Eclipse Dalgası, 3'lü Prizma Kartları & Solar Revive Fix (Faz 6'ya Hazır)  
 > **Cihaz Eşitleme:** Git Push/Pull (`main` dalı) ile Masaüstü & Laptop senkronizasyonu aktif.  
 
 ---
@@ -21,28 +21,31 @@
 ```mermaid
 graph TD
     subgraph Input_UI ["📱 Girdi & Arayüz (UI)"]
-        Touch["LightTouchInput (Tek Parmak Yay, W/S Klavye & UI Koruması)"] --> Aim["FlashlightController2D"]
-        Flow["GameFlowManager (Menu/Playing/Pause/GameOver + Solar Revive)"] --> HUD["LightWeaverHUD (BatteryBar, ScoreCounter, SectorTitle)"]
-        Flow --> Menus["MenuScreensUI (Sektör Seçimi, PauseModal, SolarRevive)"]
+        Touch["LightTouchInput (Yay Sürükleme, Space Zıplama, Focus, Burst)"] --> Aim["FlashlightController2D"]
+        Flow["GameFlowManager (Menu/Playing/BlessingSelect/Paused/GameOver)"] --> HUD["LightWeaverHUD (BatteryBar, EclipseBar, JUMP/FOCUS/BURST Mobil Butonlar)"]
+        Flow --> Menus["MenuScreensUI (Sektör Seçimi, 3'lü Prizma Kartı, Pause, SolarRevive)"]
+        Flow --> Upg["PrismUpgradeManager (6 Roguelite Prizma Güçlendirmesi)"]
         Safe["SafeAreaFit (Çentikli Ekran Uyumu)"] -.-> HUD
     end
 
     subgraph Player_System ["🏃‍♂️ Light Weaver Karakteri"]
         Aim --> Cone["LightConeCaster2D (Zero-GC Tarama & Volümetrik UV Huzme)"]
-        Motor["RunnerMotor2D (Otomatik Koşu, Rampa Teğet Tırmanışı, Exact Step-Up)"]
+        Motor["RunnerMotor2D (Koşu, Photon Jump/Double-Jump, KineticBoost, Stumble, Exact Step-Up)"]
         Battery["BatterySystem (Tüketim, Overcharge/Ember Fazları, Perfect Weave, Hazard Şoku)"]
-        Burst["FlashBurstController (Çift Dokunuş / F / E Şok Dalgası Parry)"]
+        Burst["FlashBurstController (Çift Dokunuş / F / E Şok Dalgası Parry & Gate Kırıcı)"]
         Anim["RunnerProceduralAnimator (Adım, Diegetik Sırt Pili, Kıvılcım, Trail)"]
         Cam["CameraFollow2D (İleri Görüş Look-Ahead, Respawn Snap & Shake)"]
     end
 
     subgraph World_Prisms ["💎 Kristal Dünya & Havuz"]
-        Director["EndlessChunkDirector (6 Balistik Chunk, 5 Sektör SO, Geri Dönüşüm)"] --> Pool["ObjectPooler (IPoolable)"]
-        Pool --> Platform["CrystalPlatform : ILightReactive (Phantom -> Solid -> Afterglow)"]
+        Director["EndlessChunkDirector (8 Balistik Chunk, 5 Sektör SO, Geri Dönüşüm)"] --> Pool["ObjectPooler (IPoolable)"]
+        Pool --> Platform["CrystalPlatform : ILightReactive (Standard / KineticBoost / FragileShard / UmbraBridge)"]
         Pool --> JumpPad["PrismaticJumpPad : ILightReactive (Işıkla Şarj Olan Sıçrama Halkası)"]
+        Pool --> Gate["PrismLockGate : ILightReactive (Tepe Elmasıyla Açılan Lazer Kapı)"]
+        Pool --> Anchor["PhotonAnchor : ILightReactive (Uçurum Üstü Işık Halatı Kancası)"]
         Pool --> Orb["EnergyOrb : ILightReactive (+ENERGY Manyetik Şarj Hücresi)"]
-        Pool --> Prism["PrismRelay2D : ILightReactive (Çift Huzmeli Işık Kırıcı)"]
         Pool --> Hazard["ShadowHazard : ILightReactive (MovingPillar / UmbraStalker / VoidLeech)"]
+        Eclipse["EclipsePursuitWave (Soldan Kovalayan Hiçlik Dalgası)"]
         Stars["ParallaxStarfield (Sonsuz Uzay Derinliği)"]
     end
 
@@ -113,6 +116,12 @@ graph TD
   - `LightWeaverHUD.cs`, `MenuScreensUI.cs` & `SafeAreaFit.cs`: Referans görseldeki birebir sol üst gradyan `BATTERY: XX%` pil barı, sağ üst `LEVEL X - SECTOR` & `31,500` skor sayacı, *Flash-Burst* dolum çubuğu, sektör seçmeli Ana Menü (`L1..L5`), ESC/Pause ve Game Over ekranı (`InputSystemUIInputModule`).
   - `HarmonicAudioManager.cs` & `JuiceFeedbackManager.cs`: Harici ses dosyası gerektirmeyen Do Minör Pentatonik kristal cam/çan ASMR sentezleyicisi, uzay ambient drone, mikro Hit-Stop (`0.032s`), Camera Shake ve mobil haptik titreşim.
   - **Görsel Cila (`LightWeaverSetupUtility.cs`):** URP Post-Processing **Bloom** (`LightWeaverPostProcess.asset`), Hero Cyan Aura, fasetli `256x96` cam kristal dokusu ve doğru katmanlama (`sortingOrder`).
+
+- [x] **v2.0 Derin Oynanış Revizyonu (GDD v2.0 + Solar Revive Bug Fix):**
+  - **Solar Revive & Retry Bug Fix:** `RunnerMotor2D.ReviveAtPosition` & `RespawnAtStart` içinde `Physics2D.SyncTransforms()` + `_voidGraceTimer` ile yeniden doğuş anında aynı karede tekrar boşluğa düşme hatası tamamen giderildi; `EndlessChunkDirector.SpawnReviveSafetyBridge` yeniden doğuş çevresini temizleyip `9.5m` güvenli geçici köprü (`ForceGraceSolid`) kuruyor.
+  - **4 Kristal Varyantı (`CrystalPlatform.cs`):** `Standard`, `KineticBoost` (+%42 hız fırlatması), `FragileShard` (basıldıktan 0.24s sonra parçalanır) ve **Ters Faz `UmbraBridge`** (karanlıkta katıdır, fener ışığı değerse erir — ışığı yukarı/başka yöne kaçırmayı zorunlu kılar!).
+  - **Aktif Zıplama & Kanca & Kilitli Kapılar:** `RunnerMotor2D` üzerinde `Space` / Mobil `JUMP` ile Zıplama + Çift Zıplama, `PrismLockGate.cs` (tepesindeki elmas ışıkla vurulup açılan lazer kapıları), `PhotonAnchor.cs` (dev uçurumlar üstünde ışık halatıyla fırlatan kancalar).
+  - **The Eclipse & Roguelite Kartlar:** Soldan kovalayan `EclipsePursuitWave.cs` baskı mekaniği ve sektör geçişlerinde zamanı duraklatıp 3 rastgele güçlendirme sunan `PrismUpgradeManager.cs` kuruldu.
 
 ---
 

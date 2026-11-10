@@ -7,9 +7,8 @@ using UnityEngine.InputSystem;
 namespace LightWeaver.Player
 {
     /// <summary>
-    /// Mobil dokunmatik yay sürükleme (Arc Drag) ve PC Klavye/Fare girdilerini çakışmasız yönetir.
-    /// W/S veya Yukarı/Aşağı ok tuşları kullanıldığında sabit fare imleci açıyı asla ezmez;
-    /// fare yalnızca gerçekten hareket ettirildiğinde veya sürüklemede nişan alır.
+    /// Mobil dokunmatik yay sürükleme + butonlar ve PC Klavye/Fare girdilerini yönetir.
+    /// Space -> Zıplama/Çift Zıplama, Sağ Tık / Shift -> Odak Lazeri, F/E / Çift Dokunuş -> Flash-Burst.
     /// </summary>
     public sealed class LightTouchInput : MonoBehaviour
     {
@@ -17,21 +16,23 @@ namespace LightWeaver.Player
 
         [Header("References")]
         [SerializeField] private FlashlightController2D flashlightController;
+        [SerializeField] private RunnerMotor2D runnerMotor;
         [SerializeField] private Camera targetCamera;
 
         [Header("Aim Sensitivity & Limits")]
-        [SerializeField] private float minAngleDeg = -60f;
-        [SerializeField] private float maxAngleDeg = 65f;
+        [SerializeField] private float minAngleDeg = -62f;
+        [SerializeField] private float maxAngleDeg = 70f;
         [SerializeField] private float initialAngleDeg = -14f;
         [SerializeField] private float touchDragSensitivity = 0.28f;
         [SerializeField] private float mouseDragSensitivity = 0.32f;
-        [SerializeField] private float keyboardAimSpeedDegPerSec = 115f;
+        [SerializeField] private float keyboardAimSpeedDegPerSec = 135f;
         [SerializeField] private float doubleTapMaxInterval = 0.28f;
 
         private float _targetAngleDeg;
         private bool _isTouchDragging;
         private bool _isMouseDragging;
         private bool _mouseAimActive;
+        private bool _externalUiFocusHeld;
         private Vector2 _lastPointerPos;
         private float _lastTapTime = -10f;
 
@@ -40,15 +41,12 @@ namespace LightWeaver.Player
         private void Awake()
         {
             _targetAngleDeg = initialAngleDeg;
-            if (flashlightController == null)
-            {
-                flashlightController = GetComponentInChildren<FlashlightController2D>();
-            }
-            if (targetCamera == null)
-            {
-                targetCamera = Camera.main;
-            }
+            if (flashlightController == null) flashlightController = GetComponentInChildren<FlashlightController2D>();
+            if (runnerMotor == null) runnerMotor = GetComponent<RunnerMotor2D>();
+            if (targetCamera == null) targetCamera = Camera.main;
         }
+
+        public void SetUiFocusHeld(bool held) => _externalUiFocusHeld = held;
 
         public void ResetAimToInitial()
         {
@@ -56,10 +54,8 @@ namespace LightWeaver.Player
             _mouseAimActive = false;
             _isTouchDragging = false;
             _isMouseDragging = false;
-            if (flashlightController != null)
-            {
-                flashlightController.SetAimInput(_targetAngleDeg, false, snapImmediate: true);
-            }
+            _externalUiFocusHeld = false;
+            if (flashlightController != null) flashlightController.SetAimInput(_targetAngleDeg, false, snapImmediate: true);
         }
 
         private void Update()
@@ -69,21 +65,43 @@ namespace LightWeaver.Player
             {
                 _isTouchDragging = false;
                 _isMouseDragging = false;
+                _externalUiFocusHeld = false;
                 return;
             }
 
-            // UI butonlarına tıklanırken fener açısını bozma
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-            {
-                return;
-            }
-
-            bool isFocused = false;
+            bool isFocused = _externalUiFocusHeld;
             float dt = Time.deltaTime;
 
-            // 1. Mobil Dokunmatik (Primary Touch + 2. Parmak Odak Lazeri + Çift Dokunuş Flash-Burst)
+            // Zıplama & Flash-Burst Klavye Kısayolları (UI üstünde değilse fare drag/aim devam eder)
+            Keyboard kb = Keyboard.current;
+            bool keyboardAimedThisFrame = false;
+            if (kb != null)
+            {
+                if (kb.spaceKey.wasPressedThisFrame && runnerMotor != null)
+                {
+                    runnerMotor.RequestJump();
+                }
+
+                float keyAxis = 0f;
+                if (kb.wKey.isPressed || kb.upArrowKey.isPressed) keyAxis += 1f;
+                if (kb.sKey.isPressed || kb.downArrowKey.isPressed) keyAxis -= 1f;
+                if (Mathf.Abs(keyAxis) > 0.01f)
+                {
+                    keyboardAimedThisFrame = true;
+                    _mouseAimActive = false;
+                    _targetAngleDeg = Mathf.Clamp(_targetAngleDeg + keyAxis * keyboardAimSpeedDegPerSec * dt, minAngleDeg, maxAngleDeg);
+                }
+
+                if (kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed) isFocused = true;
+                if (kb.fKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame) OnFlashBurstTriggered?.Invoke();
+            }
+
+            // UI elemanlarının üzerine dokunulduğunda yalnızca aim sürüklemesini pas geç
+            bool pointerOverUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+
+            // 1. Mobil Dokunmatik
             Touchscreen touch = Touchscreen.current;
-            if (touch != null && touch.primaryTouch.press.isPressed)
+            if (touch != null && touch.primaryTouch.press.isPressed && !pointerOverUi)
             {
                 _mouseAimActive = false;
                 if (touch.primaryTouch.press.wasPressedThisFrame)
@@ -111,47 +129,15 @@ namespace LightWeaver.Player
                     _targetAngleDeg = Mathf.Clamp(_targetAngleDeg + deltaY * touchDragSensitivity, minAngleDeg, maxAngleDeg);
                     _lastPointerPos = touchPos;
                 }
-
-                if (touch.touches.Count > 1 && touch.touches[1].press.isPressed)
-                {
-                    isFocused = true;
-                }
             }
             else
             {
                 _isTouchDragging = false;
             }
 
-            // 2. PC Klavye (W/S veya Yukarı/Aşağı Ok Tuşları + Space/Shift Focus + F/E FlashBurst)
-            Keyboard kb = Keyboard.current;
-            bool keyboardAimedThisFrame = false;
-            if (kb != null)
-            {
-                float keyAxis = 0f;
-                if (kb.wKey.isPressed || kb.upArrowKey.isPressed) keyAxis += 1f;
-                if (kb.sKey.isPressed || kb.downArrowKey.isPressed) keyAxis -= 1f;
-
-                if (Mathf.Abs(keyAxis) > 0.01f)
-                {
-                    keyboardAimedThisFrame = true;
-                    _mouseAimActive = false; // Sabit fare imlecinin klavyeyi ezmesini kalıcı olarak önle
-                    _targetAngleDeg = Mathf.Clamp(_targetAngleDeg + keyAxis * keyboardAimSpeedDegPerSec * dt, minAngleDeg, maxAngleDeg);
-                }
-
-                if (kb.spaceKey.isPressed || kb.leftShiftKey.isPressed)
-                {
-                    isFocused = true;
-                }
-
-                if (kb.fKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame)
-                {
-                    OnFlashBurstTriggered?.Invoke();
-                }
-            }
-
-            // 3. PC Fare Kontrolü (Sol Tık Sürükleme VEYA Fare Hareket Ettiğinde İmleç Takibi)
+            // 2. PC Fare (UI üstünde değilken)
             Mouse mouse = Mouse.current;
-            if (mouse != null && !_isTouchDragging && !keyboardAimedThisFrame)
+            if (mouse != null && !_isTouchDragging && !keyboardAimedThisFrame && !pointerOverUi)
             {
                 if (mouse.leftButton.isPressed)
                 {
@@ -172,11 +158,7 @@ namespace LightWeaver.Player
                 else
                 {
                     _isMouseDragging = false;
-                    // Fare yalnızca kullanıcı belirgin şekilde hareket ettirdiğinde aktif nişan alır
-                    if (mouse.delta.ReadValue().sqrMagnitude > 2.25f)
-                    {
-                        _mouseAimActive = true;
-                    }
+                    if (mouse.delta.ReadValue().sqrMagnitude > 2.25f) _mouseAimActive = true;
 
                     if (_mouseAimActive && targetCamera != null)
                     {
@@ -192,10 +174,7 @@ namespace LightWeaver.Player
                     }
                 }
 
-                if (mouse.rightButton.isPressed)
-                {
-                    isFocused = true;
-                }
+                if (mouse.rightButton.isPressed) isFocused = true;
             }
 
             flashlightController.SetAimInput(_targetAngleDeg, isFocused);

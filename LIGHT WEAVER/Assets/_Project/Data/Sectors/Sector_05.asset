@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 5
   sectorName: THE SINGULARITY CORE
-  sectorDistanceMeters: 160
+  sectorDistanceMeters: 150
   voidBackgroundColor: {r: 0.045, g: 0.015, b: 0.04, a: 1}
   sectorAccentColor: {r: 1, g: 0.12, b: 0.34, a: 1}
   sectorSecondaryColor: {r: 0, g: 0.94, b: 1, a: 1}
@@ -22,4 +22,4 @@ MonoBehaviour:
   batteryDrainMultiplier: 1.42
   hazardFrequency: 0.52
   prismRelayFrequency: 0.3
-  orbDensity: 0.82
+  orbDensity: 0.85

@@ -20,6 +20,8 @@ namespace LightWeaver.Feedbacks
         private void OnEnable()
         {
             PrismaticJumpPad.OnJumpPadLaunched += HandleJumpPadLaunched;
+            PhotonAnchor.OnAnchorLaunched += HandleAnchorLaunched;
+            PrismLockGate.OnGateResolved += HandleGateResolved;
             ShadowHazard.OnHazardResolved += HandleHazardResolved;
             EnergyOrb.OnEnergyCollected += HandleEnergyCollected;
             if (batterySystem != null) batterySystem.OnPerfectWeaveTriggered += HandlePerfectWeave;
@@ -28,9 +30,33 @@ namespace LightWeaver.Feedbacks
         private void OnDisable()
         {
             PrismaticJumpPad.OnJumpPadLaunched -= HandleJumpPadLaunched;
+            PhotonAnchor.OnAnchorLaunched -= HandleAnchorLaunched;
+            PrismLockGate.OnGateResolved -= HandleGateResolved;
             ShadowHazard.OnHazardResolved -= HandleHazardResolved;
             EnergyOrb.OnEnergyCollected -= HandleEnergyCollected;
             if (batterySystem != null) batterySystem.OnPerfectWeaveTriggered -= HandlePerfectWeave;
+        }
+
+        private void HandleAnchorLaunched(PhotonAnchor anchor)
+        {
+            if (cameraFollow != null) cameraFollow.TriggerShake(0.16f, 0.14f);
+            TriggerLightHaptic();
+        }
+
+        private void HandleGateResolved(PrismLockGate gate, bool unlocked)
+        {
+            if (unlocked)
+            {
+                if (cameraFollow != null) cameraFollow.TriggerShake(0.12f, 0.12f);
+                TriggerHitStop(0.032f);
+                TriggerLightHaptic();
+            }
+            else
+            {
+                if (cameraFollow != null) cameraFollow.TriggerShake(0.32f, 0.25f);
+                TriggerHitStop(0.050f);
+                TriggerHeavyHaptic();
+            }
         }
 
         private void HandleJumpPadLaunched(PrismaticJumpPad pad)

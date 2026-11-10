@@ -7,7 +7,7 @@
 
 ## 📊 Genel İlerleme Durumu
 
-- **Aktif Faz:** Faz 5 Tamamlandı — Referans Görsel HUD, Menüler, ASMR Pentatonik Ses, Juice & URP Bloom Cilası Tamam (Faz 6: Mobil Monetizasyon & Mağaza Hazırlığı Bekleniyor) 🎨🎵📱
+- **Aktif Faz:** v2.0 Derin Oynanış Revizyonu Tamamlandı — Solar Revive Düzeltildi, Jump/DoubleJump, 4 Kristal Varyantı, Kilitli Kapılar, Foton Kancası, The Eclipse & Yükseltme Kartları Hazır (Faz 6: Monetizasyon Bekleniyor) 🔥🔦🚀
 - **Hedef Motor:** Unity 6 (URP 2D) + Unity MCP (`com.coplaydev.unity-mcp`)
 - **Depo Konumu:** `C:\Users\Yusuf\Documents\GitHub\Light-Weaver` (`https://github.com/RozZyen/Light-Weaver`)
 - **Son Güncelleme:** 2026-11-10
@@ -68,6 +68,14 @@
 ---
 
 ## 📜 Geliştirme Günlüğü (Changelog)
+
+### [2026-11-10] — v0.7.0: GDD v2.0 Derin Mekanik Revizyonu & Solar Revive Düzeltmesi
+- **Bug Fix (`Solar Revive` / `Retry`):** `RunnerMotor2D.ReviveAtPosition` ve `RespawnAtStart` içinde `Physics2D.SyncTransforms()` + `_voidGraceTimer` ve `EndlessChunkDirector.SpawnReviveSafetyBridge` köprü/temizlik düzeltmesi ile yeniden doğuş %100 çalışır hale getirildi ve Play Mode'da test edildi.
+- **Yeni Derin Oynanış Sistemleri:**
+  - `CrystalPlatform.cs`: 4 varyant (`Standard`, `KineticBoost`, `FragileShard`, ışıkta eriyen ters faz `UmbraBridge`).
+  - `RunnerMotor2D.cs` & `LightWeaverHUD.cs`: `Space` / Mobil `JUMP` zıplama & çift zıplama + mobil `FOCUS`/`BURST` dokunmatik kontrolleri.
+  - `PrismLockGate.cs` & `PhotonAnchor.cs`: Tepe elmasıyla açılan lazer kapıları ve uçurum üstü ışık halatı kancaları.
+  - `EclipsePursuitWave.cs` & `PrismUpgradeManager.cs`: Soldan kovalayan Hiçlik Dalgası ve sektör geçişlerinde 3'lü Prizma Yükseltme Kartları (`BlessingSelect`).
 
 ### [2026-11-10] — v0.6.0: Faz 5 Referans Görsel HUD, Menüler, ASMR Pentatonik Ses, Juice & URP Bloom Cilası
 - **Oyun Akışı & Kalıcı İlerleme (`GameFlowManager.cs`, `ProgressManager.cs`):** `MainMenu -> Playing -> Paused -> GameOver` akışı, 3x Overcharge skor çarpanı, PlayerPrefs yüksek skor/mesafe kaydı ve güvenli köprü oluşturan `Solar Revive` sistemi kuruldu.

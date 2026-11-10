@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 2
   sectorName: THE PRISM CAVERNS
-  sectorDistanceMeters: 120
+  sectorDistanceMeters: 115
   voidBackgroundColor: {r: 0.025, g: 0.02, b: 0.065, a: 1}
   sectorAccentColor: {r: 0, g: 0.94, b: 1, a: 1}
   sectorSecondaryColor: {r: 0.71, g: 0.22, b: 0.95, a: 1}
   runSpeedMultiplier: 1.07
   batteryDrainMultiplier: 1
-  hazardFrequency: 0.24
+  hazardFrequency: 0.25
   prismRelayFrequency: 0.3
-  orbDensity: 0.82
+  orbDensity: 0.85

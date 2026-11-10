@@ -38,11 +38,17 @@ namespace LightWeaver.Player
         private float _batteryEfficiency = 1.0f;
         private float _rangeMultiplier = 1.0f;
         private float _angleMultiplier = 1.0f;
+        private float _blessingAngleMultiplier = 1.0f;
 
         public float CurrentAimAngleDeg => _currentAimAngleDeg;
         public bool IsFocusedBeam => _isFocusedBeam;
         public float CurrentRange => (_isFocusedBeam ? focusedRange : standardRange) * _rangeMultiplier * Mathf.Lerp(0.45f, 1f, _batteryEfficiency);
-        public float CurrentHalfAngleDeg => (_isFocusedBeam ? focusedHalfAngleDeg : standardHalfAngleDeg) * _angleMultiplier;
+        public float CurrentHalfAngleDeg => (_isFocusedBeam ? focusedHalfAngleDeg : standardHalfAngleDeg) * _angleMultiplier * _blessingAngleMultiplier;
+
+        public void SetBlessingAngleMultiplier(float mult)
+        {
+            _blessingAngleMultiplier = Mathf.Clamp(mult, 0.8f, 1.8f);
+        }
 
         private void Awake()
         {

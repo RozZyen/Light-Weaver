@@ -55,7 +55,15 @@ namespace LightWeaver.Player
         private bool _isDepleted;
         private float _hazardInvulnTimer;
         private float _distanceDrainMultiplier = 1.0f;
+        private float _blessingDrainMultiplier = 1.0f;
+        private float _blessingChargeMultiplier = 1.0f;
         private bool _isSimulationPaused;
+
+        public void SetBlessingModifiers(float drainMult, float chargeMult)
+        {
+            _blessingDrainMultiplier = Mathf.Clamp(drainMult, 0.5f, 1.5f);
+            _blessingChargeMultiplier = Mathf.Clamp(chargeMult, 1.0f, 2.0f);
+        }
 
         public void SetSimulationPaused(bool paused)
         {
@@ -133,7 +141,7 @@ namespace LightWeaver.Player
             if (amount <= 0f) return;
 
             // Kritik Kor (<%20) fazında yüksek risk/ödül: alınan enerji hücreleri 2 kat şarj verir!
-            float multiplier = _currentPhase == SpectrumPhase.CriticalEmber ? 2.0f : 1.0f;
+            float multiplier = (_currentPhase == SpectrumPhase.CriticalEmber ? 2.0f : 1.0f) * _blessingChargeMultiplier;
             _currentBattery = Mathf.Clamp(_currentBattery + amount * multiplier, 0f, maxBattery);
 
             if (_currentBattery > 0f) _isDepleted = false;
@@ -184,7 +192,7 @@ namespace LightWeaver.Player
 
             float distanceTraveled = Mathf.Max(0f, transform.position.x - _startX);
             float distFactor = Mathf.Clamp01(distanceTraveled / Mathf.Max(1f, distanceForMaxDrain));
-            float drainRate = Mathf.Lerp(baseDrainPerSecond, maxDistanceDrainPerSecond, distFactor) * _distanceDrainMultiplier;
+            float drainRate = Mathf.Lerp(baseDrainPerSecond, maxDistanceDrainPerSecond, distFactor) * _distanceDrainMultiplier * _blessingDrainMultiplier;
 
             if (flashlightController != null && flashlightController.IsFocusedBeam)
             {

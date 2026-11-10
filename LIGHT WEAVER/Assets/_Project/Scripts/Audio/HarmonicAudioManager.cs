@@ -12,6 +12,7 @@ namespace LightWeaver.Audio
     public sealed class HarmonicAudioManager : MonoBehaviour
     {
         [Header("Core References")]
+        [SerializeField] private RunnerMotor2D runnerMotor;
         [SerializeField] private BatterySystem batterySystem;
         [SerializeField] private FlashBurstController flashBurst;
 
@@ -48,9 +49,13 @@ namespace LightWeaver.Audio
         private void OnEnable()
         {
             CrystalPlatform.OnPlatformSolidified += HandleCrystalSolidified;
+            CrystalPlatform.OnVariantTriggered += HandleVariantTriggered;
             EnergyOrb.OnEnergyCollected += HandleEnergyCollected;
             PrismaticJumpPad.OnJumpPadLaunched += HandleJumpPadLaunched;
+            PhotonAnchor.OnAnchorLaunched += HandleAnchorLaunched;
+            PrismLockGate.OnGateResolved += HandleGateResolved;
             ShadowHazard.OnHazardResolved += HandleHazardResolved;
+            if (runnerMotor != null) runnerMotor.OnRunnerJumped += HandleRunnerJumped;
             if (batterySystem != null) batterySystem.OnPerfectWeaveTriggered += HandlePerfectWeave;
             if (flashBurst != null) flashBurst.OnBurstExecuted += HandleFlashBurst;
         }
@@ -58,9 +63,13 @@ namespace LightWeaver.Audio
         private void OnDisable()
         {
             CrystalPlatform.OnPlatformSolidified -= HandleCrystalSolidified;
+            CrystalPlatform.OnVariantTriggered -= HandleVariantTriggered;
             EnergyOrb.OnEnergyCollected -= HandleEnergyCollected;
             PrismaticJumpPad.OnJumpPadLaunched -= HandleJumpPadLaunched;
+            PhotonAnchor.OnAnchorLaunched -= HandleAnchorLaunched;
+            PrismLockGate.OnGateResolved -= HandleGateResolved;
             ShadowHazard.OnHazardResolved -= HandleHazardResolved;
+            if (runnerMotor != null) runnerMotor.OnRunnerJumped -= HandleRunnerJumped;
             if (batterySystem != null) batterySystem.OnPerfectWeaveTriggered -= HandlePerfectWeave;
             if (flashBurst != null) flashBurst.OnBurstExecuted -= HandleFlashBurst;
         }
@@ -145,6 +154,45 @@ namespace LightWeaver.Audio
             if (!ProgressManager.SfxEnabled || _sfxSource == null || _jumpPadClip == null) return;
             _sfxSource.pitch = Random.Range(0.95f, 1.05f);
             _sfxSource.PlayOneShot(_jumpPadClip, sfxMasterVolume * 0.85f);
+        }
+
+        private void HandleRunnerJumped(bool isDoubleJump)
+        {
+            if (!ProgressManager.SfxEnabled || _sfxSource == null || _pentatonicCrystalClips == null) return;
+            _sfxSource.pitch = isDoubleJump ? 1.32f : 1.06f;
+            _sfxSource.PlayOneShot(_pentatonicCrystalClips[isDoubleJump ? 6 : 4], sfxMasterVolume * 0.55f);
+        }
+
+        private void HandleVariantTriggered(CrystalPlatform plat, CrystalVariant variant)
+        {
+            if (!ProgressManager.SfxEnabled || _sfxSource == null || _energyPickupClip == null) return;
+            if (variant == CrystalVariant.KineticBoost)
+            {
+                _sfxSource.pitch = 1.25f;
+                _sfxSource.PlayOneShot(_energyPickupClip, sfxMasterVolume * 0.78f);
+            }
+        }
+
+        private void HandleAnchorLaunched(PhotonAnchor anchor)
+        {
+            if (!ProgressManager.SfxEnabled || _sfxSource == null || _jumpPadClip == null) return;
+            _sfxSource.pitch = 1.20f;
+            _sfxSource.PlayOneShot(_jumpPadClip, sfxMasterVolume * 0.90f);
+        }
+
+        private void HandleGateResolved(PrismLockGate gate, bool unlocked)
+        {
+            if (!ProgressManager.SfxEnabled || _sfxSource == null) return;
+            if (unlocked && _perfectWeaveClip != null)
+            {
+                _sfxSource.pitch = 1.18f;
+                _sfxSource.PlayOneShot(_perfectWeaveClip, sfxMasterVolume * 0.75f);
+            }
+            else if (!unlocked && _hazardHitClip != null)
+            {
+                _sfxSource.pitch = 0.85f;
+                _sfxSource.PlayOneShot(_hazardHitClip, sfxMasterVolume * 0.95f);
+            }
         }
 
         private void HandleFlashBurst()
