@@ -107,6 +107,7 @@ namespace LightWeaver.World
             _lastExposedTime = -999f;
             transform.position = _originPosition;
             transform.localScale = _baseScale;
+            transform.rotation = Quaternion.identity;
 
             if (_collider != null) _collider.enabled = true;
             if (_renderer != null)
@@ -144,11 +145,11 @@ namespace LightWeaver.World
                     break;
 
                 case ShadowHazardType.VoidLeech:
-                    // Işık tutulursa şişer ve fener pilini emer! (Oyuncuyu ışığı çekmeye veya Flash-Burst atmaya zorlar)
-                    transform.localScale = _baseScale * (1.28f + Mathf.Sin(Time.time * 24f) * 0.08f);
+                    // Işık tutulursa kanatları gerilir ve fener pilini emer! (Karanlıktan sızan gece skarabı)
+                    transform.localScale = _baseScale * (1.16f + Mathf.Sin(Time.time * 20f) * 0.06f);
                     if (_renderer != null)
                     {
-                        _renderer.color = new Color(1f, 0.12f, 0.45f, 1f);
+                        _renderer.color = new Color(0.95f, 0.48f, 0.56f, 1f);
                     }
                     BatterySystem bat = BatterySystem.ActiveInstance;
                     if (bat != null)
@@ -166,7 +167,7 @@ namespace LightWeaver.World
             if (hazardType == ShadowHazardType.MovingShadowPillar)
             {
                 _freezeTimer = 1.4f;
-                if (_renderer != null) _renderer.color = new Color(0.45f, 0.85f, 1f, 0.55f);
+                if (_renderer != null) _renderer.color = new Color(0.72f, 0.86f, 0.90f, 0.62f);
             }
             else
             {
@@ -231,9 +232,12 @@ namespace LightWeaver.World
                     break;
 
                 case ShadowHazardType.VoidLeech:
-                    float pulse = 1f + Mathf.Sin(Time.time * 4.5f + _phaseOffset) * 0.08f;
+                    float flutter = Mathf.Sin(Time.time * 9.5f + _phaseOffset) * 7.5f;
+                    float hoverScarabY = Mathf.Sin(Time.time * 3.8f + _phaseOffset) * 0.24f;
+                    transform.position = new Vector3(_originPosition.x, _originPosition.y + hoverScarabY, _originPosition.z);
+                    transform.rotation = Quaternion.Euler(0f, 0f, flutter);
+                    float pulse = 1f + Mathf.Sin(Time.time * 4.5f + _phaseOffset) * 0.05f;
                     if (!beingLit) transform.localScale = _baseScale * pulse;
-                    transform.Rotate(0f, 0f, -45f * dt);
                     break;
             }
         }

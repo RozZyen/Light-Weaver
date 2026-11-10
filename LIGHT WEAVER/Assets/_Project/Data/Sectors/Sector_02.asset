@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Sector_02
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 2
-  sectorName: THE SANDSTONE TOMBS
-  sectorDistanceMeters: 115
-  voidBackgroundColor: {r: 0.038, g: 0.032, b: 0.082, a: 1}
-  sectorAccentColor: {r: 0.05, g: 0.88, b: 0.82, a: 1}
-  sectorSecondaryColor: {r: 0.95, g: 0.68, b: 0.22, a: 1}
-  runSpeedMultiplier: 1.07
-  batteryDrainMultiplier: 1
-  hazardFrequency: 0.25
-  prismRelayFrequency: 0.3
+  sectorName: KHAMSIN SANDSTORM
+  sectorDistanceMeters: 280
+  voidBackgroundColor: {r: 0.125, g: 0.072, b: 0.095, a: 1}
+  sectorAccentColor: {r: 0.96, g: 0.6, b: 0.24, a: 1}
+  sectorSecondaryColor: {r: 0.95, g: 0.72, b: 0.38, a: 1}
+  runSpeedMultiplier: 1.08
+  batteryDrainMultiplier: 1.02
+  hazardFrequency: 0.26
+  prismRelayFrequency: 0.28
   orbDensity: 0.85

@@ -1,7 +1,7 @@
 # 🧠 LIGHT WEAVER: Prism Runner - Canlı Proje Hafızası (Cross-Device Memory)
 
 > **Son Güncelleme:** 2026-11-10  
-> **Durum:** v3.0 Mısır Gizemi Dönüşümü Tamamlandı — Modüler Trençkotlu Dedektif Rig'i, 3 Katmanlı Gize Piramit & Kumul Paralaksı, 210° Fener Yayı (`-105°..+105°`), Sol Alt `JUMP` + `LONG: OFF/ON` İkonlu Kontroller & Kumtaşı/Anubis Dünyası Hazır (Faz 6'ya Hazır)  
+> **Durum:** v4.0 Sarkaç Halat Salınımı, Basılı Tutmalı Uzun Fener, Bütünleşik Mısır Sanat Seti & Mesafe Bazlı Yumuşak Hava Geçişleri Tamamlandı (Faz 6'ya Hazır)  
 > **Cihaz Eşitleme:** Git Push/Pull (`main` dalı) ile Masaüstü & Laptop senkronizasyonu aktif.  
 
 ---
@@ -21,32 +21,33 @@
 ```mermaid
 graph TD
     subgraph Input_UI ["📱 Girdi & Arayüz (UI)"]
-        Touch["LightTouchInput (360° Floating Stick / Touch Point, EnhancedTouch Multi-Touch, PC Fare/WASD)"] --> Aim["FlashlightController2D"]
-        Flow["GameFlowManager (Menu/Playing/BlessingSelect/Paused/GameOver)"] --> HUD["LightWeaverHUD (BatteryBar, EclipseBar, JUMP/FOCUS/BURST + FloatingStick UI)"]
-        Flow --> Menus["MenuScreensUI (Sektör Seçimi, Aim Mode Toggle, 3'lü Prizma Kartı, Pause, SolarRevive)"]
+        Touch["LightTouchInput (Sabit 210° Floating Stick, Hold-Only Uzun Fener, PC Fare/WASD)"] --> Aim["FlashlightController2D"]
+        Flow["GameFlowManager (Menu/Playing/BlessingSelect/Paused/GameOver)"] --> HUD["LightWeaverHUD (BatteryBar, EclipseBar, JUMP, LONG [HOLD], BURST)"]
+        Flow --> Menus["MenuScreensUI (Temiz Ana Menü, Pause, 3'lü Prizma Kartı, SolarRevive)"]
         Flow --> Upg["PrismUpgradeManager (6 Roguelite Prizma Güçlendirmesi)"]
         Safe["SafeAreaFit (Çentikli Ekran Uyumu)"] -.-> HUD
     end
 
     subgraph Player_System ["🏃‍♂️ Light Weaver Karakteri"]
-        Aim --> Cone["LightConeCaster2D (Zero-GC Tarama & Volümetrik UV Huzme)"]
-        Motor["RunnerMotor2D (Koşu, Photon Jump/Double-Jump, KineticBoost, Stumble, Exact Step-Up)"]
+        Aim --> Cone["LightConeCaster2D (Zero-GC Tarama & Volümetrik Huzme)"]
+        Motor["RunnerMotor2D (Koşu, Zıplama/Çift Zıplama, Sarkaç Halat Salınımı, KineticBoost, Step-Up)"]
         Battery["BatterySystem (Tüketim, Overcharge/Ember Fazları, Perfect Weave, Hazard Şoku)"]
         Burst["FlashBurstController (Çift Dokunuş / F / E Şok Dalgası Parry & Gate Kırıcı)"]
-        Anim["RunnerProceduralAnimator (Adım, Diegetik Sırt Pili, Kıvılcım, Trail)"]
+        Anim["RunnerProceduralAnimator (Çift Eklemli Adım, İpli Diğer Kol, Dalgalanan Trençkot)"]
         Cam["CameraFollow2D (İleri Görüş Look-Ahead, Respawn Snap & Shake)"]
     end
 
     subgraph World_Prisms ["💎 Kristal Dünya & Havuz"]
-        Director["EndlessChunkDirector (8 Balistik Chunk, 5 Sektör SO, Geri Dönüşüm)"] --> Pool["ObjectPooler (IPoolable)"]
+        Director["EndlessChunkDirector (8 Balistik Chunk, 5 Mesafe Eşiği, Geri Dönüşüm)"] --> Pool["ObjectPooler (IPoolable)"]
+        Atmosphere["DesertAtmosphereController (SmoothStep Gök, Hamsin Kumu, Sis & Tutulma Geçişi)"] -.-> Director
         Pool --> Platform["CrystalPlatform : ILightReactive (Standard / KineticBoost / FragileShard / UmbraBridge)"]
-        Pool --> JumpPad["PrismaticJumpPad : ILightReactive (Işıkla Şarj Olan Sıçrama Halkası)"]
-        Pool --> Gate["PrismLockGate : ILightReactive (Tepe Elmasıyla Açılan Lazer Kapı)"]
-        Pool --> Anchor["PhotonAnchor : ILightReactive (Uçurum Üstü Işık Halatı Kancası)"]
-        Pool --> Orb["EnergyOrb : ILightReactive (+ENERGY Manyetik Şarj Hücresi)"]
-        Pool --> Hazard["ShadowHazard : ILightReactive (MovingPillar / UmbraStalker / VoidLeech)"]
-        Eclipse["EclipsePursuitWave (Soldan Kovalayan Hiçlik Dalgası)"]
-        Stars["ParallaxStarfield (Sonsuz Uzay Derinliği)"]
+        Pool --> JumpPad["PrismaticJumpPad : ILightReactive (Kumtaşı Horus Sıçrama Altarı)"]
+        Pool --> Gate["PrismLockGate : ILightReactive (Antik Mühür Bariyeri & Eye-of-Ra Kilidi)"]
+        Pool --> Anchor["PhotonAnchor : ILightReactive (Horus Halkası — Işık Tutunca Sarkaca İp Atar)"]
+        Pool --> Orb["EnergyOrb : ILightReactive (+ENERGY Skarabe Alev Reliği)"]
+        Pool --> Hazard["ShadowHazard : ILightReactive (Zincirli Dikilitaş / Kum Hayaleti / Gece Skarabı)"]
+        Eclipse["EclipsePursuitWave (Soldan Kovalayan Lanet Dalgası)"]
+        Stars["ParallaxStarfield (Gize Piramit & Kumul Paralaksı)"]
     end
 
     subgraph Juice_Services ["✨ ASMR Juice, VFX, Ses & Servisler"]
@@ -130,9 +131,15 @@ graph TD
   - **Görsel Netlik & VFX (`WorldVfxManager.cs`, `CrystalPlatform.cs`, `PrismLockGate.cs`, `LightWeaverSetupUtility.cs`):** 4 kristal varyantına 4 ayrı prosedürel sprite (`crystal_standard`, `crystal_boost`, `crystal_fragile`, `crystal_umbra`), `PrismLockGate` elmas bağlantı hattı (`LineRenderer`), Zero-GC `WorldVfxManager` parçacık patlamaları (`WorldBurstParticles`), `BeamDustMotes` ve derinlik katan paralaks eklendi.
 
 - [x] **v3.0 (Mısır Gizemi Konsepti, Modüler Dedektif Rig'i & 210° Akıllı Fener):**
-  - **210° Fener Yayı (`-105°..+105°`) & Sol Uzun Fener Toggle (`LightConeCaster2D.cs`, `LightTouchInput.cs`, `LightWeaverHUD.cs`):** Gereksiz arka kör bölge (`|açı| > 105°`) kapatılarak ön+tepe+alt+salınım ivme açısı `-105°..+105°` bandında kilitlendi; sol altta özel fener+ışın simgeli `MobileHighBeamBtn` (`LONG: OFF/ON`) & çift ok `MobileJumpBtn` yan yana kondu.
-  - **10+ Modüler Parçalı Trençkotlu Dedektif (`FlashlightController2D.cs`, `RunnerProceduralAnimator.cs`):** Şapkalı Kafa (`HeadLookPivot`), Gövde+Kemer, Rüzgârda Dalgalanan Trençkot Etekleri, 2-Eklemli Diz/Bacak (`Thigh -> Shin+Boot`) ve 2-Eklemli Fener Kolu (`Shoulder/UpperArm -> Forearm/Elbow -> VintageFlashlight`) kuruldu; kol kırılmadan tüm `-105°..+105°` aralığında doğal bükülüp hizalanıyor.
-  - **3 Katmanlı Mısır Piramit Paralaksı & Kumtaşı Dünyası (`LightWeaverSetupUtility.cs`, `MenuScreensUI.cs`):** `EGYPT PANORAMA PARALLAX` (kesintisiz el boyaması Dolunay, Büyük Piramitler & Sfenks) + yakın çöl kumulları (`0.60x`), el boyaması 4 Mısır taşı platformu (`egypt_plat_standard/boost/fragile/umbra`), 9-Slice işlemeli altın-obsidyen UI kartları & Piramit/Scarab pil barı (`egypt_ui_battery_frame/temple_panel`), Mısır Ankh madalyonları ve Shadow Anubis / Apophis Eye / Curse Obelisk düşman görselleri entegre edildi. `EnergyOrb` & `ShadowHazard` havuz `OnEnable` koordinat sıfırlama hatası giderildi (`OnEnable` artık önce `_originPosition`'ı yakalar).
+  - **210° Fener Yayı (`-105°..+105°`) & Sol Uzun Fener (`LightConeCaster2D.cs`, `LightTouchInput.cs`, `LightWeaverHUD.cs`):** Ön+tepe+alt+salınım ivme açısı `-105°..+105°` bandında kilitlendi.
+  - **10+ Modüler Parçalı Trençkotlu Dedektif (`FlashlightController2D.cs`, `RunnerProceduralAnimator.cs`):** Şapkalı Kafa, Gövde, Trençkot Etekleri, 2-Eklemli Diz/Bacak ve 2-Eklemli Fener Kolu kuruldu.
+  - **3 Katmanlı Mısır Piramit Paralaksı & Kumtaşı Dünyası (`LightWeaverSetupUtility.cs`):** Kesintisiz Gize Piramit/Sfenks panoraması, 4 oyma taş platform (`egypt_plat_*`), 9-Slice işlemeli UI Kit ve `EnergyOrb`/`ShadowHazard` havuz `OnEnable` düzeltmesi uygulandı.
+
+- [x] **v4.0 (Işık Tutmalı Sarkaç Halat Salınımı, Basılı Tutmalı Uzun Fener, Bütünleşik Dünya Sanatı & Dinamik Çöl Hava Geçişleri):**
+  - **Sürekli Işıkla Asılı Sarkaç Halat Salınımı (`PhotonAnchor.cs`, `RunnerMotor2D.cs`, `RunnerProceduralAnimator.cs`):** Dedektifin diğer eline (`BackArmPivot` / `det_back_arm_rope.png`) rulo halat eklendi; tavan Horus Güneş Halkasına (`egypt_swing_sconce.png`) fener tutulduğu SÜRECE halat atılıp polar sarkaç fiziğiyle salınım yapılır; ışık halkadan çekilince veya Jump'a basılınca teğetsel sapan ivmesiyle serbest kalınır.
+  - **Basılı Tutmalı Uzun Fener (`LightTouchInput.cs`, `LightWeaverHUD.cs`):** `MobileHighBeamBtn` (`LONG [HOLD]` -> basılıyken `LONG: ON`) açık/kapalı kilit yerine yalnızca basılı tutulduğu sürece aktif çalışacak şekilde yenilendi.
+  - **Bütünleşik Mısır Dünya Sanatı:** Uyumsuz gemi çapası/Ankh/pembe çizgi kaldırılarak tavan zincirli **Horus Güneş Halkası (`egypt_swing_sconce`)**, saydam alevli **Skarabe Işık Reliği (`egypt_orb_scarab_wisp`)**, düz yan kesit **Kumtaşı Sıçrama Altarı (`egypt_jump_vent_altar`)**, duman kuyruklu **Çöl Kum Hayaleti**, zincirli **Dikilitaş Tuzağı**, sabit kanat titremeli **Gece Skarabı** ve ezilmeyen 1:1 ölçekli **Tapınak Mühür Kapısı (`TempleWardLineMat.mat`)** entegre edildi.
+  - **Menü Sadeleştirme & Mesafe Bazlı Yumuşak Hava Geçişi (`MenuScreensUI.cs`, `DesertAtmosphereController.cs`):** Ana menüdeki L1–L5 seviye seçici ve Aim ayar butonu tamamen kaldırıldı (`210°` tek standart). Koşuda metre ilerledikçe (`0m Giza Nightfall` -> `240m Khamsin Sandstorm` -> `520m Necropolis Mist` -> `860m Blood Eclipse` -> `1250m Heart of the Duat`) gökyüzü, piramit aydınlatması, kum fırtınası şeritleri, pus ve URP Bloom/Vignette **SmoothStep** ile yumuşak geçiş yapar.
 
 ---
 

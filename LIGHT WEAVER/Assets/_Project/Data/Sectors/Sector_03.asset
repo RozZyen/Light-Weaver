@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Sector_03
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 3
-  sectorName: CHAMBER OF ANUBIS
-  sectorDistanceMeters: 125
-  voidBackgroundColor: {r: 0.045, g: 0.026, b: 0.068, a: 1}
-  sectorAccentColor: {r: 0.96, g: 0.56, b: 0.18, a: 1}
-  sectorSecondaryColor: {r: 0.68, g: 0.3, b: 0.88, a: 1}
-  runSpeedMultiplier: 1.14
+  sectorName: NECROPOLIS MIST
+  sectorDistanceMeters: 340
+  voidBackgroundColor: {r: 0.032, g: 0.105, b: 0.135, a: 1}
+  sectorAccentColor: {r: 0.18, g: 0.9, b: 0.78, a: 1}
+  sectorSecondaryColor: {r: 0.92, g: 0.82, b: 0.42, a: 1}
+  runSpeedMultiplier: 1.15
   batteryDrainMultiplier: 1.15
   hazardFrequency: 0.36
   prismRelayFrequency: 0.24

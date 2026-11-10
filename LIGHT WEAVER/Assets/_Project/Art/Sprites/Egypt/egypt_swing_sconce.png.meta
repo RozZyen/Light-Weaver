@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 1f4d1f228827352449c5a6c1510373a9
+guid: 1b72b4ded056ac94fa10e4b437f1bcbb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5199979300617388524
-    second: egypt_orb_ankh_0
+      213: 3222166072782310197
+    second: egypt_swing_sconce_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,9 +49,9 @@ TextureImporter:
   spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 0
-  spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 240
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.28}
+  spritePixelsToUnits: 260
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: egypt_orb_ankh_0
+      name: egypt_swing_sconce_0
       rect:
         serializedVersion: 2
         x: 3
         y: 3
-        width: 210
-        height: 248
+        width: 365
+        height: 544
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ce10fac8f990a2840800000000000000
-      internalID: 5199979300617388524
+      spriteID: 53b418fa8fe67bc20800000000000000
+      internalID: 3222166072782310197
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      egypt_orb_ankh_0: 5199979300617388524
+      egypt_swing_sconce_0: 3222166072782310197
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

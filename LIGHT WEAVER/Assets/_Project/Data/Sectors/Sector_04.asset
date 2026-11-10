@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Sector_04
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 4
-  sectorName: HALL OF SCARABS
-  sectorDistanceMeters: 135
-  voidBackgroundColor: {r: 0.024, g: 0.04, b: 0.078, a: 1}
-  sectorAccentColor: {r: 0.18, g: 0.92, b: 0.72, a: 1}
-  sectorSecondaryColor: {r: 1, g: 0.78, b: 0.24, a: 1}
-  runSpeedMultiplier: 1.22
+  sectorName: BLOOD ECLIPSE
+  sectorDistanceMeters: 390
+  voidBackgroundColor: {r: 0.125, g: 0.038, b: 0.078, a: 1}
+  sectorAccentColor: {r: 0.96, g: 0.3, b: 0.36, a: 1}
+  sectorSecondaryColor: {r: 1, g: 0.76, b: 0.28, a: 1}
+  runSpeedMultiplier: 1.23
   batteryDrainMultiplier: 1.28
-  hazardFrequency: 0.44
+  hazardFrequency: 0.45
   prismRelayFrequency: 0.28
   orbDensity: 0.85

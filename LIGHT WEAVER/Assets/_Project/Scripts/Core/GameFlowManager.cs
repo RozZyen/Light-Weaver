@@ -131,7 +131,8 @@ namespace LightWeaver.Core
             _accumulatedDistanceScore = 0f;
             _lastRecordedDistance = 0f;
             _hasUsedSolarRevive = false;
-            _highestSectorReachedThisRun = _selectedStartSectorIndex + 1;
+            _selectedStartSectorIndex = 0;
+            _highestSectorReachedThisRun = 1;
 
             if (upgradeManager != null) upgradeManager.ResetAllBlessings();
             if (runnerMotor != null)
@@ -146,7 +147,7 @@ namespace LightWeaver.Core
                 batterySystem.ResetBattery();
                 batterySystem.SetSimulationPaused(true);
             }
-            if (chunkDirector != null) chunkDirector.SetStartingSector(_selectedStartSectorIndex);
+            if (chunkDirector != null) chunkDirector.SetStartingSector(0);
             if (eclipseWave != null) eclipseWave.ResetPursuit();
             if (cameraFollow != null) cameraFollow.SnapToTarget();
 
@@ -161,10 +162,11 @@ namespace LightWeaver.Core
             _accumulatedDistanceScore = 0f;
             _lastRecordedDistance = 0f;
             _hasUsedSolarRevive = false;
-            _highestSectorReachedThisRun = _selectedStartSectorIndex + 1;
+            _selectedStartSectorIndex = 0;
+            _highestSectorReachedThisRun = 1;
 
             if (upgradeManager != null) upgradeManager.ResetAllBlessings();
-            if (chunkDirector != null) chunkDirector.SetStartingSector(_selectedStartSectorIndex);
+            if (chunkDirector != null) chunkDirector.SetStartingSector(0);
             if (runnerMotor != null)
             {
                 runnerMotor.ResetBlessings();
@@ -187,7 +189,7 @@ namespace LightWeaver.Core
             if (chunkDirector != null && chunkDirector.ActiveSector != null)
             {
                 SectorProfileSO sec = chunkDirector.ActiveSector;
-                OnBannerMessage?.Invoke($"LEVEL {sec.sectorNumber} - {sec.sectorName}", sec.sectorAccentColor);
+                OnBannerMessage?.Invoke(sec.sectorName, sec.sectorAccentColor);
             }
         }
 
@@ -355,7 +357,7 @@ namespace LightWeaver.Core
             if (_currentState != GameState.Playing) return;
             float mult = batterySystem != null ? batterySystem.ScoreMultiplier : 1f;
             AddScore(Mathf.RoundToInt(anchorSwingBonus * mult));
-            OnBannerMessage?.Invoke("PHOTON TETHER SWING!", new Color(1.0f, 0.92f, 0.35f, 1f));
+            OnBannerMessage?.Invoke("ROPE GRAPPLE SWING!", new Color(1.0f, 0.88f, 0.42f, 1f));
         }
 
         private void HandleSpectrumPhaseChanged(SpectrumPhase phase)
@@ -369,7 +371,6 @@ namespace LightWeaver.Core
         {
             if (_currentState != GameState.Playing || sector == null) return;
 
-            // Yeni bir sektöre ilk kez ulaşıldığında 3'lü Prizma Yükseltme Kartı sun!
             if (sector.sectorNumber > _highestSectorReachedThisRun && upgradeManager != null)
             {
                 _highestSectorReachedThisRun = sector.sectorNumber;
@@ -381,7 +382,7 @@ namespace LightWeaver.Core
             }
             else
             {
-                OnBannerMessage?.Invoke($"LEVEL {sector.sectorNumber} - {sector.sectorName}", sector.sectorAccentColor);
+                OnBannerMessage?.Invoke(sector.sectorName, sector.sectorAccentColor);
             }
         }
 

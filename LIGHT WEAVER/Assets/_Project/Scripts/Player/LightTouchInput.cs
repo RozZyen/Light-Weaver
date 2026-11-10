@@ -16,20 +16,20 @@ namespace LightWeaver.Player
     public sealed class LightTouchInput : MonoBehaviour
     {
         public event Action OnFlashBurstTriggered;
-        public event Action<bool> OnUiFocusToggledChanged;
+        public event Action<bool> OnLongBeamHeldChanged;
 
         [Header("References")]
         [SerializeField] private FlashlightController2D flashlightController;
         [SerializeField] private RunnerMotor2D runnerMotor;
         [SerializeField] private Camera targetCamera;
 
-        [Header("Floating 360 Joystick UI (Optional)")]
+        [Header("Floating 210° Joystick UI (Optional)")]
         [SerializeField] private RectTransform joystickBaseRect;
         [SerializeField] private RectTransform joystickKnobRect;
         [SerializeField] private float joystickMaxRadiusPx = 95f;
         [SerializeField] private float joystickDeadzonePx = 10f;
 
-        [Header("Aim Tuning (210° Forward & Vertical Arc)")]
+        [Header("Aim Tuning (Fixed 210° Forward & Vertical Arc)")]
         [SerializeField] private float initialAngleDeg = -10f;
         [SerializeField] private float minAimAngleDeg = -105f;
         [SerializeField] private float maxAimAngleDeg = 105f;
@@ -38,7 +38,7 @@ namespace LightWeaver.Player
         private float _targetAngleDeg;
         private bool _mouseAimActive;
         private bool _externalUiFocusHeld;
-        private bool _uiFocusToggled;
+        private bool _lastLongBeamHeld;
 
         private bool _isStickActive;
         private int _aimTouchId = -1;
@@ -46,7 +46,7 @@ namespace LightWeaver.Player
         private float _lastTapTime = -10f;
 
         public float TargetAngleDeg => _targetAngleDeg;
-        public bool IsUiFocusToggled => _uiFocusToggled;
+        public bool IsLongBeamHeld => _lastLongBeamHeld;
 
         private void Awake()
         {
@@ -70,12 +70,6 @@ namespace LightWeaver.Player
 
         public void SetUiFocusHeld(bool held) => _externalUiFocusHeld = held;
 
-        public void ToggleUiFocus()
-        {
-            _uiFocusToggled = !_uiFocusToggled;
-            OnUiFocusToggledChanged?.Invoke(_uiFocusToggled);
-        }
-
         public void ResetAimToInitial()
         {
             _targetAngleDeg = initialAngleDeg;
@@ -83,8 +77,11 @@ namespace LightWeaver.Player
             _isStickActive = false;
             _aimTouchId = -1;
             _externalUiFocusHeld = false;
-            _uiFocusToggled = false;
-            OnUiFocusToggledChanged?.Invoke(false);
+            if (_lastLongBeamHeld)
+            {
+                _lastLongBeamHeld = false;
+                OnLongBeamHeldChanged?.Invoke(false);
+            }
             HideJoystickUi();
             if (flashlightController != null) flashlightController.SetAimInput(_targetAngleDeg, false, snapImmediate: true);
         }
@@ -97,11 +94,17 @@ namespace LightWeaver.Player
                 _isStickActive = false;
                 _aimTouchId = -1;
                 _externalUiFocusHeld = false;
+                if (_lastLongBeamHeld)
+                {
+                    _lastLongBeamHeld = false;
+                    OnLongBeamHeldChanged?.Invoke(false);
+                }
                 HideJoystickUi();
                 return;
             }
 
-            bool isFocused = _externalUiFocusHeld || _uiFocusToggled;
+            // Uzun huzme (Long Beam) yalnızca basılı tutulduğu sürece açık kalır!
+            bool isFocused = _externalUiFocusHeld;
             float dt = Time.deltaTime;
 
             // 1. Klavye (Space Zıplama, WASD/Ok 8-yön 360° Nişan, Shift Focus, F/E Burst)
@@ -144,10 +147,10 @@ namespace LightWeaver.Player
                 if (kb.fKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame) OnFlashBurstTriggered?.Invoke();
             }
 
-            // 2. Mobil Çoklu Dokunma (Sol el UI butonuna basarken sağ el serbestçe 360° nişan alabilir!)
-            bool handledTouchAim = ProcessMultiTouchAim(ref isFocused);
+            // 2. Mobil Çoklu Dokunma (Sol el zıplama/bas-uzun tutarken sağ el 210° Floating Stick ile nişan alır!)
+            bool handledTouchAim = ProcessMultiTouchAim();
 
-            // 3. PC Fare (Dokunmatik & Klavye aktif değilken, UI üzerinde değilken 360° imleç takibi)
+            // 3. PC Fare (Dokunmatik & Klavye aktif değilken, UI üzerinde değilken 210° imleç takibi)
             Mouse mouse = Mouse.current;
             bool pointerOverUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
             if (!handledTouchAim && !keyboardAimed && mouse != null && !pointerOverUi)
@@ -166,10 +169,16 @@ namespace LightWeaver.Player
                 if (mouse.rightButton.isPressed) isFocused = true;
             }
 
+            if (isFocused != _lastLongBeamHeld)
+            {
+                _lastLongBeamHeld = isFocused;
+                OnLongBeamHeldChanged?.Invoke(isFocused);
+            }
+
             flashlightController.SetAimInput(_targetAngleDeg, isFocused);
         }
 
-        private bool ProcessMultiTouchAim(ref bool isFocused)
+        private bool ProcessMultiTouchAim()
         {
             var activeTouches = Touch.activeTouches;
             int count = activeTouches.Count;
@@ -190,7 +199,6 @@ namespace LightWeaver.Player
                 Touch t = activeTouches[i];
                 if (_aimTouchId == -1 && t.phase == UnityEngine.InputSystem.TouchPhase.Began)
                 {
-                    // UI butonunun üstüne dokunulmadıysa bu parmağı nişan parmağı yap
                     if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(t.touchId))
                         continue;
 
@@ -219,25 +227,13 @@ namespace LightWeaver.Player
                         return true;
                     }
 
-                    if (ProgressManager.MobileAimMode == 0)
+                    // Standart Sabit 210° Floating Stick (Ayar gerektirmez!)
+                    Vector2 delta = t.screenPosition - _stickOriginScreenPos;
+                    if (delta.magnitude > joystickDeadzonePx)
                     {
-                        // MOD 0: 360° Floating Virtual Stick (Parmağın ekranı kapatmadan tam kontrol!)
-                        Vector2 delta = t.screenPosition - _stickOriginScreenPos;
-                        float dist = delta.magnitude;
-                        if (dist > joystickDeadzonePx)
-                        {
-                            _targetAngleDeg = ClampAim210(Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
-                            // Parmağı çok uzağa çekince otomatik Focus Lazeri (veya sol UI LONG BEAM butonu)
-                            if (dist > joystickMaxRadiusPx * 1.15f) isFocused = true;
-                        }
-                        UpdateJoystickUi(_stickOriginScreenPos, Vector2.ClampMagnitude(delta, joystickMaxRadiusPx));
+                        _targetAngleDeg = ClampAim210(Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
                     }
-                    else
-                    {
-                        // MOD 1: Direct Touch Aim (Dokunduğun noktaya doğrudan 360° ışık tut!)
-                        HideJoystickUi();
-                        AimTowardScreenPoint(t.screenPosition);
-                    }
+                    UpdateJoystickUi(_stickOriginScreenPos, Vector2.ClampMagnitude(delta, joystickMaxRadiusPx));
                     return true;
                 }
             }

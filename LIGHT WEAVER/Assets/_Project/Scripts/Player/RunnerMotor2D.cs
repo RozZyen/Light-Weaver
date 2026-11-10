@@ -76,9 +76,19 @@ namespace LightWeaver.Player
         private float _voidGraceTimer;
         private bool _isRunning = true;
 
+        private bool _isSwinging;
+        private Vector2 _swingAnchorPos;
+        private float _swingRopeLength;
+        private float _swingTargetLength;
+        private float _swingAngleRad;
+        private float _swingAngularVel;
+        private Action _onSwingDetachedCallback;
+
         public bool IsGrounded => _isGrounded;
         public bool IsOnCoyoteTime => !_isGrounded && _coyoteTimer > 0f;
         public bool IsBoosting => _boostTimer > 0f;
+        public bool IsSwinging => _isSwinging;
+        public Vector2 SwingAnchorPosition => _swingAnchorPos;
         public float CurrentSpeedX => _rb != null ? _rb.linearVelocity.x : 0f;
         public float CurrentSpeedY => _rb != null ? _rb.linearVelocity.y : 0f;
         public float CurrentSlopeAngleDeg => _currentSlopeAngleDeg;
@@ -125,13 +135,93 @@ namespace LightWeaver.Player
             _isRunning = active;
             if (!active && _rb != null)
             {
+                ClearSwingStateOnly();
                 _rb.linearVelocity = Vector2.zero;
                 _rb.simulated = false;
             }
             else if (active && _rb != null)
             {
+                _rb.gravityScale = gravityScale;
                 _rb.simulated = true;
             }
+        }
+
+        public void BeginPendulumSwing(Vector2 anchorPos, Action onDetached = null)
+        {
+            if (_rb == null || !_isRunning || _isSwinging) return;
+
+            Vector2 offset = _rb.position - anchorPos;
+            float dist = offset.magnitude;
+            if (dist < 0.8f) offset = new Vector2(-0.2f, -2.5f);
+
+            _isSwinging = true;
+            _swingAnchorPos = anchorPos;
+            _onSwingDetachedCallback = onDetached;
+            _swingRopeLength = Mathf.Max(2.1f, dist);
+            _swingTargetLength = Mathf.Clamp(dist, 2.55f, 4.15f);
+            _swingAngleRad = Mathf.Atan2(offset.y, offset.x);
+
+            // Doğal sarkaç giriş teğet hızı (CCW teğeti = alt noktada +X sağa doğru!)
+            Vector2 tangentDir = new Vector2(-Mathf.Sin(_swingAngleRad), Mathf.Cos(_swingAngleRad));
+            float tangentialSpeed = Vector2.Dot(_rb.linearVelocity, tangentDir);
+            float minEntrySpeed = GetEffectiveTargetSpeed() * 0.92f;
+            if (tangentialSpeed < minEntrySpeed) tangentialSpeed = minEntrySpeed;
+            _swingAngularVel = tangentialSpeed / Mathf.Max(0.8f, _swingRopeLength);
+
+            _isGrounded = false;
+            _coyoteTimer = 0f;
+            _hasDoubleJump = true;
+            _externalJumpLockTimer = 0f;
+            _jumpBufferTimer = 0f;
+            _rb.gravityScale = 0f;
+        }
+
+        public void EndPendulumSwing(bool withJumpBoost)
+        {
+            if (!_isSwinging) return;
+
+            Action detachCb = _onSwingDetachedCallback;
+            float angle = _swingAngleRad;
+            float tangentialSpeed = _swingAngularVel * _swingRopeLength;
+            ClearSwingStateOnly();
+
+            if (_rb != null)
+            {
+                Vector2 tangentDir = new Vector2(-Mathf.Sin(angle), Mathf.Cos(angle));
+                Vector2 releaseVel = tangentDir * tangentialSpeed;
+
+                if (withJumpBoost)
+                {
+                    releaseVel.x = Mathf.Max(releaseVel.x + 1.6f, GetEffectiveTargetSpeed() * 1.32f);
+                    releaseVel.y = Mathf.Max(releaseVel.y + 3.2f, 11.2f * _jumpPowerBonusMultiplier);
+                    _externalJumpLockTimer = 0.14f;
+                    OnRunnerJumped?.Invoke(false);
+                }
+                else
+                {
+                    // Yukarı-ileri salınım çıkışında teğetsel ivmeyi koru ve hafif sapan artışı ekle
+                    if (releaseVel.x > 1f)
+                    {
+                        releaseVel.x = Mathf.Max(releaseVel.x, GetEffectiveTargetSpeed() * 1.12f);
+                    }
+                    if (releaseVel.y > 0.25f)
+                    {
+                        releaseVel.y += 1.45f;
+                    }
+                }
+
+                _rb.linearVelocity = releaseVel;
+            }
+
+            _hasDoubleJump = true;
+            detachCb?.Invoke();
+        }
+
+        private void ClearSwingStateOnly()
+        {
+            _isSwinging = false;
+            _onSwingDetachedCallback = null;
+            if (_rb != null) _rb.gravityScale = gravityScale;
         }
 
         public void SetAutoRespawnOnVoidFall(bool enabled) => autoRespawnOnVoidFall = enabled;
@@ -169,6 +259,7 @@ namespace LightWeaver.Player
         public void ReviveAtPosition(Vector3 worldPos)
         {
             if (_rb == null) return;
+            ClearSwingStateOnly();
             _rb.simulated = true;
             transform.position = worldPos;
             _rb.position = worldPos;
@@ -187,6 +278,7 @@ namespace LightWeaver.Player
         public void RespawnAtStart()
         {
             if (_rb == null) return;
+            ClearSwingStateOnly();
             transform.position = _spawnPosition;
             _rb.position = _spawnPosition;
             Physics2D.SyncTransforms();
@@ -220,6 +312,27 @@ namespace LightWeaver.Player
                 if (_boostTimer <= 0f) _boostSpeedMultiplier = 1f;
             }
             if (_stumbleTimer > 0f) _stumbleTimer -= dt;
+
+            if (_isSwinging)
+            {
+                if (_jumpBufferTimer > 0f)
+                {
+                    _jumpBufferTimer = 0f;
+                    EndPendulumSwing(withJumpBoost: true);
+                }
+                else
+                {
+                    IntegratePendulumSwing(dt);
+                }
+
+                if (_voidGraceTimer <= 0f && transform.position.y < voidFallY)
+                {
+                    ClearSwingStateOnly();
+                    OnRunnerFellIntoVoid?.Invoke();
+                    if (autoRespawnOnVoidFall) RespawnAtStart();
+                }
+                return;
+            }
 
             float preVelocityY = _rb.linearVelocity.y;
             DetectGround();
@@ -421,11 +534,50 @@ namespace LightWeaver.Player
             }
         }
 
+        private void IntegratePendulumSwing(float dt)
+        {
+            _swingRopeLength = Mathf.MoveTowards(_swingRopeLength, _swingTargetLength, 5.2f * dt);
+
+            float g = gravityScale * 9.81f;
+            float angularAccel = -(g / Mathf.Max(0.8f, _swingRopeLength)) * Mathf.Cos(_swingAngleRad);
+
+            // İniş yarım yayında doğal momentum koruma / hafif salınım desteği
+            if (Mathf.Cos(_swingAngleRad) < 0f && _swingAngularVel >= -0.35f)
+            {
+                angularAccel += 0.95f;
+            }
+
+            _swingAngularVel += angularAccel * dt;
+            _swingAngularVel *= Mathf.Clamp01(1f - 0.04f * dt);
+            float maxOmega = 16.5f / Mathf.Max(0.8f, _swingRopeLength);
+            _swingAngularVel = Mathf.Clamp(_swingAngularVel, -maxOmega, maxOmega);
+
+            float nextAngle = _swingAngleRad + _swingAngularVel * dt;
+            float minAngle = -Mathf.PI * 0.90f; // -162° (arka sınır)
+            float maxAngle = -Mathf.PI * 0.12f; // -21.6° (ön üst salınım sınırı)
+            if (nextAngle <= minAngle)
+            {
+                nextAngle = minAngle;
+                _swingAngularVel = Mathf.Abs(_swingAngularVel) * 0.85f;
+            }
+            else if (nextAngle >= maxAngle)
+            {
+                nextAngle = maxAngle;
+                _swingAngularVel = -Mathf.Abs(_swingAngularVel) * 0.85f;
+            }
+
+            _swingAngleRad = nextAngle;
+            Vector2 nextPos = _swingAnchorPos + new Vector2(Mathf.Cos(nextAngle), Mathf.Sin(nextAngle)) * _swingRopeLength;
+            _rb.linearVelocity = (nextPos - _rb.position) / Mathf.Max(0.0001f, dt);
+        }
+
         private void ApplyAirborneMotion(float dt)
         {
             float targetSpeed = GetEffectiveTargetSpeed();
             Vector2 vel = _rb.linearVelocity;
-            vel.x = Mathf.MoveTowards(vel.x, targetSpeed, airControlAccel * dt);
+            // Sarkaç çıkışı / Boost momentumunu havada hemen frenleme; yavaşça rüzgâr direncine yaklaş
+            float accelRate = vel.x > targetSpeed ? 2.4f : airControlAccel;
+            vel.x = Mathf.MoveTowards(vel.x, targetSpeed, accelRate * dt);
             vel.y = Mathf.Max(vel.y, maxFallSpeed);
             _rb.linearVelocity = vel;
         }

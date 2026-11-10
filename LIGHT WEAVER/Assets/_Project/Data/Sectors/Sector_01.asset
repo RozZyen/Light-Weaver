@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Sector_01
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 1
-  sectorName: OUTSKIRTS OF GIZA
-  sectorDistanceMeters: 90
-  voidBackgroundColor: {r: 0.032, g: 0.038, b: 0.088, a: 1}
+  sectorName: GIZA NIGHTFALL
+  sectorDistanceMeters: 240
+  voidBackgroundColor: {r: 0.035, g: 0.045, b: 0.102, a: 1}
   sectorAccentColor: {r: 1, g: 0.82, b: 0.3, a: 1}
   sectorSecondaryColor: {r: 0, g: 0.85, b: 0.78, a: 1}
   runSpeedMultiplier: 1
-  batteryDrainMultiplier: 0.85
-  hazardFrequency: 0.14
-  prismRelayFrequency: 0.15
+  batteryDrainMultiplier: 0.88
+  hazardFrequency: 0.16
+  prismRelayFrequency: 0.16
   orbDensity: 0.85

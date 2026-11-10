@@ -10,12 +10,13 @@ namespace LightWeaver.World
     /// Yolu kesen kilitli lazer bariyeri ve tepesindeki Elmas Kilit anahtarı.
     /// Fener ışığını bariyerin üzerindeki kilide doğrultup kırmadan geçersen ağır pil şoku + sendeleme uygular!
     /// </summary>
-    [RequireComponent(typeof(BoxCollider2D), typeof(SpriteRenderer))]
+    [RequireComponent(typeof(BoxCollider2D))]
     public sealed class PrismLockGate : MonoBehaviour, ILightReactive, IPoolable
     {
         public static event Action<PrismLockGate, bool> OnGateResolved; // (gate, unlockedByLight)
 
         [Header("Lock & Barrier Setup")]
+        [SerializeField] private SpriteRenderer barrierVisualRenderer;
         [SerializeField] private SpriteRenderer diamondLockRenderer;
         [SerializeField] private Transform diamondLockTransform;
         [SerializeField] private LineRenderer lockTetherLine;
@@ -28,6 +29,7 @@ namespace LightWeaver.World
         private float _unlockProgress;
         private float _lastExposedTime = -999f;
         private Vector3 _baseLockScale = Vector3.one;
+        private Vector3 _baseLockPos = new Vector3(0f, 2.25f, 0f);
 
         public Vector2 WorldPosition => diamondLockTransform != null ? (Vector2)diamondLockTransform.position : (Vector2)transform.position;
         public HardlightPhase CurrentPhase => _isUnlocked ? HardlightPhase.Phantom : HardlightPhase.Solid;
@@ -36,8 +38,17 @@ namespace LightWeaver.World
         {
             _barrierCollider = GetComponent<BoxCollider2D>();
             _barrierCollider.isTrigger = true;
-            _barrierRenderer = GetComponent<SpriteRenderer>();
-            if (diamondLockTransform != null) _baseLockScale = diamondLockTransform.localScale;
+            _barrierRenderer = barrierVisualRenderer != null ? barrierVisualRenderer : GetComponent<SpriteRenderer>();
+            if (lockTetherLine != null && lockTetherLine.sharedMaterial == null)
+            {
+                Shader shader = Shader.Find("Sprites/Default");
+                if (shader != null) lockTetherLine.sharedMaterial = new Material(shader);
+            }
+            if (diamondLockTransform != null)
+            {
+                _baseLockScale = diamondLockTransform.localScale;
+                _baseLockPos = diamondLockTransform.localPosition;
+            }
             ResetGate();
         }
 
@@ -101,11 +112,11 @@ namespace LightWeaver.World
             float ratio = Mathf.Clamp01(_unlockProgress / unlockChargeSeconds);
             if (diamondLockTransform != null)
             {
-                diamondLockTransform.localScale = _baseLockScale * (1f + ratio * 0.45f);
+                diamondLockTransform.localScale = _baseLockScale * (1f + ratio * 0.28f);
             }
             if (diamondLockRenderer != null)
             {
-                diamondLockRenderer.color = Color.Lerp(new Color(0f, 0.94f, 1f, 1f), Color.white, ratio);
+                diamondLockRenderer.color = Color.Lerp(Color.white, new Color(1.0f, 0.94f, 0.72f, 1f), ratio);
             }
 
             if (_unlockProgress >= unlockChargeSeconds)
@@ -136,7 +147,9 @@ namespace LightWeaver.World
 
             if (diamondLockTransform != null)
             {
-                diamondLockTransform.Rotate(0f, 0f, 75f * dt);
+                float hoverY = Mathf.Sin(Time.time * 3.2f) * 0.08f;
+                diamondLockTransform.localPosition = new Vector3(_baseLockPos.x, _baseLockPos.y + hoverY, _baseLockPos.z);
+                diamondLockTransform.localRotation = Quaternion.identity;
             }
 
             if ((Time.time - _lastExposedTime) > 0.05f && _unlockProgress > 0f)
@@ -145,6 +158,10 @@ namespace LightWeaver.World
                 if (diamondLockTransform != null)
                 {
                     diamondLockTransform.localScale = Vector3.Lerp(diamondLockTransform.localScale, _baseLockScale, dt * 12f);
+                }
+                if (diamondLockRenderer != null)
+                {
+                    diamondLockRenderer.color = Color.Lerp(diamondLockRenderer.color, Color.white, dt * 10f);
                 }
             }
         }

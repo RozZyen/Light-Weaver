@@ -26,8 +26,8 @@ Transform:
   m_GameObject: {fileID: 541678587973181546}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.72, z: 0}
-  m_LocalScale: {x: 1.75, y: 0.32, z: 1}
+  m_LocalPosition: {x: 0, y: 2.28, z: 0}
+  m_LocalScale: {x: 0.84, y: 0.84, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2219816190807934995}
@@ -91,7 +91,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!1 &7806175321711482925
+--- !u!1 &7417967377238294113
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -99,42 +99,38 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2219816190807934995}
-  - component: {fileID: 4255287196390649748}
-  - component: {fileID: 3673562491551780803}
-  - component: {fileID: 3567412479630800929}
-  - component: {fileID: 4392583445536670235}
+  - component: {fileID: 6247346988292132248}
+  - component: {fileID: 2871330600914787}
   m_Layer: 0
-  m_Name: PF_PrismLockGate
+  m_Name: BarrierVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2219816190807934995
+--- !u!4 &6247346988292132248
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7806175321711482925}
+  m_GameObject: {fileID: 7417967377238294113}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.62, y: 3.4, z: 1}
+  m_LocalScale: {x: 0.76, y: 0.84, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 6506717407149861129}
-  m_Father: {fileID: 0}
+  m_Children: []
+  m_Father: {fileID: 2219816190807934995}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &4255287196390649748
+--- !u!212 &2871330600914787
 SpriteRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7806175321711482925}
+  m_GameObject: {fileID: 7417967377238294113}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -181,11 +177,47 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 4}
+  m_Size: {x: 0.75, y: 4}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &7806175321711482925
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2219816190807934995}
+  - component: {fileID: 3673562491551780803}
+  - component: {fileID: 3567412479630800929}
+  - component: {fileID: 4392583445536670235}
+  m_Layer: 0
+  m_Name: PF_PrismLockGate
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2219816190807934995
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7806175321711482925}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6247346988292132248}
+  - {fileID: 6506717407149861129}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &3673562491551780803
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -223,14 +255,14 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 4}
-    newSize: {x: 1, y: 4}
-    adaptiveTilingThreshold: 0.5
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.85, y: 1}
+  m_Size: {x: 0.56, y: 3.2}
   m_EdgeRadius: 0
 --- !u!120 &3567412479630800929
 LineRenderer:
@@ -258,7 +290,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 4aef01cdfca6f1c4cb6c20259bbada68, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -282,8 +314,8 @@ LineRenderer:
   m_SortingOrder: 17
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 0, y: 0.45, z: 0}
-  - {x: 0, y: 0.72, z: 0}
+  - {x: 0, y: 1.56, z: 0}
+  - {x: 0, y: 2.28, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -292,7 +324,7 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.08
+        value: 0.06
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -301,7 +333,7 @@ LineRenderer:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 1
-        value: 0.08
+        value: 0.06
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -313,8 +345,8 @@ LineRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 0.9490196, g: 0.34117648, b: 0.23921569, a: 0.8784314}
-      key1: {r: 1, g: 0.8392157, b: 0.32156864, a: 0.9607843}
+      key0: {r: 0.8784314, g: 0.41960785, b: 0.21960784, a: 0.81960785}
+      key1: {r: 1, g: 0.8392157, b: 0.36078432, a: 0.92156863}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -363,6 +395,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b87bdfc4ad1a4948bb585a75d918236, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.PrismLockGate
+  barrierVisualRenderer: {fileID: 2871330600914787}
   diamondLockRenderer: {fileID: 6902401646161902297}
   diamondLockTransform: {fileID: 6506717407149861129}
   lockTetherLine: {fileID: 3567412479630800929}

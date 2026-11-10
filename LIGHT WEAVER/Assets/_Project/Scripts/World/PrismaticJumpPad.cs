@@ -23,8 +23,8 @@ namespace LightWeaver.World
 
         [Header("Visuals")]
         [SerializeField] private SpriteRenderer innerCoreRenderer;
-        [SerializeField] private Color activeRingColor = new Color(0.0f, 0.94f, 1.0f, 0.98f);
-        [SerializeField] private Color afterglowColor = new Color(1.0f, 0.45f, 0.12f, 0.80f);
+        [SerializeField] private Color activeRingColor = Color.white;
+        [SerializeField] private Color afterglowColor = new Color(0.88f, 0.84f, 0.78f, 0.85f);
 
         private BoxCollider2D _triggerCollider;
         private SpriteRenderer _outerRingRenderer;
@@ -188,11 +188,11 @@ namespace LightWeaver.World
 
                 case HardlightPhase.Solid:
                     _outerRingRenderer.enabled = true;
-                    _outerRingRenderer.color = Color.Lerp(activeRingColor, Color.white, factor * 0.3f);
+                    _outerRingRenderer.color = activeRingColor;
                     if (innerCoreRenderer != null)
                     {
                         innerCoreRenderer.enabled = true;
-                        innerCoreRenderer.color = new Color(1f, 0.55f, 0.1f, 0.95f);
+                        innerCoreRenderer.color = new Color(0.24f, 0.88f, 0.80f, 0.48f);
                     }
                     break;
 
@@ -202,7 +202,7 @@ namespace LightWeaver.World
                     if (innerCoreRenderer != null)
                     {
                         innerCoreRenderer.enabled = factor > 0.15f;
-                        innerCoreRenderer.color = new Color(1f, 0.45f, 0.1f, factor * 0.7f);
+                        innerCoreRenderer.color = new Color(0.24f, 0.88f, 0.80f, factor * 0.36f);
                     }
                     break;
             }

@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Sector_05
   m_EditorClassIdentifier: Assembly-CSharp::LightWeaver.World.SectorProfileSO
   sectorNumber: 5
-  sectorName: THE PHARAOH'S VAULT
-  sectorDistanceMeters: 150
-  voidBackgroundColor: {r: 0.055, g: 0.02, b: 0.048, a: 1}
-  sectorAccentColor: {r: 1, g: 0.24, b: 0.38, a: 1}
+  sectorName: HEART OF THE DUAT
+  sectorDistanceMeters: 450
+  voidBackgroundColor: {r: 0.07, g: 0.038, b: 0.138, a: 1}
+  sectorAccentColor: {r: 0.78, g: 0.58, b: 1, a: 1}
   sectorSecondaryColor: {r: 1, g: 0.84, b: 0.28, a: 1}
   runSpeedMultiplier: 1.32
-  batteryDrainMultiplier: 1.42
+  batteryDrainMultiplier: 1.4
   hazardFrequency: 0.52
   prismRelayFrequency: 0.3
   orbDensity: 0.85

@@ -26,14 +26,10 @@ namespace LightWeaver.UI
         [Header("Main Menu Controls")]
         [SerializeField] private Button playButton;
         [SerializeField] private Text mainBestScoreText;
-        [SerializeField] private Button[] sectorSelectButtons;
-        [SerializeField] private Text selectedSectorInfoText;
         [SerializeField] private Button musicToggleButton;
         [SerializeField] private Text musicToggleLabel;
         [SerializeField] private Button sfxToggleButton;
         [SerializeField] private Text sfxToggleLabel;
-        [SerializeField] private Button aimModeToggleButton;
-        [SerializeField] private Text aimModeToggleLabel;
 
         [Header("Pause Controls")]
         [SerializeField] private Button resumeButton;
@@ -53,13 +49,13 @@ namespace LightWeaver.UI
         [SerializeField] private Text[] blessingCardTitles;
         [SerializeField] private Text[] blessingCardDescriptions;
 
-        private static readonly string[] SectorDisplayNames =
+        private static readonly string[] ZoneDisplayNames =
         {
-            "LEVEL 1 - OUTSKIRTS OF GIZA",
-            "LEVEL 2 - THE SANDSTONE TOMBS",
-            "LEVEL 3 - CHAMBER OF ANUBIS",
-            "LEVEL 4 - HALL OF SCARABS",
-            "LEVEL 5 - THE PHARAOH'S VAULT"
+            "GIZA NIGHTFALL",
+            "KHAMSIN SANDSTORM",
+            "NECROPOLIS MIST",
+            "BLOOD ECLIPSE",
+            "HEART OF THE DUAT"
         };
 
         private void Awake()
@@ -101,16 +97,6 @@ namespace LightWeaver.UI
 
             if (musicToggleButton != null) musicToggleButton.onClick.AddListener(ToggleMusic);
             if (sfxToggleButton != null) sfxToggleButton.onClick.AddListener(ToggleSfx);
-            if (aimModeToggleButton != null) aimModeToggleButton.onClick.AddListener(ToggleMobileAimMode);
-
-            if (sectorSelectButtons != null)
-            {
-                for (int i = 0; i < sectorSelectButtons.Length; i++)
-                {
-                    int idx = i;
-                    if (sectorSelectButtons[i] != null) sectorSelectButtons[i].onClick.AddListener(() => SelectSector(idx));
-                }
-            }
 
             if (blessingCardButtons != null)
             {
@@ -135,35 +121,6 @@ namespace LightWeaver.UI
             }
         }
 
-        private void SelectSector(int index)
-        {
-            if (gameFlow != null) gameFlow.SelectStartSector(index);
-            UpdateSectorButtonVisuals(index);
-        }
-
-        private void UpdateSectorButtonVisuals(int selectedIndex)
-        {
-            if (sectorSelectButtons != null)
-            {
-                for (int i = 0; i < sectorSelectButtons.Length; i++)
-                {
-                    if (sectorSelectButtons[i] == null) continue;
-                    Image img = sectorSelectButtons[i].GetComponent<Image>();
-                    if (img != null)
-                    {
-                        img.color = i == selectedIndex
-                            ? new Color(1.0f, 0.88f, 0.45f, 1.0f)
-                            : new Color(0.62f, 0.60f, 0.66f, 0.92f);
-                    }
-                }
-            }
-
-            if (selectedSectorInfoText != null && selectedIndex >= 0 && selectedIndex < SectorDisplayNames.Length)
-            {
-                selectedSectorInfoText.text = SectorDisplayNames[selectedIndex];
-            }
-        }
-
         private void ToggleMusic()
         {
             ProgressManager.SetMusicEnabled(!ProgressManager.MusicEnabled);
@@ -178,19 +135,11 @@ namespace LightWeaver.UI
             RefreshAudioLabels();
         }
 
-        private void ToggleMobileAimMode()
-        {
-            int nextMode = ProgressManager.MobileAimMode == 0 ? 1 : 0;
-            ProgressManager.SetMobileAimMode(nextMode);
-            RefreshAudioLabels();
-        }
-
         private void RefreshAudioLabels()
         {
             ProgressManager.EnsureLoaded();
             if (musicToggleLabel != null) musicToggleLabel.text = ProgressManager.MusicEnabled ? "MUSIC: ON" : "MUSIC: OFF";
             if (sfxToggleLabel != null) sfxToggleLabel.text = ProgressManager.SfxEnabled ? "ASMR SFX: ON" : "ASMR SFX: OFF";
-            if (aimModeToggleLabel != null) aimModeToggleLabel.text = ProgressManager.MobileAimMode == 0 ? "AIM: 210 STICK" : "AIM: TOUCH POINT";
         }
 
         private void HandleGameStateChanged(GameState state)
@@ -207,7 +156,6 @@ namespace LightWeaver.UI
                 {
                     mainBestScoreText.text = $"BEST: {ProgressManager.HighScore.ToString("N0", CultureInfo.InvariantCulture)}   |   {ProgressManager.BestDistanceMeters:0}m";
                 }
-                UpdateSectorButtonVisuals(gameFlow != null ? gameFlow.SelectedStartSectorIndex : 0);
                 RefreshAudioLabels();
             }
         }
@@ -236,7 +184,8 @@ namespace LightWeaver.UI
             }
             if (gameOverDistanceText != null)
             {
-                gameOverDistanceText.text = $"DISTANCE: {distanceMeters:0}m  |  LEVEL {sectorReached}";
+                int zIdx = Mathf.Clamp(sectorReached - 1, 0, ZoneDisplayNames.Length - 1);
+                gameOverDistanceText.text = $"DISTANCE: {distanceMeters:0}m  |  {ZoneDisplayNames[zIdx]}";
             }
             if (newBestBadge != null) newBestBadge.SetActive(isNewBest);
             if (solarReviveButton != null && gameFlow != null)

@@ -215,7 +215,6 @@ namespace LightWeaver.World
 
             if (runnerMotor != null) runnerMotor.SetSectorSpeedMultiplier(_activeSector.runSpeedMultiplier);
             if (batterySystem != null) batterySystem.SetSectorDrainMultiplier(_activeSector.batteryDrainMultiplier);
-            if (mainCamera != null) mainCamera.backgroundColor = _activeSector.voidBackgroundColor;
 
             OnSectorChanged?.Invoke(_activeSector);
         }
@@ -325,7 +324,7 @@ namespace LightWeaver.World
         private void SpawnChunkJumpCanopyFork()
         {
             SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 3.8f, CrystalVariant.Standard);
-            SpawnJumpPad(_cursorX + 3.1f, _cursorTopY + 0.24f, new Vector2(8.6f, 13.5f));
+            SpawnJumpPad(_cursorX + 2.85f, _cursorTopY - 0.02f, new Vector2(8.6f, 13.5f));
 
             float canopyX = _cursorX + 6.4f;
             float canopyY = _cursorTopY + 2.65f;
@@ -348,10 +347,10 @@ namespace LightWeaver.World
 
         private void SpawnChunkPrismGateBreach()
         {
-            // Yolu kesen Elmas Kilitli Bariyer -> Feneri YUKARI kilide tutmadan geçersen çarpıp sendelersin!
+            // Yolu kesen Antik Mühür Bariyeri -> Feneri YUKARI Eye-of-Ra kilidine tutmadan geçersen çarpıp sendelersin!
             SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 7.6f, CrystalVariant.Standard);
-            SpawnPrismGate(_cursorX + 5.6f, _cursorTopY + 1.65f);
-            SpawnOrb(_cursorX + 6.6f, _cursorTopY + 2.6f, true);
+            SpawnPrismGate(_cursorX + 5.6f, _cursorTopY + 1.60f);
+            SpawnOrb(_cursorX + 6.6f, _cursorTopY + 2.45f, true);
 
             _cursorX += 7.45f;
         }
@@ -371,18 +370,18 @@ namespace LightWeaver.World
 
         private void SpawnChunkPhotonAnchorAbyss()
         {
-            // DEV UÇURUM (Zemin yok!) -> Yukarıdaki PhotonAnchor'a fener tutarak ışık kancasıyla karşıya fırlat!
-            SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 3.8f, CrystalVariant.Standard);
-            float anchorX = _cursorX + 5.8f;
-            float anchorY = _cursorTopY + 3.8f;
+            // DEV UÇURUM -> Tavan Güneş Halkasına ışığı TUTTUĞUN SÜRECE ip atıp gerçek sarkaçla sallan!
+            SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 4.0f, CrystalVariant.Standard);
+            float anchorX = _cursorX + 7.4f;
+            float anchorY = _cursorTopY + 4.35f;
             SpawnPhotonAnchor(anchorX, anchorY);
-            SpawnOrb(anchorX + 2.4f, _cursorTopY + 2.9f, true);
+            SpawnOrb(anchorX + 2.4f, _cursorTopY + 1.95f, true);
 
-            float landX = _cursorX + 10.6f;
-            float landY = _cursorTopY - 0.2f;
-            SpawnCrystal(landX, landY, 5.4f, CrystalVariant.KineticBoost);
+            float landX = _cursorX + 12.2f;
+            float landY = _cursorTopY - 0.15f;
+            SpawnCrystal(landX, landY, 6.0f, CrystalVariant.KineticBoost);
 
-            _cursorX = landX + 5.4f;
+            _cursorX = landX + 6.0f;
             _cursorTopY = landY;
         }
 
@@ -414,7 +413,7 @@ namespace LightWeaver.World
             float roll = UnityEngine.Random.value;
             if (roll < 0.35f)
             {
-                SpawnHazard(_cursorX + 3.2f, _cursorTopY + 1.55f, ShadowHazardType.MovingShadowPillar);
+                SpawnHazard(_cursorX + 3.2f, _cursorTopY + 1.95f, ShadowHazardType.MovingShadowPillar);
             }
             else if (roll < 0.70f)
             {

@@ -55,6 +55,9 @@ namespace LightWeaver.UI
         private int _lastBatteryPercent = -1;
         private int _lastScore = -1;
         private int _lastSectorNum = -1;
+        private int _lastDisplayedMeters = -1;
+        private string _currentZoneHex = "FFD24C";
+        private string _currentZoneName = "GIZA NIGHTFALL";
         private SpectrumPhase _lastPhase = (SpectrumPhase)255;
         private float _bannerTimer;
         private float _scorePunchTimer;
@@ -63,36 +66,30 @@ namespace LightWeaver.UI
         {
             if (pauseButton != null && gameFlow != null) pauseButton.onClick.AddListener(gameFlow.TogglePause);
             if (mobileJumpButton != null && runnerMotor != null) mobileJumpButton.onClick.AddListener(runnerMotor.RequestJump);
-            if (mobileHighBeamButton != null) mobileHighBeamButton.onClick.AddListener(HandleHighBeamClicked);
             if (mobileBurstButton != null && flashBurst != null) mobileBurstButton.onClick.AddListener(flashBurst.TryTriggerFlashBurst);
             SetupFocusHoldTrigger();
-            UpdateHighBeamVisual(touchInput != null && touchInput.IsUiFocusToggled);
+            UpdateHighBeamVisual(touchInput != null && touchInput.IsLongBeamHeld);
             if (bannerCanvasGroup != null) bannerCanvasGroup.alpha = 0f;
         }
 
-        private void HandleHighBeamClicked()
-        {
-            if (touchInput != null) touchInput.ToggleUiFocus();
-        }
-
-        private void UpdateHighBeamVisual(bool isOn)
+        private void UpdateHighBeamVisual(bool isHeld)
         {
             if (mobileHighBeamBg != null)
             {
-                mobileHighBeamBg.color = isOn
+                mobileHighBeamBg.color = isHeld
                     ? new Color(1.0f, 0.88f, 0.52f, 1.0f)
                     : new Color(0.85f, 0.85f, 0.90f, 0.92f);
             }
             if (mobileHighBeamIcon != null)
             {
-                mobileHighBeamIcon.color = isOn
+                mobileHighBeamIcon.color = isHeld
                     ? new Color(1.0f, 0.88f, 0.30f, 1.0f)
                     : new Color(0.78f, 0.88f, 0.92f, 0.95f);
             }
             if (mobileHighBeamLabel != null)
             {
-                mobileHighBeamLabel.text = isOn ? "LONG: ON" : "LONG: OFF";
-                mobileHighBeamLabel.color = isOn
+                mobileHighBeamLabel.text = isHeld ? "LONG: ON" : "LONG [HOLD]";
+                mobileHighBeamLabel.color = isHeld
                     ? new Color(1.0f, 0.86f, 0.28f, 1.0f)
                     : new Color(0.94f, 0.88f, 0.76f, 0.95f);
             }
@@ -100,19 +97,23 @@ namespace LightWeaver.UI
 
         private void SetupFocusHoldTrigger()
         {
-            if (mobileFocusTrigger == null || touchInput == null) return;
+            if (touchInput == null) return;
+            EventTrigger targetTrigger = mobileFocusTrigger;
+            if (targetTrigger == null && mobileHighBeamButton != null)
+            {
+                targetTrigger = mobileHighBeamButton.GetComponent<EventTrigger>();
+                if (targetTrigger == null) targetTrigger = mobileHighBeamButton.gameObject.AddComponent<EventTrigger>();
+            }
+            if (targetTrigger == null) return;
 
+            targetTrigger.triggers.Clear();
             var downEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
             downEntry.callback.AddListener(_ => touchInput.SetUiFocusHeld(true));
-            mobileFocusTrigger.triggers.Add(downEntry);
+            targetTrigger.triggers.Add(downEntry);
 
             var upEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
             upEntry.callback.AddListener(_ => touchInput.SetUiFocusHeld(false));
-            mobileFocusTrigger.triggers.Add(upEntry);
-
-            var exitEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
-            exitEntry.callback.AddListener(_ => touchInput.SetUiFocusHeld(false));
-            mobileFocusTrigger.triggers.Add(exitEntry);
+            targetTrigger.triggers.Add(upEntry);
         }
 
         private void OnEnable()
@@ -129,12 +130,16 @@ namespace LightWeaver.UI
                 batterySystem.OnSpectrumPhaseChanged += HandlePhaseChanged;
             }
             if (chunkDirector != null) chunkDirector.OnSectorChanged += HandleSectorChanged;
-            if (touchInput != null) touchInput.OnUiFocusToggledChanged += UpdateHighBeamVisual;
+            if (touchInput != null) touchInput.OnLongBeamHeldChanged += UpdateHighBeamVisual;
         }
 
         private void OnDisable()
         {
-            if (touchInput != null) touchInput.OnUiFocusToggledChanged -= UpdateHighBeamVisual;
+            if (touchInput != null)
+            {
+                touchInput.OnLongBeamHeldChanged -= UpdateHighBeamVisual;
+                touchInput.SetUiFocusHeld(false);
+            }
             if (gameFlow != null)
             {
                 gameFlow.OnGameStateChanged -= HandleGameStateChanged;
@@ -157,13 +162,18 @@ namespace LightWeaver.UI
             }
             if (state == GameState.Playing)
             {
-                UpdateHighBeamVisual(touchInput != null && touchInput.IsUiFocusToggled);
+                UpdateHighBeamVisual(touchInput != null && touchInput.IsLongBeamHeld);
                 if (batterySystem != null)
                 {
                     HandleBatteryChanged(batterySystem.CurrentBattery, batterySystem.MaxBattery);
                     HandlePhaseChanged(batterySystem.CurrentPhase);
                 }
+                _lastDisplayedMeters = -1;
                 if (chunkDirector != null && chunkDirector.ActiveSector != null) HandleSectorChanged(chunkDirector.ActiveSector);
+            }
+            else if (touchInput != null)
+            {
+                touchInput.SetUiFocusHeld(false);
             }
         }
 
@@ -208,14 +218,20 @@ namespace LightWeaver.UI
 
         private void HandleSectorChanged(SectorProfileSO sector)
         {
-            if (sector == null || sector.sectorNumber == _lastSectorNum) return;
+            if (sector == null) return;
             _lastSectorNum = sector.sectorNumber;
+            _currentZoneHex = ColorUtility.ToHtmlStringRGB(sector.sectorAccentColor);
+            _currentZoneName = sector.sectorName;
+            RefreshDistanceZoneText(force: true);
+        }
 
-            if (sectorTitleText != null)
-            {
-                string hex = ColorUtility.ToHtmlStringRGB(sector.sectorAccentColor);
-                sectorTitleText.text = $"LEVEL {sector.sectorNumber} - <color=#{hex}>{sector.sectorName}</color>";
-            }
+        private void RefreshDistanceZoneText(bool force = false)
+        {
+            if (sectorTitleText == null) return;
+            int meters = chunkDirector != null ? Mathf.Max(0, Mathf.FloorToInt(chunkDirector.DistanceTraveledMeters)) : 0;
+            if (!force && meters == _lastDisplayedMeters) return;
+            _lastDisplayedMeters = meters;
+            sectorTitleText.text = $"{meters}m  •  <color=#{_currentZoneHex}>{_currentZoneName}</color>";
         }
 
         private void HandleScoreChanged(int score)
@@ -243,6 +259,7 @@ namespace LightWeaver.UI
         private void Update()
         {
             float dt = Time.unscaledDeltaTime;
+            RefreshDistanceZoneText();
 
             if (batteryPercentText != null && _lastBatteryPercent >= 0)
             {

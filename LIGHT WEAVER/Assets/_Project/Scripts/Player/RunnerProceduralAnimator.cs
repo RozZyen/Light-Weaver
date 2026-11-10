@@ -9,6 +9,8 @@ namespace LightWeaver.Player
     /// </summary>
     public sealed class RunnerProceduralAnimator : MonoBehaviour
     {
+        public static RunnerProceduralAnimator ActiveInstance { get; private set; }
+
         [Header("Core References")]
         [SerializeField] private RunnerMotor2D motor;
         [SerializeField] private BatterySystem batterySystem;
@@ -20,10 +22,15 @@ namespace LightWeaver.Player
         [SerializeField] private Transform backShinPivot;
         [SerializeField] private Transform backArmPivot;
         [SerializeField] private Transform backForearmPivot;
+        [SerializeField] private Transform ropeHandTip;
         [SerializeField] private Transform coatTailFrontPivot;
         [SerializeField] private Transform coatTailBackPivot;
         [SerializeField] private Transform suitBatteryGaugeFill;
         [SerializeField] private SpriteRenderer suitBatteryGaugeRenderer;
+
+        public Vector3 RopeHandWorldPosition => ropeHandTip != null
+            ? ropeHandTip.position
+            : (backArmPivot != null ? backArmPivot.position : transform.position + new Vector3(0.2f, 0.25f, 0f));
 
         [Header("VFX & Trails")]
         [SerializeField] private ParticleSystem footstepSparks;
@@ -40,9 +47,15 @@ namespace LightWeaver.Player
 
         private void Awake()
         {
+            ActiveInstance = this;
             if (motor == null) motor = GetComponent<RunnerMotor2D>();
             if (batterySystem == null) batterySystem = GetComponent<BatterySystem>();
             if (visualRoot != null) _baseRootScale = visualRoot.localScale;
+        }
+
+        private void OnDestroy()
+        {
+            if (ActiveInstance == this) ActiveInstance = null;
         }
 
         private void OnEnable()
@@ -70,6 +83,7 @@ namespace LightWeaver.Player
 
             float dt = Time.deltaTime;
             bool grounded = motor.IsGrounded;
+            bool swinging = motor.IsSwinging;
             float speedNorm = motor.NormalizedSpeed;
 
             // 1. İniş Squash & Stretch
@@ -94,14 +108,32 @@ namespace LightWeaver.Player
             // 2. Gövde Koşu Eğimi & Hafif Yaylanma (Bob)
             if (bodyPivot != null)
             {
-                float targetLean = grounded ? forwardLeanAngleDeg + motor.CurrentSlopeAngleDeg * 0.35f : -8f;
-                float bobOffset = grounded ? Mathf.Abs(Mathf.Sin(_strideTimer * 2f)) * 0.05f : 0f;
+                float targetLean = swinging
+                    ? Mathf.Clamp((motor.SwingAnchorPosition.x - transform.position.x) * -4.5f, -22f, 20f)
+                    : (grounded ? forwardLeanAngleDeg + motor.CurrentSlopeAngleDeg * 0.35f : -8f);
+                float bobOffset = (grounded && !swinging) ? Mathf.Abs(Mathf.Sin(_strideTimer * 2f)) * 0.05f : 0f;
                 bodyPivot.localRotation = Quaternion.Lerp(bodyPivot.localRotation, Quaternion.Euler(0f, 0f, targetLean), dt * 14f);
                 bodyPivot.localPosition = new Vector3(0f, bobOffset, 0f);
             }
 
-            // 3. Modüler Çift Eklemli Bacak + Diz + Arka Kol + Trençkot Etek Animasyonu
-            if (grounded)
+            // 3. Modüler Çift Eklemli Bacak + İpli Arka Kol + Trençkot Etek Animasyonu
+            if (swinging)
+            {
+                // Dedektif diğer eliyle (ip tutan arka kol) tavan halkasına uzanır!
+                if (backArmPivot != null)
+                {
+                    Vector2 toAnchor = motor.SwingAnchorPosition - (Vector2)backArmPivot.position;
+                    float worldAngle = Mathf.Atan2(toAnchor.y, toAnchor.x) * Mathf.Rad2Deg;
+                    Quaternion targetRot = Quaternion.Euler(0f, 0f, worldAngle + 46f);
+                    backArmPivot.rotation = Quaternion.Lerp(backArmPivot.rotation, targetRot, dt * 24f);
+                }
+                float kickPitch = Mathf.Clamp(motor.CurrentSpeedX * 2.4f, -28f, 34f);
+                if (frontLegPivot != null) frontLegPivot.localRotation = Quaternion.Lerp(frontLegPivot.localRotation, Quaternion.Euler(0f, 0f, -18f + kickPitch * 0.6f), dt * 12f);
+                if (frontShinPivot != null) frontShinPivot.localRotation = Quaternion.Lerp(frontShinPivot.localRotation, Quaternion.Euler(0f, 0f, -54f), dt * 12f);
+                if (backLegPivot != null) backLegPivot.localRotation = Quaternion.Lerp(backLegPivot.localRotation, Quaternion.Euler(0f, 0f, -42f + kickPitch * 0.4f), dt * 12f);
+                if (backShinPivot != null) backShinPivot.localRotation = Quaternion.Lerp(backShinPivot.localRotation, Quaternion.Euler(0f, 0f, -32f), dt * 12f);
+            }
+            else if (grounded)
             {
                 _strideTimer += dt * strideFrequency * Mathf.Max(0.4f, speedNorm);
                 float swing = Mathf.Sin(_strideTimer) * legSwingAngleDeg;
@@ -112,7 +144,7 @@ namespace LightWeaver.Player
                 if (frontShinPivot != null) frontShinPivot.localRotation = Quaternion.Euler(0f, 0f, frontKnee);
                 if (backLegPivot != null) backLegPivot.localRotation = Quaternion.Euler(0f, 0f, -swing);
                 if (backShinPivot != null) backShinPivot.localRotation = Quaternion.Euler(0f, 0f, backKnee);
-                if (backArmPivot != null) backArmPivot.localRotation = Quaternion.Euler(0f, 0f, -swing * 0.72f - 12f);
+                if (backArmPivot != null) backArmPivot.localRotation = Quaternion.Lerp(backArmPivot.localRotation, Quaternion.Euler(0f, 0f, -swing * 0.55f + 16f), dt * 18f);
                 if (backForearmPivot != null) backForearmPivot.localRotation = Quaternion.Euler(0f, 0f, 26f + Mathf.Max(0f, -swing * 0.35f));
             }
             else
@@ -123,7 +155,7 @@ namespace LightWeaver.Player
                 if (frontShinPivot != null) frontShinPivot.localRotation = Quaternion.Lerp(frontShinPivot.localRotation, Quaternion.Euler(0f, 0f, -48f), dt * 11f);
                 if (backLegPivot != null) backLegPivot.localRotation = Quaternion.Lerp(backLegPivot.localRotation, Quaternion.Euler(0f, 0f, -32f + airPitch * 0.5f), dt * 11f);
                 if (backShinPivot != null) backShinPivot.localRotation = Quaternion.Lerp(backShinPivot.localRotation, Quaternion.Euler(0f, 0f, -24f), dt * 11f);
-                if (backArmPivot != null) backArmPivot.localRotation = Quaternion.Lerp(backArmPivot.localRotation, Quaternion.Euler(0f, 0f, -46f), dt * 11f);
+                if (backArmPivot != null) backArmPivot.localRotation = Quaternion.Lerp(backArmPivot.localRotation, Quaternion.Euler(0f, 0f, -12f), dt * 11f);
                 if (backForearmPivot != null) backForearmPivot.localRotation = Quaternion.Lerp(backForearmPivot.localRotation, Quaternion.Euler(0f, 0f, 38f), dt * 11f);
             }
 

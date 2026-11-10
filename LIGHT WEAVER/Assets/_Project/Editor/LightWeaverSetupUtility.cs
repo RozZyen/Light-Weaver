@@ -51,13 +51,13 @@ namespace LightWeaver.EditorTools
             Sprite starburstSprite = GenerateStarburstSprite(Path.Combine(SpritesFolder, "diamond_starburst.png"));
             Sprite emitterCoreSprite = GenerateEmitterCoreSprite(Path.Combine(SpritesFolder, "flashlight_emitter_core.png"));
 
-            // Modüler Dedektif Uzuvları (Uniform 640 PPU & Tam Eklem Pivotları)
+            // Modüler Dedektif Uzuvları (Uniform 640/720 PPU & Tam Eklem Pivotları)
             Sprite detTorsoSprite = LoadAndImportEgyptSprite("det_torso.png", 640f, new Vector2(0.50f, 0.50f));
             Sprite detHeadHatSprite = LoadAndImportEgyptSprite("det_head_hat.png", 640f, new Vector2(0.48f, 0.08f));
             Sprite detCoatTailSprite = LoadAndImportEgyptSprite("det_coat_tail.png", 640f, new Vector2(0.80f, 0.88f));
             Sprite detUpperArmSprite = LoadAndImportEgyptSprite("det_upper_arm.png", 640f, new Vector2(0.50f, 0.82f));
             Sprite detForearmTorchSprite = LoadAndImportEgyptSprite("det_forearm_flashlight.png", 640f, new Vector2(0.106f, 0.612f));
-            Sprite detBackArmSprite = LoadAndImportEgyptSprite("det_back_arm.png", 640f, new Vector2(0.50f, 0.82f));
+            Sprite detBackArmSprite = LoadAndImportEgyptSprite("det_back_arm_rope.png", 720f, new Vector2(0.213f, 0.858f));
             Sprite detThighSprite = LoadAndImportEgyptSprite("det_thigh.png", 640f, new Vector2(0.50f, 0.86f));
             Sprite detShinBootSprite = LoadAndImportEgyptSprite("det_shin_boot.png", 640f, new Vector2(0.38f, 0.90f));
 
@@ -65,20 +65,20 @@ namespace LightWeaver.EditorTools
             Sprite heroAuraSprite = GenerateSoftDotSprite(Path.Combine(SpritesFolder, "hero_aura_glow.png"));
             Texture2D beamGradientTex = GenerateBeamGradientTexture(Path.Combine(SpritesFolder, "volumetric_beam_gradient.png"));
 
-            // Mısır Dünya Nesneleri & Düşman Engelleri
-            Sprite orbAnkhSprite = LoadAndImportEgyptSprite("egypt_orb_ankh.png", 240f);
-            Sprite jumpPadSprite = LoadAndImportEgyptSprite("egypt_jump_pad.png", 328f);
+            // Uyumlu Mısır Dünya Nesneleri & Düşman Engelleri
+            Sprite orbAnkhSprite = LoadAndImportEgyptSprite("egypt_orb_scarab_wisp.png", 390f);
+            Sprite jumpPadSprite = LoadAndImportEgyptSprite("egypt_jump_vent_altar.png", 310f, new Vector2(0.50f, 0.08f));
             Sprite jumpCoreSprite = GenerateSoftDotSprite(Path.Combine(SpritesFolder, "jump_pad_core.png"));
             Sprite lockSealSprite = LoadAndImportEgyptSprite("egypt_lock_seal.png", 300f);
             Sprite solidBarSprite = GenerateSolidWhiteRectSprite(Path.Combine(SpritesFolder, "diegetic_bar_pixel.png"));
 
-            Sprite shadowPillarSprite = LoadAndImportEgyptSprite("egypt_shadow_obelisk.png", 135f);
-            Sprite umbraStalkerSprite = LoadAndImportEgyptSprite("egypt_umbra_stalker.png", 240f);
-            Sprite voidLeechSprite = LoadAndImportEgyptSprite("egypt_void_leech.png", 240f);
+            Sprite shadowPillarSprite = LoadAndImportEgyptSprite("egypt_shadow_obelisk.png", 140f, new Vector2(0.50f, 0.36f));
+            Sprite umbraStalkerSprite = LoadAndImportEgyptSprite("egypt_umbra_stalker.png", 260f, new Vector2(0.50f, 0.56f));
+            Sprite voidLeechSprite = LoadAndImportEgyptSprite("egypt_void_leech.png", 280f);
             Sprite burstRingSprite = GenerateHollowRingSprite(Path.Combine(SpritesFolder, "flash_burst_ring.png"));
 
-            Sprite gateBarrierSprite = LoadAndImportEgyptSprite("egypt_gate_barrier.png", 64f);
-            Sprite anchorRingSprite = LoadAndImportEgyptSprite("egypt_anchor_hook.png", 180f);
+            Sprite gateBarrierSprite = LoadAndImportEgyptSprite("egypt_gate_barrier.png", 128f);
+            Sprite anchorRingSprite = LoadAndImportEgyptSprite("egypt_swing_sconce.png", 260f, new Vector2(0.500f, 0.280f));
             Sprite eclipseWallSprite = GenerateEclipseWaveSprite(Path.Combine(SpritesFolder, "eclipse_wave_wall.png"));
 
             Sprite pyramidPanoramaSprite = LoadAndImportEgyptSprite("egypt_bg_panorama.png", 66.2f);
@@ -124,22 +124,23 @@ namespace LightWeaver.EditorTools
             DestroyExistingIfFound("=== EGYPT PANORAMA PARALLAX ===");
             DestroyExistingIfFound("=== EGYPT PYRAMIDS FAR ===");
             DestroyExistingIfFound("=== EGYPT DUNES & RUINS ===");
+            DestroyExistingIfFound("=== EGYPT WEATHER & ATMOSPHERE ===");
             DestroyExistingIfFound("=== THE ECLIPSE WAVE ===");
             DestroyExistingIfFound("=== LIGHT WEAVER POSTPROCESS ===");
             DestroyExistingIfFound("=== LIGHT WEAVER UI CANVAS ===");
             DestroyExistingIfFound("EventSystem");
 
-            SetupPostProcessVolume();
+            Volume postProcessVol = SetupPostProcessVolume();
 
-            // 3. Havuz Prefab'ları (Tam Mısır Görselleri ve Doğru Ölçekler)
+            // 3. Havuz Prefab'ları (Tam Uyumlu Mısır Görselleri ve Ölçekleri)
             GameObject platPrefab = SaveCrystalPrefab(crystalStandardSprite, crystalBoostSprite, crystalFragileSprite, crystalUmbraSprite, rimGlowSprite, starburstSprite);
             GameObject orbPrefab = SaveOrbPrefab("PF_EnergyOrb.prefab", false, orbAnkhSprite, heroAuraSprite);
             GameObject superOrbPrefab = SaveOrbPrefab("PF_EnergyOrb_Super.prefab", true, orbAnkhSprite, heroAuraSprite);
             GameObject jumpPadPrefab = SaveJumpPadPrefab(jumpPadSprite, jumpCoreSprite);
             GameObject prismRelayPrefab = SavePrismRelayPrefab(lockSealSprite);
-            GameObject pillarPrefab = SaveHazardPrefab("PF_ShadowPillar.prefab", ShadowHazardType.MovingShadowPillar, shadowPillarSprite, new Vector2(0.90f, 1.05f));
-            GameObject stalkerPrefab = SaveHazardPrefab("PF_UmbraStalker.prefab", ShadowHazardType.UmbraStalker, umbraStalkerSprite, new Vector2(0.92f, 0.92f));
-            GameObject leechPrefab = SaveHazardPrefab("PF_VoidLeech.prefab", ShadowHazardType.VoidLeech, voidLeechSprite, new Vector2(0.90f, 0.90f));
+            GameObject pillarPrefab = SaveHazardPrefab("PF_ShadowPillar.prefab", ShadowHazardType.MovingShadowPillar, shadowPillarSprite, new Vector2(0.86f, 0.90f));
+            GameObject stalkerPrefab = SaveHazardPrefab("PF_UmbraStalker.prefab", ShadowHazardType.UmbraStalker, umbraStalkerSprite, new Vector2(0.86f, 0.86f));
+            GameObject leechPrefab = SaveHazardPrefab("PF_VoidLeech.prefab", ShadowHazardType.VoidLeech, voidLeechSprite, new Vector2(0.80f, 0.80f));
             GameObject gatePrefab = SavePrismGatePrefab(gateBarrierSprite, lockSealSprite);
             GameObject anchorPrefab = SavePhotonAnchorPrefab(anchorRingSprite);
 
@@ -175,8 +176,13 @@ namespace LightWeaver.EditorTools
             mainCam.transform.position = new Vector3(runnerGo.transform.position.x + 4.6f, runnerGo.transform.position.y + 0.9f, -10f);
             PrefabUtility.SaveAsPrefabAsset(runnerGo, Path.Combine(PrefabsFolder, "PF_LightWeaverRunner.prefab"));
 
-            // 5. Kesintisiz Gize Piramitleri Panorama & Ön Çöl Kumul Paralaksı
-            BuildEgyptParallaxLayers(mainCam.transform, pyramidPanoramaSprite, sandDuneSprite, runnerSparkSprite);
+            // 5. Kesintisiz Gize Piramitleri Panorama, Ön Çöl Kumul Paralaksı & Dinamik Hava Sistemi
+            BuildEgyptParallaxLayers(
+                mainCam.transform,
+                pyramidPanoramaSprite,
+                sandDuneSprite,
+                out SpriteRenderer[] panoRenderers,
+                out SpriteRenderer[] duneRenderers);
 
             // 6. Merkezi Sistemler + WorldVfxManager + Eclipse Dalgası
             GameObject systemsRoot = new GameObject("=== LIGHT WEAVER SYSTEMS ===");
@@ -187,6 +193,8 @@ namespace LightWeaver.EditorTools
             HarmonicAudioManager audioMgr = systemsRoot.AddComponent<HarmonicAudioManager>();
             JuiceFeedbackManager juiceMgr = systemsRoot.AddComponent<JuiceFeedbackManager>();
             WorldVfxManager worldVfx = systemsRoot.AddComponent<WorldVfxManager>();
+
+            BuildDesertWeatherSystem(director, mainCam, postProcessVol, panoRenderers, duneRenderers, solidBarSprite, runnerSparkSprite);
 
             // Zero-GC Global Burst ParticleSystem
             GameObject vfxObj = new GameObject("WorldBurstParticles");
@@ -281,11 +289,12 @@ namespace LightWeaver.EditorTools
 
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             EditorSceneManager.SaveOpenScenes();
-            Debug.Log("[LightWeaver Setup] v3.0 Egypt Mystery Complete: Modular Trench-Coat Detective, 210° Beam, Multi-Layer Pyramid Parallax & Sandstone World Built!");
+            Debug.Log("[LightWeaver Setup] v4.0 Egypt Pendulum & Weather Complete: Grapple Rope Swing, Hold Long-Beam, Cohesive Art & Continuous Distance Weather Built!");
         }
 
         private static void ConfigureMobileLandscapeSettings()
         {
+            PlayerSettings.runInBackground = true;
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
             PlayerSettings.allowedAutorotateToPortrait = false;
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
@@ -317,7 +326,7 @@ namespace LightWeaver.EditorTools
             return ps;
         }
 
-        private static void SetupPostProcessVolume()
+        private static Volume SetupPostProcessVolume()
         {
             string profilePath = Path.Combine(DataFolder, "LightWeaverPostProcess.asset").Replace("\\", "/");
             VolumeProfile profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
@@ -330,13 +339,13 @@ namespace LightWeaver.EditorTools
             if (!profile.TryGet(out Bloom bloom)) bloom = profile.Add<Bloom>(true);
             bloom.active = true;
             bloom.threshold.Override(0.75f);
-            bloom.intensity.Override(0.75f);
+            bloom.intensity.Override(0.72f);
             bloom.scatter.Override(0.65f);
 
             if (!profile.TryGet(out Vignette vignette)) vignette = profile.Add<Vignette>(true);
             vignette.active = true;
             vignette.color.Override(new Color(0.01f, 0.02f, 0.06f, 1f));
-            vignette.intensity.Override(0.28f);
+            vignette.intensity.Override(0.26f);
 
             EditorUtility.SetDirty(profile);
 
@@ -344,6 +353,7 @@ namespace LightWeaver.EditorTools
             Volume vol = volGo.AddComponent<Volume>();
             vol.isGlobal = true;
             vol.sharedProfile = profile;
+            return vol;
         }
 
         private static void BuildEventSystem()
@@ -497,7 +507,7 @@ namespace LightWeaver.EditorTools
             scoreRt.anchoredPosition = new Vector2(-132f, -40f);
             scoreRt.sizeDelta = new Vector2(540f, 130f);
 
-            Text sectorText = CreateUIText("SectorTitle", scoreContainer.transform, builtinFont, "LEVEL 1 - <color=#FFD24C>OUTSKIRTS OF GIZA</color>", 23, FontStyle.Bold, TextAnchor.UpperRight, new Color(0.95f, 0.90f, 0.80f, 1f));
+            Text sectorText = CreateUIText("SectorTitle", scoreContainer.transform, builtinFont, "0m  •  <color=#FFD24C>GIZA NIGHTFALL</color>", 23, FontStyle.Bold, TextAnchor.UpperRight, new Color(0.95f, 0.90f, 0.80f, 1f));
             sectorText.supportRichText = true;
             RectTransform secRt = sectorText.GetComponent<RectTransform>();
             secRt.anchorMin = new Vector2(1f, 1f);
@@ -554,7 +564,7 @@ namespace LightWeaver.EditorTools
                 panelSprite,
                 highBeamIconSprite,
                 builtinFont,
-                "LONG: OFF",
+                "LONG [HOLD]",
                 new Vector2(228f, 38f),
                 new Vector2(154f, 128f),
                 new Vector2(72f, 56f),
@@ -639,40 +649,26 @@ namespace LightWeaver.EditorTools
             hudSo.ApplyModifiedPropertiesWithoutUndo();
 
             // =================================================================
-            // 2. ANA MENÜ (Mısır Gizemi, 210° Kontroller & Mobil Aim Modu Seçimi)
+            // 2. ANA MENÜ (Saf Mısır Gizemi, Seviye Butonları Yok, Sabit 210° Kontrol)
             // =================================================================
-            GameObject mainMenuPanel = CreateModalCard("MainMenuPanel", safeRoot.transform, panelSprite, new Vector2(880f, 690f), Color.white);
+            GameObject mainMenuPanel = CreateModalCard("MainMenuPanel", safeRoot.transform, panelSprite, new Vector2(820f, 540f), Color.white);
             Text titleTxt = CreateUIText("Title", mainMenuPanel.transform, builtinFont, "LIGHT WEAVER", 62, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.84f, 0.34f, 1f));
-            SetAnchoredPos(titleTxt.rectTransform, new Vector2(0f, 232f), new Vector2(720f, 76f));
+            SetAnchoredPos(titleTxt.rectTransform, new Vector2(0f, 168f), new Vector2(720f, 76f));
 
-            Text subTxt = CreateUIText("Subtitle", mainMenuPanel.transform, builtinFont, "SANDS OF GIZA  •  210° BEAM: MOUSE / WASD / STICK  •  JUMP: SPACE", 17, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.95f, 0.88f, 0.72f, 0.94f));
-            SetAnchoredPos(subTxt.rectTransform, new Vector2(0f, 178f), new Vector2(800f, 34f));
+            Text subTxt = CreateUIText("Subtitle", mainMenuPanel.transform, builtinFont, "MYSTERY OF GIZA  •  ILLUMINATE, SWING & SURVIVE", 18, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.95f, 0.88f, 0.72f, 0.94f));
+            SetAnchoredPos(subTxt.rectTransform, new Vector2(0f, 110f), new Vector2(760f, 34f));
 
             Text bestTxt = CreateUIText("BestScoreText", mainMenuPanel.transform, builtinFont, "BEST: 0   |   0m", 22, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.16f, 0.90f, 0.82f, 1f));
-            SetAnchoredPos(bestTxt.rectTransform, new Vector2(0f, 128f), new Vector2(640f, 36f));
+            SetAnchoredPos(bestTxt.rectTransform, new Vector2(0f, 62f), new Vector2(640f, 36f));
 
-            Button[] sectorBtns = new Button[5];
-            for (int i = 0; i < 5; i++)
-            {
-                Button sBtn = CreateNeonButton($"SectorBtn_{i + 1}", mainMenuPanel.transform, panelSprite, builtinFont, $"L{i + 1}", 22, new Color(0.62f, 0.60f, 0.66f, 0.92f), new Color(1.0f, 0.94f, 0.80f, 1f), new Vector2(100f, 56f));
-                SetAnchoredPos(sBtn.GetComponent<RectTransform>(), new Vector2((i - 2) * 116f, 56f), new Vector2(100f, 56f));
-                sectorBtns[i] = sBtn;
-            }
+            Button playBtn = CreateNeonButton("PlayButton", mainMenuPanel.transform, panelSprite, builtinFont, "EXPLORE THE PYRAMIDS", 26, new Color(1.0f, 0.88f, 0.45f, 1f), new Color(1.0f, 0.94f, 0.70f, 1f), new Vector2(420f, 86f));
+            SetAnchoredPos(playBtn.GetComponent<RectTransform>(), new Vector2(0f, -26f), new Vector2(420f, 86f));
 
-            Text secInfoTxt = CreateUIText("SelectedSectorInfo", mainMenuPanel.transform, builtinFont, "LEVEL 1 - OUTSKIRTS OF GIZA", 20, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.84f, 0.34f, 0.98f));
-            SetAnchoredPos(secInfoTxt.rectTransform, new Vector2(0f, 2f), new Vector2(620f, 32f));
+            Button musicBtn = CreateNeonButton("MusicToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "MUSIC: ON", 18, new Color(0.84f, 0.84f, 0.88f, 0.95f), new Color(0.95f, 0.90f, 0.78f, 1f), new Vector2(220f, 56f));
+            SetAnchoredPos(musicBtn.GetComponent<RectTransform>(), new Vector2(-128f, -142f), new Vector2(220f, 56f));
 
-            Button playBtn = CreateNeonButton("PlayButton", mainMenuPanel.transform, panelSprite, builtinFont, "EXPLORE THE PYRAMIDS", 26, new Color(1.0f, 0.88f, 0.45f, 1f), new Color(1.0f, 0.94f, 0.70f, 1f), new Vector2(410f, 84f));
-            SetAnchoredPos(playBtn.GetComponent<RectTransform>(), new Vector2(0f, -84f), new Vector2(410f, 84f));
-
-            Button musicBtn = CreateNeonButton("MusicToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "MUSIC: ON", 18, new Color(0.84f, 0.84f, 0.88f, 0.95f), new Color(0.95f, 0.90f, 0.78f, 1f), new Vector2(215f, 56f));
-            SetAnchoredPos(musicBtn.GetComponent<RectTransform>(), new Vector2(-240f, -205f), new Vector2(215f, 56f));
-
-            Button sfxBtn = CreateNeonButton("SfxToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "ASMR SFX: ON", 18, new Color(0.84f, 0.84f, 0.88f, 0.95f), new Color(0.95f, 0.90f, 0.78f, 1f), new Vector2(215f, 56f));
-            SetAnchoredPos(sfxBtn.GetComponent<RectTransform>(), new Vector2(0f, -205f), new Vector2(215f, 56f));
-
-            Button aimBtn = CreateNeonButton("AimModeToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "AIM: 210 STICK", 18, new Color(0.84f, 0.88f, 0.92f, 0.95f), new Color(1.0f, 0.86f, 0.36f, 1f), new Vector2(230f, 56f));
-            SetAnchoredPos(aimBtn.GetComponent<RectTransform>(), new Vector2(245f, -205f), new Vector2(230f, 56f));
+            Button sfxBtn = CreateNeonButton("SfxToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "ASMR SFX: ON", 18, new Color(0.84f, 0.84f, 0.88f, 0.95f), new Color(0.95f, 0.90f, 0.78f, 1f), new Vector2(220f, 56f));
+            SetAnchoredPos(sfxBtn.GetComponent<RectTransform>(), new Vector2(128f, -142f), new Vector2(220f, 56f));
 
             // =================================================================
             // 3. PAUSE, GAME OVER & BLESSING CARDS
@@ -698,7 +694,7 @@ namespace LightWeaver.EditorTools
             Text goScoreTxt = CreateUIText("GameOverScore", gameOverPanel.transform, builtinFont, "SCORE: 0", 34, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.94f, 0.80f, 1f));
             SetAnchoredPos(goScoreTxt.rectTransform, new Vector2(0f, 115f), new Vector2(540f, 46f));
 
-            Text goDistTxt = CreateUIText("GameOverDistance", gameOverPanel.transform, builtinFont, "DISTANCE: 0m  |  LEVEL 1", 22, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.16f, 0.90f, 0.82f, 0.98f));
+            Text goDistTxt = CreateUIText("GameOverDistance", gameOverPanel.transform, builtinFont, "DISTANCE: 0m  |  GIZA NIGHTFALL", 22, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.16f, 0.90f, 0.82f, 0.98f));
             SetAnchoredPos(goDistTxt.rectTransform, new Vector2(0f, 66f), new Vector2(540f, 34f));
 
             Text newBestObj = CreateUIText("NewBestBadge", gameOverPanel.transform, builtinFont, "★ NEW RECORD! ★", 22, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.85f, 0.15f, 1f));
@@ -751,16 +747,10 @@ namespace LightWeaver.EditorTools
 
             menuSo.FindProperty("playButton").objectReferenceValue = playBtn;
             menuSo.FindProperty("mainBestScoreText").objectReferenceValue = bestTxt;
-            SerializedProperty secBtnsProp = menuSo.FindProperty("sectorSelectButtons");
-            secBtnsProp.arraySize = sectorBtns.Length;
-            for (int i = 0; i < sectorBtns.Length; i++) secBtnsProp.GetArrayElementAtIndex(i).objectReferenceValue = sectorBtns[i];
-            menuSo.FindProperty("selectedSectorInfoText").objectReferenceValue = secInfoTxt;
             menuSo.FindProperty("musicToggleButton").objectReferenceValue = musicBtn;
             menuSo.FindProperty("musicToggleLabel").objectReferenceValue = musicBtn.GetComponentInChildren<Text>();
             menuSo.FindProperty("sfxToggleButton").objectReferenceValue = sfxBtn;
             menuSo.FindProperty("sfxToggleLabel").objectReferenceValue = sfxBtn.GetComponentInChildren<Text>();
-            menuSo.FindProperty("aimModeToggleButton").objectReferenceValue = aimBtn;
-            menuSo.FindProperty("aimModeToggleLabel").objectReferenceValue = aimBtn.GetComponentInChildren<Text>();
 
             menuSo.FindProperty("resumeButton").objectReferenceValue = resumeBtn;
             menuSo.FindProperty("pauseRestartButton").objectReferenceValue = pauseRestartBtn;
@@ -933,11 +923,11 @@ namespace LightWeaver.EditorTools
         {
             var specs = new (int num, string title, float dist, Color bg, Color accent, Color sec, float speed, float drain, float haz, float prism)[]
             {
-                (1, "OUTSKIRTS OF GIZA",      90f,  new Color(0.032f, 0.038f, 0.088f, 1f), new Color(1.00f, 0.82f, 0.30f, 1f), new Color(0.00f, 0.85f, 0.78f, 1f), 1.00f, 0.85f, 0.14f, 0.15f),
-                (2, "THE SANDSTONE TOMBS",    115f, new Color(0.038f, 0.032f, 0.082f, 1f), new Color(0.05f, 0.88f, 0.82f, 1f), new Color(0.95f, 0.68f, 0.22f, 1f), 1.07f, 1.00f, 0.25f, 0.30f),
-                (3, "CHAMBER OF ANUBIS",      125f, new Color(0.045f, 0.026f, 0.068f, 1f), new Color(0.96f, 0.56f, 0.18f, 1f), new Color(0.68f, 0.30f, 0.88f, 1f), 1.14f, 1.15f, 0.36f, 0.24f),
-                (4, "HALL OF SCARABS",        135f, new Color(0.024f, 0.040f, 0.078f, 1f), new Color(0.18f, 0.92f, 0.72f, 1f), new Color(1.00f, 0.78f, 0.24f, 1f), 1.22f, 1.28f, 0.44f, 0.28f),
-                (5, "THE PHARAOH'S VAULT",    150f, new Color(0.055f, 0.020f, 0.048f, 1f), new Color(1.00f, 0.24f, 0.38f, 1f), new Color(1.00f, 0.84f, 0.28f, 1f), 1.32f, 1.42f, 0.52f, 0.30f),
+                (1, "GIZA NIGHTFALL",     240f, new Color(0.035f, 0.045f, 0.102f, 1f), new Color(1.00f, 0.82f, 0.30f, 1f), new Color(0.00f, 0.85f, 0.78f, 1f), 1.00f, 0.88f, 0.16f, 0.16f),
+                (2, "KHAMSIN SANDSTORM",  280f, new Color(0.125f, 0.072f, 0.095f, 1f), new Color(0.96f, 0.60f, 0.24f, 1f), new Color(0.95f, 0.72f, 0.38f, 1f), 1.08f, 1.02f, 0.26f, 0.28f),
+                (3, "NECROPOLIS MIST",    340f, new Color(0.032f, 0.105f, 0.135f, 1f), new Color(0.18f, 0.90f, 0.78f, 1f), new Color(0.92f, 0.82f, 0.42f, 1f), 1.15f, 1.15f, 0.36f, 0.24f),
+                (4, "BLOOD ECLIPSE",      390f, new Color(0.125f, 0.038f, 0.078f, 1f), new Color(0.96f, 0.30f, 0.36f, 1f), new Color(1.00f, 0.76f, 0.28f, 1f), 1.23f, 1.28f, 0.45f, 0.28f),
+                (5, "HEART OF THE DUAT",  450f, new Color(0.070f, 0.038f, 0.138f, 1f), new Color(0.78f, 0.58f, 1.00f, 1f), new Color(1.00f, 0.84f, 0.28f, 1f), 1.32f, 1.40f, 0.52f, 0.30f),
             };
 
             SectorProfileSO[] result = new SectorProfileSO[specs.Length];
@@ -1034,8 +1024,11 @@ namespace LightWeaver.EditorTools
             Transform coatTailBackPivot = CreateLimbPivot("CoatTailBackPivot", bodyPivot.transform, new Vector3(-0.08f, -0.02f, 0f), new Vector3(0.76f, 0.76f, 1f), Vector3.zero, coatTailSprite, new Color(0.80f, 0.74f, 0.68f, 1f), 10);
             Transform coatTailFrontPivot = CreateLimbPivot("CoatTailFrontPivot", bodyPivot.transform, new Vector3(-0.01f, -0.04f, 0f), new Vector3(0.78f, 0.78f, 1f), Vector3.zero, coatTailSprite, Color.white, 15);
 
-            // Arka Kol (Gövde arkasında dengeli salınır)
-            Transform backArmPivot = CreateLimbPivot("BackArmPivot", bodyPivot.transform, new Vector3(0.11f, 0.34f, 0f), new Vector3(0.82f, 0.82f, 1f), Vector3.zero, backArmSprite, new Color(0.76f, 0.70f, 0.65f, 1f), 10);
+            // Arka Kol (Gövde arkasında halat/kırbaç rulosu tutan diğer el)
+            Transform backArmPivot = CreateLimbPivot("BackArmPivot", bodyPivot.transform, new Vector3(0.11f, 0.34f, 0f), new Vector3(0.84f, 0.84f, 1f), Vector3.zero, backArmSprite, new Color(0.84f, 0.78f, 0.72f, 1f), 10);
+            GameObject ropeHandTip = new GameObject("RopeHandTip");
+            ropeHandTip.transform.SetParent(backArmPivot, false);
+            ropeHandTip.transform.localPosition = new Vector3(0.216f, -0.224f, 0f);
 
             // Trençkot Gövde (1:1 orantılı el boyaması)
             GameObject torsoGo = new GameObject("DetectiveTorsoSprite");
@@ -1195,6 +1188,7 @@ namespace LightWeaver.EditorTools
             animSo.FindProperty("backShinPivot").objectReferenceValue = backShinPivot;
             animSo.FindProperty("backArmPivot").objectReferenceValue = backArmPivot;
             animSo.FindProperty("backForearmPivot").objectReferenceValue = null;
+            animSo.FindProperty("ropeHandTip").objectReferenceValue = ropeHandTip.transform;
             animSo.FindProperty("coatTailFrontPivot").objectReferenceValue = coatTailFrontPivot;
             animSo.FindProperty("coatTailBackPivot").objectReferenceValue = coatTailBackPivot;
             animSo.FindProperty("suitBatteryGaugeFill").objectReferenceValue = gaugeFillPivot.transform;
@@ -1313,10 +1307,16 @@ namespace LightWeaver.EditorTools
             return tr;
         }
 
-        private static void BuildEgyptParallaxLayers(Transform camTransform, Sprite panoramaSprite, Sprite duneSprite, Sprite dotSprite)
+        private static void BuildEgyptParallaxLayers(
+            Transform camTransform,
+            Sprite panoramaSprite,
+            Sprite duneSprite,
+            out SpriteRenderer[] panoRenderers,
+            out SpriteRenderer[] duneRenderers)
         {
             // Katman 1 (Uzak): El Boyaması Kesintisiz Gize Piramitleri, Sfenks & Çöl Dolunayı Panoraması
             GameObject panoRoot = new GameObject("=== EGYPT PANORAMA PARALLAX ===");
+            panoRenderers = new SpriteRenderer[3];
             float tileW = 19.33f;
             for (int i = -1; i <= 1; i++)
             {
@@ -1327,6 +1327,7 @@ namespace LightWeaver.EditorTools
                 SpriteRenderer sr = tile.AddComponent<SpriteRenderer>();
                 sr.sprite = panoramaSprite;
                 sr.sortingOrder = -25;
+                panoRenderers[i + 1] = sr;
             }
 
             ParallaxStarfield panoParallax = panoRoot.AddComponent<ParallaxStarfield>();
@@ -1339,6 +1340,7 @@ namespace LightWeaver.EditorTools
 
             // Katman 2 (Yakın-Orta): İnce Ön Çöl Kumul Silüetleri (Derinlik Ayırıcı)
             GameObject midRoot = new GameObject("=== EGYPT DUNES & RUINS ===");
+            duneRenderers = new SpriteRenderer[8];
             for (int i = 0; i < 8; i++)
             {
                 GameObject dune = new GameObject($"DesertDune_{i:00}");
@@ -1348,8 +1350,9 @@ namespace LightWeaver.EditorTools
 
                 SpriteRenderer sr = dune.AddComponent<SpriteRenderer>();
                 sr.sprite = duneSprite;
-                sr.color = new Color(0.14f, 0.11f, 0.16f, 0.94f);
+                sr.color = new Color(0.14f, 0.11f, 0.17f, 0.94f);
                 sr.sortingOrder = -16;
+                duneRenderers[i] = sr;
             }
 
             ParallaxStarfield midParallax = midRoot.AddComponent<ParallaxStarfield>();
@@ -1359,6 +1362,93 @@ namespace LightWeaver.EditorTools
             midSo.FindProperty("fieldHeight").floatValue = 36f;
             midSo.FindProperty("parallaxFactor").floatValue = 0.60f;
             midSo.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void BuildDesertWeatherSystem(
+            EndlessChunkDirector director,
+            Camera mainCam,
+            Volume postProcessVol,
+            SpriteRenderer[] panoRenderers,
+            SpriteRenderer[] duneRenderers,
+            Sprite solidSprite,
+            Sprite dotSprite)
+        {
+            GameObject weatherRoot = new GameObject("=== EGYPT WEATHER & ATMOSPHERE ===");
+            Vector3 camPos = mainCam != null ? mainCam.transform.position : Vector3.zero;
+            weatherRoot.transform.position = new Vector3(camPos.x, camPos.y, 0f);
+
+            // Yumuşak Atmosferik Sis / Kum Fırtınası Pus Perdesi
+            GameObject hazeGo = new GameObject("WeatherHazeOverlay");
+            hazeGo.transform.SetParent(weatherRoot.transform, false);
+            hazeGo.transform.localScale = new Vector3(36f, 20f, 1f);
+            SpriteRenderer hazeSr = hazeGo.AddComponent<SpriteRenderer>();
+            hazeSr.sprite = solidSprite;
+            hazeSr.color = new Color(0.05f, 0.07f, 0.16f, 0f);
+            hazeSr.sortingOrder = -12;
+
+            // Hamsin Kum Rüzgarı Şeritleri
+            GameObject windGo = new GameObject("SandWindParticles");
+            windGo.transform.SetParent(weatherRoot.transform, false);
+            windGo.transform.localPosition = new Vector3(13f, 0f, 0f);
+            ParticleSystem windPs = windGo.AddComponent<ParticleSystem>();
+            var wMain = windPs.main;
+            wMain.startLifetime = 2.6f;
+            wMain.startSpeed = 5.5f;
+            wMain.startSize = new ParticleSystem.MinMaxCurve(0.06f, 0.14f);
+            wMain.startColor = new Color(0.88f, 0.78f, 0.54f, 0.18f);
+            wMain.simulationSpace = ParticleSystemSimulationSpace.Local;
+            wMain.maxParticles = 160;
+            var wEmit = windPs.emission;
+            wEmit.rateOverTime = 2f;
+            var wShape = windPs.shape;
+            wShape.shapeType = ParticleSystemShapeType.Box;
+            wShape.scale = new Vector3(1f, 13f, 0.1f);
+            var wVel = windPs.velocityOverLifetime;
+            wVel.enabled = false;
+            windGo.transform.localRotation = Quaternion.Euler(0f, 0f, 184f); // Sağdan sola hafif rüzgar
+            var wRen = windGo.GetComponent<ParticleSystemRenderer>();
+            wRen.renderMode = ParticleSystemRenderMode.Stretch;
+            wRen.lengthScale = 6.5f;
+            wRen.sortingOrder = 19;
+            Shader shader = Shader.Find("Sprites/Default");
+            if (shader != null) wRen.sharedMaterial = new Material(shader) { mainTexture = dotSprite.texture };
+
+            // Mistik Çöl Ateşböceği / Tapınak Sisi / Tutulma Külü Parçacıkları
+            GameObject moteGo = new GameObject("AmbientMoteParticles");
+            moteGo.transform.SetParent(weatherRoot.transform, false);
+            ParticleSystem motePs = moteGo.AddComponent<ParticleSystem>();
+            var mMain = motePs.main;
+            mMain.startLifetime = 4.2f;
+            mMain.startSpeed = new ParticleSystem.MinMaxCurve(0.35f, 1.1f);
+            mMain.startSize = new ParticleSystem.MinMaxCurve(0.07f, 0.17f);
+            mMain.startColor = new Color(1.0f, 0.88f, 0.56f, 0.34f);
+            mMain.simulationSpace = ParticleSystemSimulationSpace.Local;
+            mMain.maxParticles = 140;
+            var mEmit = motePs.emission;
+            mEmit.rateOverTime = 6f;
+            var mShape = motePs.shape;
+            mShape.shapeType = ParticleSystemShapeType.Box;
+            mShape.scale = new Vector3(24f, 12.5f, 0.1f);
+            var mRen = moteGo.GetComponent<ParticleSystemRenderer>();
+            mRen.sortingOrder = 19;
+            if (shader != null) mRen.sharedMaterial = new Material(shader) { mainTexture = dotSprite.texture };
+
+            DesertAtmosphereController atmo = weatherRoot.AddComponent<DesertAtmosphereController>();
+            SerializedObject atmoSo = new SerializedObject(atmo);
+            atmoSo.FindProperty("chunkDirector").objectReferenceValue = director;
+            atmoSo.FindProperty("targetCamera").objectReferenceValue = mainCam;
+            atmoSo.FindProperty("postProcessVolume").objectReferenceValue = postProcessVol;
+            atmoSo.FindProperty("cameraFollowAnchor").objectReferenceValue = weatherRoot.transform;
+            atmoSo.FindProperty("weatherHazeRenderer").objectReferenceValue = hazeSr;
+            SerializedProperty panoProp = atmoSo.FindProperty("panoramaRenderers");
+            panoProp.arraySize = panoRenderers.Length;
+            for (int i = 0; i < panoRenderers.Length; i++) panoProp.GetArrayElementAtIndex(i).objectReferenceValue = panoRenderers[i];
+            SerializedProperty duneProp = atmoSo.FindProperty("duneRenderers");
+            duneProp.arraySize = duneRenderers.Length;
+            for (int i = 0; i < duneRenderers.Length; i++) duneProp.GetArrayElementAtIndex(i).objectReferenceValue = duneRenderers[i];
+            atmoSo.FindProperty("sandWindParticles").objectReferenceValue = windPs;
+            atmoSo.FindProperty("ambientMoteParticles").objectReferenceValue = motePs;
+            atmoSo.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static GameObject SaveCrystalPrefab(Sprite stdSprite, Sprite boostSprite, Sprite fragileSprite, Sprite umbraSprite, Sprite rimSprite, Sprite starSprite)
@@ -1412,26 +1502,26 @@ namespace LightWeaver.EditorTools
             return prefab;
         }
 
-        private static GameObject SaveOrbPrefab(string fileName, bool isSuper, Sprite ankhRelicSprite, Sprite auraSprite)
+        private static GameObject SaveOrbPrefab(string fileName, bool isSuper, Sprite wispRelicSprite, Sprite auraSprite)
         {
             GameObject go = new GameObject(fileName.Replace(".prefab", ""));
-            float s = isSuper ? 1.18f : 0.96f;
+            float s = isSuper ? 0.94f : 0.78f;
             go.transform.localScale = new Vector3(s, s, 1f);
 
             SpriteRenderer frameSr = go.AddComponent<SpriteRenderer>();
-            frameSr.sprite = ankhRelicSprite;
+            frameSr.sprite = wispRelicSprite;
             frameSr.sortingOrder = 17;
 
             CircleCollider2D col = go.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
-            col.radius = 0.55f;
+            col.radius = 0.56f;
 
             GameObject auraObj = new GameObject("OrbHalo");
             auraObj.transform.SetParent(go.transform, false);
-            auraObj.transform.localScale = new Vector3(1.65f, 1.65f, 1f);
+            auraObj.transform.localScale = new Vector3(1.38f, 1.38f, 1f);
             SpriteRenderer auraSr = auraObj.AddComponent<SpriteRenderer>();
             auraSr.sprite = auraSprite;
-            auraSr.color = isSuper ? new Color(1f, 0.88f, 0.36f, 0.36f) : new Color(1f, 0.80f, 0.25f, 0.26f);
+            auraSr.color = isSuper ? new Color(0.28f, 0.92f, 0.84f, 0.32f) : new Color(1f, 0.82f, 0.34f, 0.24f);
             auraSr.sortingOrder = 16;
 
             EnergyOrb orb = go.AddComponent<EnergyOrb>();
@@ -1448,7 +1538,7 @@ namespace LightWeaver.EditorTools
         private static GameObject SaveJumpPadPrefab(Sprite jumpPadSprite, Sprite coreSprite)
         {
             GameObject go = new GameObject("PF_PrismaticJumpPad");
-            go.transform.localScale = new Vector3(1.65f, 1.0f, 1f);
+            go.transform.localScale = new Vector3(0.95f, 0.95f, 1f);
 
             SpriteRenderer ringSr = go.AddComponent<SpriteRenderer>();
             ringSr.sprite = jumpPadSprite;
@@ -1456,14 +1546,16 @@ namespace LightWeaver.EditorTools
 
             BoxCollider2D col = go.AddComponent<BoxCollider2D>();
             col.isTrigger = true;
-            col.size = new Vector2(0.92f, 0.45f);
+            col.offset = new Vector2(0f, 0.34f);
+            col.size = new Vector2(1.48f, 0.60f);
 
-            GameObject coreObj = new GameObject("InnerOrangeCore");
+            GameObject coreObj = new GameObject("InnerWindGlow");
             coreObj.transform.SetParent(go.transform, false);
-            coreObj.transform.localScale = new Vector3(0.55f, 0.36f, 1f);
+            coreObj.transform.localPosition = new Vector3(0f, 0.44f, 0f);
+            coreObj.transform.localScale = new Vector3(0.95f, 0.32f, 1f);
             SpriteRenderer coreSr = coreObj.AddComponent<SpriteRenderer>();
             coreSr.sprite = coreSprite;
-            coreSr.color = new Color(1f, 0.72f, 0.18f, 0.48f);
+            coreSr.color = new Color(0.24f, 0.88f, 0.80f, 0.42f);
             coreSr.sortingOrder = 11;
 
             PrismaticJumpPad pad = go.AddComponent<PrismaticJumpPad>();
@@ -1479,7 +1571,7 @@ namespace LightWeaver.EditorTools
         private static GameObject SavePrismRelayPrefab(Sprite prismSprite)
         {
             GameObject go = new GameObject("PF_PrismRelay");
-            go.transform.localScale = new Vector3(0.95f, 0.95f, 1f);
+            go.transform.localScale = new Vector3(0.85f, 0.85f, 1f);
 
             SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = prismSprite;
@@ -1511,7 +1603,8 @@ namespace LightWeaver.EditorTools
             {
                 BoxCollider2D box = go.AddComponent<BoxCollider2D>();
                 box.isTrigger = true;
-                box.size = new Vector2(0.82f, 0.92f);
+                box.offset = new Vector2(0f, -0.04f);
+                box.size = new Vector2(0.76f, 2.05f);
             }
             else
             {
@@ -1532,41 +1625,56 @@ namespace LightWeaver.EditorTools
 
         private static GameObject SavePrismGatePrefab(Sprite barrierSprite, Sprite lockDiamondSprite)
         {
+            // ÖNEMLİ: Kök ölçeği (1,1,1) tutulur; üstteki mühür asla ezilmez/büzülmez!
             GameObject go = new GameObject("PF_PrismLockGate");
-            go.transform.localScale = new Vector3(0.62f, 3.4f, 1f);
-
-            SpriteRenderer barrierSr = go.AddComponent<SpriteRenderer>();
-            barrierSr.sprite = barrierSprite;
-            barrierSr.sortingOrder = 16;
+            go.transform.localScale = Vector3.one;
 
             BoxCollider2D col = go.AddComponent<BoxCollider2D>();
             col.isTrigger = true;
-            col.size = new Vector2(0.85f, 1.0f);
+            col.size = new Vector2(0.56f, 3.20f);
+
+            GameObject barrierVisualObj = new GameObject("BarrierVisual");
+            barrierVisualObj.transform.SetParent(go.transform, false);
+            barrierVisualObj.transform.localScale = new Vector3(0.76f, 0.84f, 1f);
+            SpriteRenderer barrierSr = barrierVisualObj.AddComponent<SpriteRenderer>();
+            barrierSr.sprite = barrierSprite;
+            barrierSr.sortingOrder = 16;
 
             GameObject lockObj = new GameObject("DiamondLockSwitch");
             lockObj.transform.SetParent(go.transform, false);
-            lockObj.transform.localPosition = new Vector3(0f, 0.72f, 0f);
-            lockObj.transform.localScale = new Vector3(1.75f, 0.32f, 1f);
+            lockObj.transform.localPosition = new Vector3(0f, 2.28f, 0f);
+            lockObj.transform.localScale = new Vector3(0.84f, 0.84f, 1f);
             SpriteRenderer lockSr = lockObj.AddComponent<SpriteRenderer>();
             lockSr.sprite = lockDiamondSprite;
             lockSr.sortingOrder = 19;
 
-            // Bariyer ile Elmas Kilit arasındaki bağlantı ışığı
+            // Bariyer ile üst Eye-of-Ra kilidi arasındaki antik mühür bağ ışığı
             LineRenderer linkLine = go.AddComponent<LineRenderer>();
             linkLine.useWorldSpace = false;
             linkLine.positionCount = 2;
-            linkLine.SetPosition(0, new Vector3(0f, 0.45f, 0f));
-            linkLine.SetPosition(1, new Vector3(0f, 0.72f, 0f));
-            linkLine.startWidth = 0.08f;
-            linkLine.endWidth = 0.08f;
+            linkLine.SetPosition(0, new Vector3(0f, 1.56f, 0f));
+            linkLine.SetPosition(1, new Vector3(0f, 2.28f, 0f));
+            linkLine.startWidth = 0.06f;
+            linkLine.endWidth = 0.06f;
             linkLine.sortingOrder = 17;
             Shader shader = Shader.Find("Sprites/Default");
-            if (shader != null) linkLine.sharedMaterial = new Material(shader);
-            linkLine.startColor = new Color(0.95f, 0.34f, 0.24f, 0.88f);
-            linkLine.endColor = new Color(1.0f, 0.84f, 0.32f, 0.96f);
+            if (shader != null)
+            {
+                string lineMatPath = Path.Combine(DataFolder, "TempleWardLineMat.mat").Replace("\\", "/");
+                Material lineMat = AssetDatabase.LoadAssetAtPath<Material>(lineMatPath);
+                if (lineMat == null)
+                {
+                    lineMat = new Material(shader);
+                    AssetDatabase.CreateAsset(lineMat, lineMatPath);
+                }
+                linkLine.sharedMaterial = lineMat;
+            }
+            linkLine.startColor = new Color(0.88f, 0.42f, 0.22f, 0.82f);
+            linkLine.endColor = new Color(1.0f, 0.84f, 0.36f, 0.92f);
 
             PrismLockGate gate = go.AddComponent<PrismLockGate>();
             SerializedObject so = new SerializedObject(gate);
+            so.FindProperty("barrierVisualRenderer").objectReferenceValue = barrierSr;
             so.FindProperty("diamondLockRenderer").objectReferenceValue = lockSr;
             so.FindProperty("diamondLockTransform").objectReferenceValue = lockObj.transform;
             so.FindProperty("lockTetherLine").objectReferenceValue = linkLine;
@@ -1580,7 +1688,7 @@ namespace LightWeaver.EditorTools
         private static GameObject SavePhotonAnchorPrefab(Sprite anchorSprite)
         {
             GameObject go = new GameObject("PF_PhotonAnchor");
-            go.transform.localScale = new Vector3(1.15f, 1.15f, 1f);
+            go.transform.localScale = new Vector3(0.95f, 0.95f, 1f);
 
             SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = anchorSprite;

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b36d27ba76d493748a17233674202818
+guid: 97ac9d312bf1f024ea9200356ec0adbd
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4391711163534162789
-    second: egypt_anchor_hook_0
+      213: 8278747513918434946
+    second: det_back_arm_rope_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,9 +49,9 @@ TextureImporter:
   spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 0
-  spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 180
+  alignment: 9
+  spritePivot: {x: 0.213, y: 0.858}
+  spritePixelsToUnits: 720
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: egypt_anchor_hook_0
+      name: det_back_arm_rope_0
       rect:
         serializedVersion: 2
         x: 3
         y: 3
-        width: 174
-        height: 180
+        width: 403
+        height: 481
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 56b3292f80e72fc30800000000000000
-      internalID: 4391711163534162789
+      spriteID: 28ea140500504e270800000000000000
+      internalID: 8278747513918434946
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      egypt_anchor_hook_0: 4391711163534162789
+      det_back_arm_rope_0: 8278747513918434946
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

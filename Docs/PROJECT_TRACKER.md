@@ -7,7 +7,7 @@
 
 ## 📊 Genel İlerleme Durumu
 
-- **Aktif Faz:** v3.0 Mısır Gizemi Konsepti Tamamlandı — Modüler Trençkotlu Dedektif Rig'i, 3 Katmanlı Piramit/Çöl Paralaksı, 210° (`-105°..+105°`) Fener & Sol Alt `JUMP`/`LONG: OFF-ON` İkonlu Kontroller Hazır (Faz 6: Monetizasyon Bekleniyor) 🏺🔦📱
+- **Aktif Faz:** v4.0 Sarkaç Halat Salınımı, Basılı Tutmalı Uzun Fener, Bütünleşik Dünya Sanatı & Mesafe Bazlı Yumuşak Hava Geçişleri Tamamlandı (Faz 6: Monetizasyon Bekleniyor) 🏺🪢🏜️
 - **Hedef Motor:** Unity 6 (URP 2D) + Unity MCP (`com.coplaydev.unity-mcp`)
 - **Depo Konumu:** `C:\Users\Yusuf\Documents\GitHub\Light-Weaver` (`https://github.com/RozZyen/Light-Weaver`)
 - **Son Güncelleme:** 2026-11-10
@@ -59,7 +59,8 @@
 | **F5.2** | **Menü Akışı & Checkpoint/Revive** | Ana Menü, Sektör Seçimi (`L1..L5`), Duraklatma (ESC/Pause) & `Solar Revive` köprüsü | ✅ Tamamlandı |
 | **F5.3** | **`HarmonicAudioManager` & Görsel Cila** | Prosedürel Do Minör Pentatonik kristal cam/çan ASMR, Hit-Stop, Shake & URP Bloom | ✅ Tamamlandı |
 | **F5.4** | **360° Fener, Mobil Ergonomi & VFX Cila (v2.1)** | Tam 360° huzme + `1:1` ölçek fix, `EnhancedTouch` 360° Floating Stick / Touch Point, `WorldVfxManager` & 4 ayrı kristal görseli | ✅ Tamamlandı |
-| **F5.5** | **Mısır Gizemi & Modüler Dedektif Dönüşümü (v3.0)** | Modüler 2-eklemli trençkotlu dedektif, 3 katmanlı Piramit/Kumul paralaks, `210°` (`-105°..+105°`) yay & sol alt `LONG BEAM` toggle | ✅ Tamamlandı |
+| **F5.5** | **Mısır Gizemi & Modüler Dedektif Dönüşümü (v3.0)** | Modüler 2-eklemli trençkotlu dedektif, 3 katmanlı Piramit/Kumul paralaks, `210°` (`-105°..+105°`) yay & sol alt `LONG` kontrolü | ✅ Tamamlandı |
+| **F5.6** | **Sarkaç Halat Salınımı, Bütünleşik Sanat & Hava Geçişi (v4.0)** | Işıkla tutunulan sarkaç salınımı (`BackArm` ipi), basılı tutmalı uzun fener, L1–L5 & Aim ayarı kaldırma, `DesertAtmosphereController` | ✅ Tamamlandı |
 
 ### 📱 Faz 6: Mobil Mağaza Hazırlığı, Monetizasyon & Cila
 | Görev Kodu | Görev / Özellik | Detay | Durum |
@@ -70,6 +71,12 @@
 ---
 
 ## 📜 Geliştirme Günlüğü (Changelog)
+
+### [2026-11-10] — v1.0.0 (v4.0): Işık Tutmalı Sarkaç Salınımı, Bütünleşik Mısır Sanat Paketi, Hold Uzun Fener & Dinamik Çöl Havası
+- **Sarkaç Halat Salınımı & İpli Diğer Kol (`RunnerMotor2D.cs`, `PhotonAnchor.cs`, `RunnerProceduralAnimator.cs`):** Tek seferlik itme yerine, fener ışığı tavandaki **Horus Güneş Halkası (`egypt_swing_sconce.png`)** üzerinde tutulduğu sürece dedektif diğer elindeki halatı (`det_back_arm_rope.png` / `RopeHandTip`) uzatıp halkaya bağlar ve polar sarkaç fiziğiyle sallanır. Işığı başka yöne çekince veya `Jump`'a basınca teğetsel ivmeyle fırlayarak devam eder.
+- **Basılı Tutmalı Uzun Fener (`LightTouchInput.cs`, `LightWeaverHUD.cs`):** `MobileHighBeamBtn` (`LONG [HOLD]` / `LONG: ON`) açık-kapalı kilit olmaktan çıkarılarak yalnızca basılı tutulduğu sürece aktif kalacak şekilde (`EventTrigger` PointerDown/Up) güncellendi.
+- **Bütünleşik Dünya & Düşman Sanatı (`LightWeaverSetupUtility.cs`, `PrismLockGate.cs`, `ShadowHazard.cs`, `PrismaticJumpPad.cs`):** Uyumsuz gemi çapası/Ankh madalyonu/eğik kalkan kaldırılıp zincirli Horus Güneş Halkası, şeffaf alevli Skarabe Işık Reliği (`egypt_orb_scarab_wisp.png`), yan cephe Kumtaşı Zıplama Altarı (`egypt_jump_vent_altar.png`), duman kuyruklu Kum Hayaleti (`egypt_umbra_stalker.png`), zincirli Dikilitaş Tuzağı (`egypt_shadow_obelisk.png`), titreyen Gece Skarabı (`egypt_void_leech.png`) ve ölçek düzeltmeli Tapınak Mühür Kapısı (`TempleWardLineMat.mat`) entegre edildi.
+- **Menü Sadeleştirme & Mesafe Bazlı Yumuşak Hava Geçişi (`MenuScreensUI.cs`, `DesertAtmosphereController.cs`):** Ana menüdeki `L1..L5` seviye seçici ve Aim ayarı kaldırılarak tüm oyun `210°` standardına sabitlendi. İlerlenen metreyle (`0m Giza Nightfall` -> `240m Khamsin Sandstorm` -> `520m Necropolis Mist` -> `860m Blood Eclipse` -> `1250m Heart of the Duat`) gökyüzü, piramitler, Hamsin kum şeritleri, pus ve URP Bloom/Vignette **SmoothStep** ile yumuşakça dönüşür.
 
 ### [2026-11-10] — v0.9.0 (v3.0): Mısır Piramit Gecesi Konsepti, Modüler Trençkotlu Dedektif & 210° Akıllı Fener
 - **210° Fener Yayı (`-105° .. +105°`) & Sol Uzun Fener Butonu (`LightConeCaster2D.cs`, `LightTouchInput.cs`, `LightWeaverHUD.cs`):** Sürekli ileri koşuda gereksiz tam arka görüş kapatıldı, ancak ayak altı & Photon Anchor salınım ivmesi için `±90°` üzerine `15°` pay eklenerek `-105°..+105°` akıllı açıya inildi. Sol alta çift-oklu `MobileJumpBtn` yanına fener+uzun ışın simgeli bas-aç `MobileHighBeamBtn` (`LONG: OFF / ON`) yerleştirildi.
