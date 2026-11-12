@@ -12,8 +12,8 @@ namespace LightWeaver.Player
     public sealed class LightConeCaster2D : MonoBehaviour
     {
         [Header("Beam Geometry (210° Tactical Arc)")]
-        [SerializeField] private float standardRange = 10.5f;
-        [SerializeField] private float focusedRange = 16.0f;
+        [SerializeField] private float standardRange = 6.8f;
+        [SerializeField] private float focusedRange = 10.2f;
         [SerializeField] private float standardHalfAngleDeg = 22f;
         [SerializeField] private float focusedHalfAngleDeg = 8.5f;
         [SerializeField] private float minAimAngleDeg = -105f;

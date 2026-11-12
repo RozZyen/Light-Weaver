@@ -16,6 +16,7 @@ namespace LightWeaver.World
         public const string PoolCrystalPlatform = "CrystalPlatform";
         public const string PoolEnergyOrb = "EnergyOrb";
         public const string PoolEnergyOrbSuper = "EnergyOrbSuper";
+        public const string PoolScarabCoin = CoinCollectible.PoolKey;
         public const string PoolJumpPad = "PrismaticJumpPad";
         public const string PoolPrismRelay = "PrismRelay";
         public const string PoolShadowPillar = "ShadowPillar";
@@ -37,6 +38,7 @@ namespace LightWeaver.World
         [SerializeField] private GameObject crystalPlatformPrefab;
         [SerializeField] private GameObject energyOrbPrefab;
         [SerializeField] private GameObject energyOrbSuperPrefab;
+        [SerializeField] private GameObject scarabCoinPrefab;
         [SerializeField] private GameObject jumpPadPrefab;
         [SerializeField] private GameObject prismRelayPrefab;
         [SerializeField] private GameObject shadowPillarPrefab;
@@ -99,6 +101,7 @@ namespace LightWeaver.World
             if (crystalPlatformPrefab != null) pooler.RegisterPool(PoolCrystalPlatform, crystalPlatformPrefab, 48);
             if (energyOrbPrefab != null) pooler.RegisterPool(PoolEnergyOrb, energyOrbPrefab, 24);
             if (energyOrbSuperPrefab != null) pooler.RegisterPool(PoolEnergyOrbSuper, energyOrbSuperPrefab, 12);
+            if (scarabCoinPrefab != null) pooler.RegisterPool(PoolScarabCoin, scarabCoinPrefab, 48);
             if (jumpPadPrefab != null) pooler.RegisterPool(PoolJumpPad, jumpPadPrefab, 8);
             if (prismRelayPrefab != null) pooler.RegisterPool(PoolPrismRelay, prismRelayPrefab, 6);
             if (shadowPillarPrefab != null) pooler.RegisterPool(PoolShadowPillar, shadowPillarPrefab, 8);
@@ -254,7 +257,7 @@ namespace LightWeaver.World
         {
             SpawnCrystal(_cursorX, _cursorTopY, 5.4f, CrystalVariant.Standard);
             _cursorX += 5.2f;
-            SpawnOrb(_cursorX + 1.8f, _cursorTopY + 1.7f, false);
+            SpawnCoinArc(_cursorX + 0.9f, _cursorTopY + 1.4f, 0.95f, 0.55f, 3);
             SpawnSlopedCrystal(_cursorX, _cursorTopY, 4.4f, 20f, CrystalVariant.Standard, out float endX, out float endTopY);
             _cursorX = endX;
             _cursorTopY = endTopY;
@@ -303,7 +306,7 @@ namespace LightWeaver.World
             float boostX = _cursorX + 4.0f + 1.35f;
             float boostY = _cursorTopY - 0.55f;
             SpawnCrystal(boostX, boostY, 3.6f, CrystalVariant.KineticBoost); // Hız akımı!
-            SpawnOrb(boostX + 2.0f, boostY + 2.2f, false);
+            SpawnCoinArc(boostX + 1.1f, boostY + 1.75f, 0.95f, 0.7f, 4);
 
             _cursorX = boostX + 3.6f;
             _cursorTopY = boostY;
@@ -314,7 +317,7 @@ namespace LightWeaver.World
             SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 3.0f, CrystalVariant.Standard);
             float rampStartX = _cursorX + 2.75f;
             SpawnSlopedCrystal(rampStartX, _cursorTopY, 4.8f, 30f, CrystalVariant.Standard, out float endX, out float endTopY);
-            SpawnOrb((rampStartX + endX) * 0.5f, (_cursorTopY + endTopY) * 0.5f + 1.6f, false);
+            SpawnCoinArc(rampStartX + 0.9f, Mathf.Max(_cursorTopY, endTopY) + 1.35f, 1.0f, 0.65f, 3);
 
             SpawnCrystal(endX - 0.15f, endTopY - 0.08f, 3.6f, CrystalVariant.KineticBoost);
             _cursorX = endX + 3.45f;
@@ -334,7 +337,7 @@ namespace LightWeaver.World
             float lowX = _cursorX + 4.8f;
             float lowY = _cursorTopY - 2.35f;
             SpawnCrystal(lowX, lowY, 4.4f, CrystalVariant.Standard);
-            SpawnOrb(lowX + 2.1f, lowY + 1.45f, false);
+            SpawnCoinArc(lowX + 1.0f, lowY + 1.35f, 0.9f, 0.35f, 3);
             SpawnSlopedCrystal(lowX + 4.25f, lowY, 4.4f, 24f, CrystalVariant.Standard, out float lowEndX, out float lowEndY);
 
             float mergeX = Mathf.Max(canopyX + 5.5f, lowEndX + 1.1f);
@@ -350,7 +353,10 @@ namespace LightWeaver.World
             // Yolu kesen Antik Mühür Bariyeri -> Feneri YUKARI Eye-of-Ra kilidine tutmadan geçersen çarpıp sendelersin!
             SpawnCrystal(_cursorX - 0.15f, _cursorTopY, 7.6f, CrystalVariant.Standard);
             SpawnPrismGate(_cursorX + 5.6f, _cursorTopY + 1.60f);
-            SpawnOrb(_cursorX + 6.6f, _cursorTopY + 2.45f, true);
+            if ((_chunkSequenceIndex % 2) == 0)
+                SpawnOrb(_cursorX + 6.6f, _cursorTopY + 2.45f, false);
+            else
+                SpawnCoinArc(_cursorX + 5.4f, _cursorTopY + 2.15f, 0.95f, 0.55f, 3);
 
             _cursorX += 7.45f;
         }
@@ -375,7 +381,8 @@ namespace LightWeaver.World
             float anchorX = _cursorX + 7.4f;
             float anchorY = _cursorTopY + 4.35f;
             SpawnPhotonAnchor(anchorX, anchorY);
-            SpawnOrb(anchorX + 2.4f, _cursorTopY + 1.95f, true);
+            SpawnCoinArc(anchorX + 0.8f, _cursorTopY + 1.55f, 1.0f, 0.85f, 4);
+            if ((_chunkSequenceIndex % 2) == 1) SpawnOrb(anchorX + 2.4f, _cursorTopY + 2.65f, false);
 
             float landX = _cursorX + 12.2f;
             float landY = _cursorTopY - 0.15f;
@@ -392,7 +399,7 @@ namespace LightWeaver.World
             float x1 = _cursorX + 3.8f;
             float y1 = _cursorTopY - 0.35f;
             SpawnCrystal(x1, y1, 2.8f, CrystalVariant.FragileShard);
-            SpawnOrb(x1 + 1.4f, y1 + 1.9f, false);
+            SpawnCoinArc(x1 + 0.5f, y1 + 1.45f, 0.9f, 0.45f, 3);
 
             float x2 = x1 + 4.1f;
             float y2 = y1 - 0.35f;
@@ -418,7 +425,10 @@ namespace LightWeaver.World
             else if (roll < 0.70f)
             {
                 SpawnHazard(_cursorX + 3.1f, _cursorTopY + 2.4f, ShadowHazardType.VoidLeech);
-                SpawnOrb(_cursorX + 4.8f, _cursorTopY + 1.15f, false);
+                if ((_chunkSequenceIndex % 3) == 0)
+                    SpawnOrb(_cursorX + 4.8f, _cursorTopY + 1.15f, false);
+                else
+                    SpawnCoinArc(_cursorX + 3.6f, _cursorTopY + 1.25f, 0.95f, 0.3f, 3);
             }
             else
             {
@@ -468,6 +478,29 @@ namespace LightWeaver.World
                 plat.SetVariant(variant);
             }
             _activeObjects.Add(go);
+        }
+
+        private void SpawnCoin(float x, float y, int value = 1)
+        {
+            if (pooler == null) return;
+            GameObject go = pooler.Spawn(PoolScarabCoin, new Vector3(x, y, 0f), Quaternion.identity);
+            if (go == null) return;
+            if (go.TryGetComponent(out CoinCollectible coin))
+            {
+                coin.Configure(value);
+            }
+            _activeObjects.Add(go);
+        }
+
+        private void SpawnCoinArc(float startX, float baseY, float stepX, float arcHeight, int count)
+        {
+            if (count <= 0) return;
+            for (int i = 0; i < count; i++)
+            {
+                float t = count > 1 ? (float)i / (count - 1) : 0.5f;
+                float yOffset = Mathf.Sin(t * Mathf.PI) * arcHeight;
+                SpawnCoin(startX + i * stepX, baseY + yOffset, 1);
+            }
         }
 
         private void SpawnOrb(float x, float y, bool super)

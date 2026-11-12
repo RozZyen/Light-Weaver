@@ -51,6 +51,7 @@ namespace LightWeaver.Audio
             CrystalPlatform.OnPlatformSolidified += HandleCrystalSolidified;
             CrystalPlatform.OnVariantTriggered += HandleVariantTriggered;
             EnergyOrb.OnEnergyCollected += HandleEnergyCollected;
+            CoinCollectible.OnCoinCollected += HandleCoinCollected;
             PrismaticJumpPad.OnJumpPadLaunched += HandleJumpPadLaunched;
             PhotonAnchor.OnAnchorLaunched += HandleAnchorLaunched;
             PrismLockGate.OnGateResolved += HandleGateResolved;
@@ -65,6 +66,7 @@ namespace LightWeaver.Audio
             CrystalPlatform.OnPlatformSolidified -= HandleCrystalSolidified;
             CrystalPlatform.OnVariantTriggered -= HandleVariantTriggered;
             EnergyOrb.OnEnergyCollected -= HandleEnergyCollected;
+            CoinCollectible.OnCoinCollected -= HandleCoinCollected;
             PrismaticJumpPad.OnJumpPadLaunched -= HandleJumpPadLaunched;
             PhotonAnchor.OnAnchorLaunched -= HandleAnchorLaunched;
             PrismLockGate.OnGateResolved -= HandleGateResolved;
@@ -147,6 +149,13 @@ namespace LightWeaver.Audio
             if (!ProgressManager.SfxEnabled || _sfxSource == null || _energyPickupClip == null) return;
             _sfxSource.pitch = Random.Range(0.96f, 1.08f);
             _sfxSource.PlayOneShot(_energyPickupClip, sfxMasterVolume * 0.85f);
+        }
+
+        private void HandleCoinCollected(CoinCollectible coin, int amount)
+        {
+            if (!ProgressManager.SfxEnabled || _sfxSource == null || _energyPickupClip == null) return;
+            _sfxSource.pitch = Random.Range(1.38f, 1.56f);
+            _sfxSource.PlayOneShot(_energyPickupClip, sfxMasterVolume * 0.62f);
         }
 
         private void HandleJumpPadLaunched(PrismaticJumpPad pad)

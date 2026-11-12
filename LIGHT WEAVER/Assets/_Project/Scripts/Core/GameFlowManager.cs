@@ -80,6 +80,7 @@ namespace LightWeaver.Core
             CrystalPlatform.OnPlatformSolidified += HandlePlatformSolidified;
             CrystalPlatform.OnVariantTriggered += HandleCrystalVariantTriggered;
             EnergyOrb.OnEnergyCollected += HandleEnergyCollected;
+            CoinCollectible.OnCoinCollected += HandleCoinCollected;
             ShadowHazard.OnHazardResolved += HandleHazardResolved;
             PrismLockGate.OnGateResolved += HandleGateResolved;
             PhotonAnchor.OnAnchorLaunched += HandleAnchorLaunched;
@@ -100,6 +101,7 @@ namespace LightWeaver.Core
             CrystalPlatform.OnPlatformSolidified -= HandlePlatformSolidified;
             CrystalPlatform.OnVariantTriggered -= HandleCrystalVariantTriggered;
             EnergyOrb.OnEnergyCollected -= HandleEnergyCollected;
+            CoinCollectible.OnCoinCollected -= HandleCoinCollected;
             ShadowHazard.OnHazardResolved -= HandleHazardResolved;
             PrismLockGate.OnGateResolved -= HandleGateResolved;
             PhotonAnchor.OnAnchorLaunched -= HandleAnchorLaunched;
@@ -144,6 +146,7 @@ namespace LightWeaver.Core
             }
             if (batterySystem != null)
             {
+                batterySystem.ApplyMetaUpgrades(ProgressManager.GetMaxBatteryBonus(), ProgressManager.GetMetaDrainMultiplier());
                 batterySystem.ResetBattery();
                 batterySystem.SetSimulationPaused(true);
             }
@@ -174,8 +177,11 @@ namespace LightWeaver.Core
                 runnerMotor.RespawnAtStart();
                 runnerMotor.SetRunning(true);
             }
+            _runCoins = 0;
+            OnRunCoinsChanged?.Invoke(_runCoins);
             if (batterySystem != null)
             {
+                batterySystem.ApplyMetaUpgrades(ProgressManager.GetMaxBatteryBonus(), ProgressManager.GetMetaDrainMultiplier());
                 batterySystem.ResetBattery();
                 batterySystem.SetSimulationPaused(false);
             }
@@ -243,6 +249,7 @@ namespace LightWeaver.Core
             }
             if (batterySystem != null)
             {
+                batterySystem.ApplyMetaUpgrades(ProgressManager.GetMaxBatteryBonus(), ProgressManager.GetMetaDrainMultiplier());
                 batterySystem.ResetBattery();
                 batterySystem.SetSimulationPaused(false);
             }
@@ -312,6 +319,19 @@ namespace LightWeaver.Core
             float mult = batterySystem != null ? batterySystem.ScoreMultiplier : 1f;
             AddScore(Mathf.RoundToInt(perfectWeaveBonus * mult));
             OnBannerMessage?.Invoke("PERFECT WEAVE! +3%", new Color(0.0f, 0.94f, 1.0f, 1f));
+        }
+
+        private int _runCoins;
+        public int RunCoins => _runCoins;
+        public event Action<int> OnRunCoinsChanged;
+
+        private void HandleCoinCollected(CoinCollectible coin, int amount)
+        {
+            _runCoins += amount;
+            ProgressManager.AddCoins(amount);
+            OnRunCoinsChanged?.Invoke(_runCoins);
+            float mult = batterySystem != null ? batterySystem.ScoreMultiplier : 1f;
+            AddScore(Mathf.RoundToInt(75f * amount * mult));
         }
 
         private void HandleEnergyCollected(EnergyOrb orb, float amount)

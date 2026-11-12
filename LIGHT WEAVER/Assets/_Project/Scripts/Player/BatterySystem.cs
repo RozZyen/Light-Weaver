@@ -30,9 +30,9 @@ namespace LightWeaver.Player
 
         [Header("Battery Economy")]
         [SerializeField] private float maxBattery = 100f;
-        [SerializeField] private float baseDrainPerSecond = 2.4f;
-        [SerializeField] private float maxDistanceDrainPerSecond = 4.6f;
-        [SerializeField] private float distanceForMaxDrain = 350f;
+        [SerializeField] private float baseDrainPerSecond = 2.65f;
+        [SerializeField] private float maxDistanceDrainPerSecond = 5.1f;
+        [SerializeField] private float distanceForMaxDrain = 420f;
         [SerializeField] private float focusedBeamDrainMultiplier = 1.45f;
 
         [Header("Spectrum Phase Thresholds & Multipliers")]
@@ -77,12 +77,26 @@ namespace LightWeaver.Player
         public int PerfectWeaveStreak => _perfectWeaveStreak;
         public float ScoreMultiplier => _currentPhase == SpectrumPhase.Overcharge ? 3.0f : 1.0f;
 
+        private float _baseMaxBattery = 100f;
+        private float _metaDrainMultiplier = 1.0f;
+        private const float MaxTotalDrainRate = 6.0f;
+
         private void Awake()
         {
             ActiveInstance = this;
+            _baseMaxBattery = maxBattery;
             if (flashlightController == null) flashlightController = GetComponentInChildren<FlashlightController2D>();
             if (runnerMotor == null) runnerMotor = GetComponent<RunnerMotor2D>();
             ResetBattery();
+        }
+
+        public void ApplyMetaUpgrades(float bonusCapacity, float metaDrainMultiplier)
+        {
+            maxBattery = Mathf.Max(50f, _baseMaxBattery + Mathf.Max(0f, bonusCapacity));
+            _metaDrainMultiplier = Mathf.Clamp(metaDrainMultiplier, 0.65f, 1.0f);
+            _currentBattery = Mathf.Clamp(_currentBattery, 0f, maxBattery);
+            EvaluatePhase(forceNotify: true);
+            OnBatteryChanged?.Invoke(_currentBattery, maxBattery);
         }
 
         private void OnDestroy()
@@ -191,8 +205,9 @@ namespace LightWeaver.Player
             }
 
             float distanceTraveled = Mathf.Max(0f, transform.position.x - _startX);
-            float distFactor = Mathf.Clamp01(distanceTraveled / Mathf.Max(1f, distanceForMaxDrain));
-            float drainRate = Mathf.Lerp(baseDrainPerSecond, maxDistanceDrainPerSecond, distFactor) * _distanceDrainMultiplier * _blessingDrainMultiplier;
+            float distFactor = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(distanceTraveled / Mathf.Max(1f, distanceForMaxDrain)));
+            float rawDrain = Mathf.Lerp(baseDrainPerSecond, maxDistanceDrainPerSecond, distFactor) * _distanceDrainMultiplier * _blessingDrainMultiplier;
+            float drainRate = Mathf.Min(MaxTotalDrainRate, rawDrain) * _metaDrainMultiplier;
 
             if (flashlightController != null && flashlightController.IsFocusedBeam)
             {

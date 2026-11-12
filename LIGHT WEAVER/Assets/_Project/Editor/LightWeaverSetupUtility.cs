@@ -66,7 +66,8 @@ namespace LightWeaver.EditorTools
             Texture2D beamGradientTex = GenerateBeamGradientTexture(Path.Combine(SpritesFolder, "volumetric_beam_gradient.png"));
 
             // Uyumlu Mısır Dünya Nesneleri & Düşman Engelleri
-            Sprite orbAnkhSprite = LoadAndImportEgyptSprite("egypt_orb_scarab_wisp.png", 390f);
+            Sprite batteryCellSprite = LoadAndImportEgyptSprite("egypt_battery_cell.png", 310f);
+            Sprite goldCoinSprite = LoadAndImportEgyptSprite("egypt_gold_coin.png", 390f);
             Sprite jumpPadSprite = LoadAndImportEgyptSprite("egypt_jump_vent_altar.png", 310f, new Vector2(0.50f, 0.08f));
             Sprite jumpCoreSprite = GenerateSoftDotSprite(Path.Combine(SpritesFolder, "jump_pad_core.png"));
             Sprite lockSealSprite = LoadAndImportEgyptSprite("egypt_lock_seal.png", 300f);
@@ -134,8 +135,9 @@ namespace LightWeaver.EditorTools
 
             // 3. Havuz Prefab'ları (Tam Uyumlu Mısır Görselleri ve Ölçekleri)
             GameObject platPrefab = SaveCrystalPrefab(crystalStandardSprite, crystalBoostSprite, crystalFragileSprite, crystalUmbraSprite, rimGlowSprite, starburstSprite);
-            GameObject orbPrefab = SaveOrbPrefab("PF_EnergyOrb.prefab", false, orbAnkhSprite, heroAuraSprite);
-            GameObject superOrbPrefab = SaveOrbPrefab("PF_EnergyOrb_Super.prefab", true, orbAnkhSprite, heroAuraSprite);
+            GameObject orbPrefab = SaveOrbPrefab("PF_EnergyOrb.prefab", false, batteryCellSprite, heroAuraSprite);
+            GameObject superOrbPrefab = SaveOrbPrefab("PF_EnergyOrb_Super.prefab", true, batteryCellSprite, heroAuraSprite);
+            GameObject coinPrefab = SaveScarabCoinPrefab("PF_ScarabCoin.prefab", goldCoinSprite, heroAuraSprite);
             GameObject jumpPadPrefab = SaveJumpPadPrefab(jumpPadSprite, jumpCoreSprite);
             GameObject prismRelayPrefab = SavePrismRelayPrefab(lockSealSprite);
             GameObject pillarPrefab = SaveHazardPrefab("PF_ShadowPillar.prefab", ShadowHazardType.MovingShadowPillar, shadowPillarSprite, new Vector2(0.86f, 0.90f));
@@ -227,6 +229,7 @@ namespace LightWeaver.EditorTools
             dirSo.FindProperty("crystalPlatformPrefab").objectReferenceValue = platPrefab;
             dirSo.FindProperty("energyOrbPrefab").objectReferenceValue = orbPrefab;
             dirSo.FindProperty("energyOrbSuperPrefab").objectReferenceValue = superOrbPrefab;
+            dirSo.FindProperty("scarabCoinPrefab").objectReferenceValue = coinPrefab;
             dirSo.FindProperty("jumpPadPrefab").objectReferenceValue = jumpPadPrefab;
             dirSo.FindProperty("prismRelayPrefab").objectReferenceValue = prismRelayPrefab;
             dirSo.FindProperty("shadowPillarPrefab").objectReferenceValue = pillarPrefab;
@@ -285,7 +288,9 @@ namespace LightWeaver.EditorTools
                 stickRingSprite,
                 runnerSparkSprite,
                 highBeamIconSprite,
-                jumpArrowIconSprite);
+                jumpArrowIconSprite,
+                batteryCellSprite,
+                goldCoinSprite);
 
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             EditorSceneManager.SaveOpenScenes();
@@ -379,7 +384,9 @@ namespace LightWeaver.EditorTools
             Sprite stickRingSprite,
             Sprite knobDotSprite,
             Sprite highBeamIconSprite,
-            Sprite jumpArrowIconSprite)
+            Sprite jumpArrowIconSprite,
+            Sprite batteryCellSprite,
+            Sprite goldCoinSprite)
         {
             Font builtinFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
@@ -392,7 +399,8 @@ namespace LightWeaver.EditorTools
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = 1.0f;
+            canvasGo.AddComponent<ResponsiveCanvasFit>();
             canvasGo.AddComponent<GraphicRaycaster>();
 
             GameObject safeRoot = CreateUIObject("SafeAreaRoot", canvasGo.transform);
@@ -540,6 +548,41 @@ namespace LightWeaver.EditorTools
             pauseRt.pivot = new Vector2(1f, 1f);
             pauseRt.anchoredPosition = new Vector2(-46f, -40f);
 
+            // HUD Scarab Coin Counter Pill (Top-Right below Pause/Score)
+            GameObject hudCoinPill = CreateObsidianPill("HudCoinPill", hudRoot.transform, solidSprite, new Vector2(176f, 44f));
+            RectTransform hudCoinRt = hudCoinPill.GetComponent<RectTransform>();
+            hudCoinRt.anchorMin = new Vector2(1f, 1f);
+            hudCoinRt.anchorMax = new Vector2(1f, 1f);
+            hudCoinRt.pivot = new Vector2(1f, 1f);
+            hudCoinRt.anchoredPosition = new Vector2(-46f, -182f);
+
+            GameObject hudCoinIconGo = CreateUIObject("CoinIcon", hudCoinPill.transform);
+            RectTransform hudCoinIconRt = hudCoinIconGo.GetComponent<RectTransform>();
+            hudCoinIconRt.anchorMin = new Vector2(0f, 0.5f);
+            hudCoinIconRt.anchorMax = new Vector2(0f, 0.5f);
+            hudCoinIconRt.pivot = new Vector2(0f, 0.5f);
+            hudCoinIconRt.anchoredPosition = new Vector2(10f, 0f);
+            hudCoinIconRt.sizeDelta = new Vector2(30f, 30f);
+            Image hudCoinIconImg = hudCoinIconGo.AddComponent<Image>();
+            hudCoinIconImg.sprite = goldCoinSprite;
+            hudCoinIconImg.preserveAspect = true;
+            hudCoinIconImg.raycastTarget = false;
+
+            Text hudCoinValueText = CreateUIText("CoinValue", hudCoinPill.transform, builtinFont, "0", 23, FontStyle.Bold, TextAnchor.MiddleRight, new Color(1.0f, 0.86f, 0.34f, 1f));
+            RectTransform hudCoinValRt = hudCoinValueText.GetComponent<RectTransform>();
+            hudCoinValRt.anchorMin = new Vector2(0f, 0f);
+            hudCoinValRt.anchorMax = new Vector2(1f, 1f);
+            hudCoinValRt.offsetMin = new Vector2(44f, 0f);
+            hudCoinValRt.offsetMax = new Vector2(-14f, 0f);
+
+            Text aimHintTxt = CreateUIText("AimHintText", hudRoot.transform, builtinFont, "DRAG RIGHT SIDE TO AIM 210°", 15, FontStyle.Bold, TextAnchor.LowerRight, new Color(0.95f, 0.88f, 0.72f, 0.60f));
+            RectTransform aimHintRt = aimHintTxt.GetComponent<RectTransform>();
+            aimHintRt.anchorMin = new Vector2(1f, 0f);
+            aimHintRt.anchorMax = new Vector2(1f, 0f);
+            aimHintRt.pivot = new Vector2(1f, 0f);
+            aimHintRt.anchoredPosition = new Vector2(-48f, 32f);
+            aimHintRt.sizeDelta = new Vector2(320f, 26f);
+
             // Sol Alt: Antik Mısır Taş Çerçeveli JUMP + LONG BEAM İkon Butonları + Üstte BURST
             Button jumpBtn = CreateTactileIconButton(
                 "MobileJumpBtn",
@@ -637,6 +680,8 @@ namespace LightWeaver.EditorTools
             hudSo.FindProperty("sectorTitleText").objectReferenceValue = sectorText;
             hudSo.FindProperty("scoreValueText").objectReferenceValue = scoreText;
             hudSo.FindProperty("multiplierBadgeText").objectReferenceValue = multText;
+            hudSo.FindProperty("coinValueText").objectReferenceValue = hudCoinValueText;
+            hudSo.FindProperty("aimHintText").objectReferenceValue = aimHintTxt;
             hudSo.FindProperty("bannerCanvasGroup").objectReferenceValue = bannerCg;
             hudSo.FindProperty("bannerText").objectReferenceValue = bannerTxt;
             hudSo.FindProperty("mobileJumpButton").objectReferenceValue = jumpBtn;
@@ -649,26 +694,180 @@ namespace LightWeaver.EditorTools
             hudSo.ApplyModifiedPropertiesWithoutUndo();
 
             // =================================================================
-            // 2. ANA MENÜ (Saf Mısır Gizemi, Seviye Butonları Yok, Sabit 210° Kontrol)
+            // 2. SCENIC FULL-SCREEN MAIN MENU (Açık Piramit & Dedektif Manzarası)
             // =================================================================
-            GameObject mainMenuPanel = CreateModalCard("MainMenuPanel", safeRoot.transform, panelSprite, new Vector2(820f, 540f), Color.white);
-            Text titleTxt = CreateUIText("Title", mainMenuPanel.transform, builtinFont, "LIGHT WEAVER", 62, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.84f, 0.34f, 1f));
-            SetAnchoredPos(titleTxt.rectTransform, new Vector2(0f, 168f), new Vector2(720f, 76f));
+            GameObject mainMenuPanel = CreateUIObject("MainMenuPanel", safeRoot.transform);
+            StretchFull(mainMenuPanel.GetComponent<RectTransform>());
 
-            Text subTxt = CreateUIText("Subtitle", mainMenuPanel.transform, builtinFont, "MYSTERY OF GIZA  •  ILLUMINATE, SWING & SURVIVE", 18, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.95f, 0.88f, 0.72f, 0.94f));
-            SetAnchoredPos(subTxt.rectTransform, new Vector2(0f, 110f), new Vector2(760f, 34f));
+            // Sol Üst: Başlık & En İyi Skor Rozeti
+            GameObject titleBlock = CreateUIObject("TitleBlock", mainMenuPanel.transform);
+            RectTransform titleBlockRt = titleBlock.GetComponent<RectTransform>();
+            titleBlockRt.anchorMin = new Vector2(0f, 1f);
+            titleBlockRt.anchorMax = new Vector2(0f, 1f);
+            titleBlockRt.pivot = new Vector2(0f, 1f);
+            titleBlockRt.anchoredPosition = new Vector2(56f, -44f);
+            titleBlockRt.sizeDelta = new Vector2(680f, 190f);
 
-            Text bestTxt = CreateUIText("BestScoreText", mainMenuPanel.transform, builtinFont, "BEST: 0   |   0m", 22, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.16f, 0.90f, 0.82f, 1f));
-            SetAnchoredPos(bestTxt.rectTransform, new Vector2(0f, 62f), new Vector2(640f, 36f));
+            Text titleTxt = CreateUIText("Title", titleBlock.transform, builtinFont, "LIGHT WEAVER", 68, FontStyle.Bold, TextAnchor.UpperLeft, new Color(1.0f, 0.84f, 0.34f, 1f));
+            RectTransform tRt = titleTxt.GetComponent<RectTransform>();
+            tRt.anchorMin = new Vector2(0f, 1f);
+            tRt.anchorMax = new Vector2(0f, 1f);
+            tRt.pivot = new Vector2(0f, 1f);
+            tRt.anchoredPosition = Vector2.zero;
+            tRt.sizeDelta = new Vector2(680f, 80f);
 
-            Button playBtn = CreateNeonButton("PlayButton", mainMenuPanel.transform, panelSprite, builtinFont, "EXPLORE THE PYRAMIDS", 26, new Color(1.0f, 0.88f, 0.45f, 1f), new Color(1.0f, 0.94f, 0.70f, 1f), new Vector2(420f, 86f));
-            SetAnchoredPos(playBtn.GetComponent<RectTransform>(), new Vector2(0f, -26f), new Vector2(420f, 86f));
+            Text subTxt = CreateUIText("Subtitle", titleBlock.transform, builtinFont, "DETECTIVE OF THE GIZA SANDS", 19, FontStyle.Bold, TextAnchor.UpperLeft, new Color(0.95f, 0.88f, 0.72f, 0.94f));
+            RectTransform sRt = subTxt.GetComponent<RectTransform>();
+            sRt.anchorMin = new Vector2(0f, 1f);
+            sRt.anchorMax = new Vector2(0f, 1f);
+            sRt.pivot = new Vector2(0f, 1f);
+            sRt.anchoredPosition = new Vector2(4f, -80f);
+            sRt.sizeDelta = new Vector2(640f, 30f);
 
-            Button musicBtn = CreateNeonButton("MusicToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "MUSIC: ON", 18, new Color(0.84f, 0.84f, 0.88f, 0.95f), new Color(0.95f, 0.90f, 0.78f, 1f), new Vector2(220f, 56f));
-            SetAnchoredPos(musicBtn.GetComponent<RectTransform>(), new Vector2(-128f, -142f), new Vector2(220f, 56f));
+            GameObject bestPill = CreateObsidianPill("BestScorePill", titleBlock.transform, solidSprite, new Vector2(420f, 44f));
+            RectTransform bestPillRt = bestPill.GetComponent<RectTransform>();
+            bestPillRt.anchorMin = new Vector2(0f, 1f);
+            bestPillRt.anchorMax = new Vector2(0f, 1f);
+            bestPillRt.pivot = new Vector2(0f, 1f);
+            bestPillRt.anchoredPosition = new Vector2(2f, -122f);
 
-            Button sfxBtn = CreateNeonButton("SfxToggleBtn", mainMenuPanel.transform, panelSprite, builtinFont, "ASMR SFX: ON", 18, new Color(0.84f, 0.84f, 0.88f, 0.95f), new Color(0.95f, 0.90f, 0.78f, 1f), new Vector2(220f, 56f));
-            SetAnchoredPos(sfxBtn.GetComponent<RectTransform>(), new Vector2(128f, -142f), new Vector2(220f, 56f));
+            Text bestTxt = CreateUIText("BestScoreText", bestPill.transform, builtinFont, "BEST: 0   •   0m", 20, FontStyle.Bold, TextAnchor.MiddleLeft, new Color(0.18f, 0.92f, 0.84f, 1f));
+            RectTransform bTxtRt = bestTxt.GetComponent<RectTransform>();
+            bTxtRt.anchorMin = Vector2.zero;
+            bTxtRt.anchorMax = Vector2.one;
+            bTxtRt.offsetMin = new Vector2(16f, 0f);
+            bTxtRt.offsetMax = new Vector2(-14f, 0f);
+
+            // Sağ Üst: Scarab Altın Bakiyesi & Ses Kontrolleri
+            GameObject topRightBar = CreateUIObject("TopRightUtilityBar", mainMenuPanel.transform);
+            RectTransform trbRt = topRightBar.GetComponent<RectTransform>();
+            trbRt.anchorMin = new Vector2(1f, 1f);
+            trbRt.anchorMax = new Vector2(1f, 1f);
+            trbRt.pivot = new Vector2(1f, 1f);
+            trbRt.anchoredPosition = new Vector2(-54f, -46f);
+            trbRt.sizeDelta = new Vector2(560f, 64f);
+
+            GameObject mainCoinPill = CreateObsidianPill("MainCoinsPill", topRightBar.transform, solidSprite, new Vector2(180f, 52f));
+            RectTransform mcRt = mainCoinPill.GetComponent<RectTransform>();
+            mcRt.anchorMin = new Vector2(1f, 1f);
+            mcRt.anchorMax = new Vector2(1f, 1f);
+            mcRt.pivot = new Vector2(1f, 1f);
+            mcRt.anchoredPosition = new Vector2(0f, 0f);
+
+            GameObject mcIconGo = CreateUIObject("CoinIcon", mainCoinPill.transform);
+            RectTransform mcIconRt = mcIconGo.GetComponent<RectTransform>();
+            mcIconRt.anchorMin = new Vector2(0f, 0.5f);
+            mcIconRt.anchorMax = new Vector2(0f, 0.5f);
+            mcIconRt.pivot = new Vector2(0f, 0.5f);
+            mcIconRt.anchoredPosition = new Vector2(12f, 0f);
+            mcIconRt.sizeDelta = new Vector2(34f, 34f);
+            Image mcIconImg = mcIconGo.AddComponent<Image>();
+            mcIconImg.sprite = goldCoinSprite;
+            mcIconImg.preserveAspect = true;
+            mcIconImg.raycastTarget = false;
+
+            Text mainCoinsTxt = CreateUIText("MainCoinsText", mainCoinPill.transform, builtinFont, "0", 24, FontStyle.Bold, TextAnchor.MiddleRight, new Color(1.0f, 0.86f, 0.34f, 1f));
+            RectTransform mctRt = mainCoinsTxt.GetComponent<RectTransform>();
+            mctRt.anchorMin = Vector2.zero;
+            mctRt.anchorMax = Vector2.one;
+            mctRt.offsetMin = new Vector2(50f, 0f);
+            mctRt.offsetMax = new Vector2(-16f, 0f);
+
+            Button musicBtn = CreateNeonButton("MusicToggleBtn", topRightBar.transform, panelSprite, builtinFont, "MUSIC: ON", 17, new Color(0.84f, 0.84f, 0.88f, 0.95f), new Color(0.95f, 0.90f, 0.78f, 1f), new Vector2(170f, 52f));
+            RectTransform muRt = musicBtn.GetComponent<RectTransform>();
+            muRt.anchorMin = new Vector2(1f, 1f);
+            muRt.anchorMax = new Vector2(1f, 1f);
+            muRt.pivot = new Vector2(1f, 1f);
+            muRt.anchoredPosition = new Vector2(-372f, 0f);
+
+            Button sfxBtn = CreateNeonButton("SfxToggleBtn", topRightBar.transform, panelSprite, builtinFont, "SFX: ON", 17, new Color(0.84f, 0.84f, 0.88f, 0.95f), new Color(0.95f, 0.90f, 0.78f, 1f), new Vector2(170f, 52f));
+            RectTransform sxRt = sfxBtn.GetComponent<RectTransform>();
+            sxRt.anchorMin = new Vector2(1f, 1f);
+            sxRt.anchorMax = new Vector2(1f, 1f);
+            sxRt.pivot = new Vector2(1f, 1f);
+            sxRt.anchoredPosition = new Vector2(-192f, 0f);
+
+            // Sağ Alt: Ana Aksiyon İskelesi (EXPEDITION + RELIC SHOP)
+            GameObject actionDock = CreateUIObject("BottomRightActionDock", mainMenuPanel.transform);
+            RectTransform dockRt = actionDock.GetComponent<RectTransform>();
+            dockRt.anchorMin = new Vector2(1f, 0f);
+            dockRt.anchorMax = new Vector2(1f, 0f);
+            dockRt.pivot = new Vector2(1f, 0f);
+            dockRt.anchoredPosition = new Vector2(-54f, 48f);
+            dockRt.sizeDelta = new Vector2(360f, 178f);
+
+            Button playBtn = CreateNeonButton("PlayButton", actionDock.transform, panelSprite, builtinFont, "EXPEDITION", 28, new Color(1.0f, 0.86f, 0.36f, 1f), new Color(1.0f, 0.96f, 0.80f, 1f), new Vector2(350f, 88f));
+            RectTransform plRt = playBtn.GetComponent<RectTransform>();
+            plRt.anchorMin = new Vector2(1f, 0f);
+            plRt.anchorMax = new Vector2(1f, 0f);
+            plRt.pivot = new Vector2(1f, 0f);
+            plRt.anchoredPosition = new Vector2(0f, 84f);
+
+            Button openShopBtn = CreateNeonButton("OpenShopButton", actionDock.transform, panelSprite, builtinFont, "RELIC SHOP", 22, new Color(0.75f, 0.86f, 0.92f, 0.96f), new Color(0.20f, 0.94f, 0.86f, 1f), new Vector2(350f, 68f));
+            RectTransform osRt = openShopBtn.GetComponent<RectTransform>();
+            osRt.anchorMin = new Vector2(1f, 0f);
+            osRt.anchorMax = new Vector2(1f, 0f);
+            osRt.pivot = new Vector2(1f, 0f);
+            osRt.anchoredPosition = Vector2.zero;
+
+            GameObject shopBadgeObj = CreateObsidianPill("ShopAffordableBadge", openShopBtn.transform, solidSprite, new Vector2(32f, 32f));
+            RectTransform sbRt = shopBadgeObj.GetComponent<RectTransform>();
+            sbRt.anchorMin = new Vector2(1f, 1f);
+            sbRt.anchorMax = new Vector2(1f, 1f);
+            sbRt.pivot = new Vector2(1f, 1f);
+            sbRt.anchoredPosition = new Vector2(-10f, -10f);
+            shopBadgeObj.GetComponent<Image>().color = new Color(1.0f, 0.78f, 0.16f, 1f);
+            Text sbTxt = CreateUIText("Bang", shopBadgeObj.transform, builtinFont, "!", 20, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.10f, 0.08f, 0.04f, 1f));
+            StretchFull(sbTxt.GetComponent<RectTransform>());
+            shopBadgeObj.SetActive(false);
+
+            // =================================================================
+            // 2B. RELIC WORKSHOP (KALICI BATARYA & MIĞNATIS MAĞAZASI)
+            // =================================================================
+            GameObject shopPanel = CreateModalCard("ShopPanel", safeRoot.transform, panelSprite, new Vector2(1020f, 560f), Color.white);
+            Text shopTitle = CreateUIText("ShopTitle", shopPanel.transform, builtinFont, "RELIC WORKSHOP", 38, FontStyle.Bold, TextAnchor.MiddleLeft, new Color(1.0f, 0.84f, 0.34f, 1f));
+            SetAnchoredPos(shopTitle.rectTransform, new Vector2(-235f, 214f), new Vector2(450f, 54f));
+
+            GameObject shopCoinPill = CreateObsidianPill("ShopCoinsPill", shopPanel.transform, solidSprite, new Vector2(190f, 48f));
+            SetAnchoredPos(shopCoinPill.GetComponent<RectTransform>(), new Vector2(210f, 214f), new Vector2(190f, 48f));
+            GameObject scIconGo = CreateUIObject("CoinIcon", shopCoinPill.transform);
+            RectTransform scIconRt = scIconGo.GetComponent<RectTransform>();
+            scIconRt.anchorMin = new Vector2(0f, 0.5f);
+            scIconRt.anchorMax = new Vector2(0f, 0.5f);
+            scIconRt.pivot = new Vector2(0f, 0.5f);
+            scIconRt.anchoredPosition = new Vector2(12f, 0f);
+            scIconRt.sizeDelta = new Vector2(32f, 32f);
+            Image scIconImg = scIconGo.AddComponent<Image>();
+            scIconImg.sprite = goldCoinSprite;
+            scIconImg.preserveAspect = true;
+            scIconImg.raycastTarget = false;
+
+            Text shopCoinsTxt = CreateUIText("ShopCoinsText", shopCoinPill.transform, builtinFont, "0", 23, FontStyle.Bold, TextAnchor.MiddleRight, new Color(1.0f, 0.86f, 0.34f, 1f));
+            RectTransform sctRt = shopCoinsTxt.GetComponent<RectTransform>();
+            sctRt.anchorMin = Vector2.zero;
+            sctRt.anchorMax = Vector2.one;
+            sctRt.offsetMin = new Vector2(48f, 0f);
+            sctRt.offsetMax = new Vector2(-14f, 0f);
+
+            Button closeShopBtn = CreateNeonButton("CloseShopBtn", shopPanel.transform, panelSprite, builtinFont, "BACK", 20, new Color(0.84f, 0.84f, 0.88f, 0.95f), Color.white, new Vector2(130f, 48f));
+            SetAnchoredPos(closeShopBtn.GetComponent<RectTransform>(), new Vector2(395f, 214f), new Vector2(130f, 48f));
+
+            BuildShopUpgradeCard(
+                "ShopCard_BatteryCap", shopPanel.transform, panelSprite, solidSprite, batteryCellSprite, builtinFont,
+                new Vector2(-315f, -20f), "SUN-CELL TANK", "Permanent Max Battery",
+                out Text capLvlTxt, out Text capStatTxt, out Button capBuyBtn, out Text capBuyLbl);
+
+            BuildShopUpgradeCard(
+                "ShopCard_Efficiency", shopPanel.transform, panelSprite, solidSprite, highBeamIconSprite, builtinFont,
+                new Vector2(0f, -20f), "SOLAR LENS", "Reduces Battery Drain",
+                out Text effLvlTxt, out Text effStatTxt, out Button effBuyBtn, out Text effBuyLbl);
+
+            BuildShopUpgradeCard(
+                "ShopCard_Magnet", shopPanel.transform, panelSprite, solidSprite, goldCoinSprite, builtinFont,
+                new Vector2(315f, -20f), "SCARAB MAGNET", "Pulls Coins Farther",
+                out Text magLvlTxt, out Text magStatTxt, out Button magBuyBtn, out Text magBuyLbl);
+
+            shopPanel.SetActive(false);
 
             // =================================================================
             // 3. PAUSE, GAME OVER & BLESSING CARDS
@@ -741,16 +940,35 @@ namespace LightWeaver.EditorTools
             menuSo.FindProperty("gameFlow").objectReferenceValue = gameFlow;
             menuSo.FindProperty("audioManager").objectReferenceValue = audioMgr;
             menuSo.FindProperty("mainMenuPanel").objectReferenceValue = mainMenuPanel;
+            menuSo.FindProperty("shopPanel").objectReferenceValue = shopPanel;
             menuSo.FindProperty("pausePanel").objectReferenceValue = pausePanel;
             menuSo.FindProperty("gameOverPanel").objectReferenceValue = gameOverPanel;
             menuSo.FindProperty("blessingPanel").objectReferenceValue = blessingPanel;
 
             menuSo.FindProperty("playButton").objectReferenceValue = playBtn;
+            menuSo.FindProperty("openShopButton").objectReferenceValue = openShopBtn;
+            menuSo.FindProperty("shopAffordableBadge").objectReferenceValue = shopBadgeObj;
             menuSo.FindProperty("mainBestScoreText").objectReferenceValue = bestTxt;
+            menuSo.FindProperty("mainCoinsText").objectReferenceValue = mainCoinsTxt;
             menuSo.FindProperty("musicToggleButton").objectReferenceValue = musicBtn;
             menuSo.FindProperty("musicToggleLabel").objectReferenceValue = musicBtn.GetComponentInChildren<Text>();
             menuSo.FindProperty("sfxToggleButton").objectReferenceValue = sfxBtn;
             menuSo.FindProperty("sfxToggleLabel").objectReferenceValue = sfxBtn.GetComponentInChildren<Text>();
+
+            menuSo.FindProperty("closeShopButton").objectReferenceValue = closeShopBtn;
+            menuSo.FindProperty("shopCoinsText").objectReferenceValue = shopCoinsTxt;
+            menuSo.FindProperty("capLevelText").objectReferenceValue = capLvlTxt;
+            menuSo.FindProperty("capStatText").objectReferenceValue = capStatTxt;
+            menuSo.FindProperty("capBuyButton").objectReferenceValue = capBuyBtn;
+            menuSo.FindProperty("capBuyLabel").objectReferenceValue = capBuyLbl;
+            menuSo.FindProperty("effLevelText").objectReferenceValue = effLvlTxt;
+            menuSo.FindProperty("effStatText").objectReferenceValue = effStatTxt;
+            menuSo.FindProperty("effBuyButton").objectReferenceValue = effBuyBtn;
+            menuSo.FindProperty("effBuyLabel").objectReferenceValue = effBuyLbl;
+            menuSo.FindProperty("magLevelText").objectReferenceValue = magLvlTxt;
+            menuSo.FindProperty("magStatText").objectReferenceValue = magStatTxt;
+            menuSo.FindProperty("magBuyButton").objectReferenceValue = magBuyBtn;
+            menuSo.FindProperty("magBuyLabel").objectReferenceValue = magBuyLbl;
 
             menuSo.FindProperty("resumeButton").objectReferenceValue = resumeBtn;
             menuSo.FindProperty("pauseRestartButton").objectReferenceValue = pauseRestartBtn;
@@ -854,10 +1072,68 @@ namespace LightWeaver.EditorTools
             cb.highlightedColor = new Color(1.15f, 1.15f, 1.15f, 1f);
             cb.pressedColor = new Color(0.75f, 0.75f, 0.75f, 1f);
             btn.colors = cb;
+            go.AddComponent<UIButtonJuice>();
 
             Text txt = CreateUIText("Label", go.transform, font, label, fontSize, FontStyle.Bold, TextAnchor.MiddleCenter, textColor);
             StretchFull(txt.GetComponent<RectTransform>());
             return btn;
+        }
+
+        private static void BuildShopUpgradeCard(
+            string name,
+            Transform parent,
+            Sprite panelSprite,
+            Sprite solidSprite,
+            Sprite iconSprite,
+            Font font,
+            Vector2 pos,
+            string title,
+            string desc,
+            out Text levelText,
+            out Text statText,
+            out Button buyButton,
+            out Text buyLabel)
+        {
+            GameObject card = CreateObsidianPill(name, parent, solidSprite, new Vector2(288f, 360f));
+            SetAnchoredPos(card.GetComponent<RectTransform>(), pos, new Vector2(288f, 360f));
+
+            GameObject iconGo = CreateUIObject("Icon", card.transform);
+            SetAnchoredPos(iconGo.GetComponent<RectTransform>(), new Vector2(0f, 112f), new Vector2(78f, 78f));
+            Image iconImg = iconGo.AddComponent<Image>();
+            iconImg.sprite = iconSprite;
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+
+            Text titleTxt = CreateUIText("Title", card.transform, font, title, 21, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.86f, 0.34f, 1f));
+            SetAnchoredPos(titleTxt.rectTransform, new Vector2(0f, 44f), new Vector2(260f, 32f));
+
+            Text descTxt = CreateUIText("Desc", card.transform, font, desc, 16, FontStyle.Normal, TextAnchor.MiddleCenter, new Color(0.86f, 0.90f, 0.94f, 0.88f));
+            SetAnchoredPos(descTxt.rectTransform, new Vector2(0f, 14f), new Vector2(260f, 26f));
+
+            levelText = CreateUIText("Level", card.transform, font, "LV 0/5", 18, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.18f, 0.92f, 0.84f, 1f));
+            SetAnchoredPos(levelText.rectTransform, new Vector2(0f, -24f), new Vector2(240f, 28f));
+
+            statText = CreateUIText("Stat", card.transform, font, "MAX: 100 -> 120", 17, FontStyle.Bold, TextAnchor.MiddleCenter, Color.white);
+            SetAnchoredPos(statText.rectTransform, new Vector2(0f, -58f), new Vector2(260f, 30f));
+
+            buyButton = CreateNeonButton("BuyBtn", card.transform, panelSprite, font, "50 COINS", 20, new Color(1.0f, 0.86f, 0.36f, 1f), new Color(1.0f, 0.96f, 0.80f, 1f), new Vector2(226f, 62f));
+            SetAnchoredPos(buyButton.GetComponent<RectTransform>(), new Vector2(0f, -124f), new Vector2(226f, 62f));
+            buyLabel = buyButton.GetComponentInChildren<Text>();
+        }
+
+        private static GameObject CreateObsidianPill(string name, Transform parent, Sprite whiteSprite, Vector2 size)
+        {
+            GameObject pill = CreateUIObject(name, parent);
+            RectTransform rt = pill.GetComponent<RectTransform>();
+            rt.sizeDelta = size;
+            Image img = pill.AddComponent<Image>();
+            img.sprite = whiteSprite;
+            img.color = new Color(0.05f, 0.06f, 0.10f, 0.80f);
+            img.raycastTarget = false;
+            Outline outline = pill.AddComponent<Outline>();
+            outline.effectColor = new Color(0.85f, 0.68f, 0.24f, 0.55f);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
+            return pill;
         }
 
         private static Button CreateTactileIconButton(
@@ -884,6 +1160,7 @@ namespace LightWeaver.EditorTools
             rt.pivot = new Vector2(0f, 0f);
             rt.anchoredPosition = anchoredPos;
             rt.sizeDelta = buttonSize;
+            go.AddComponent<UIButtonJuice>();
 
             bgImage = go.AddComponent<Image>();
             bgImage.sprite = bgSprite;
@@ -1529,6 +1806,37 @@ namespace LightWeaver.EditorTools
             orbSo.FindProperty("isSuperCharge").boolValue = isSuper;
             orbSo.FindProperty("innerBoltRenderer").objectReferenceValue = null;
             orbSo.ApplyModifiedPropertiesWithoutUndo();
+
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, Path.Combine(PrefabsFolder, fileName));
+            Object.DestroyImmediate(go);
+            return prefab;
+        }
+
+        private static GameObject SaveScarabCoinPrefab(string fileName, Sprite coinSprite, Sprite auraSprite)
+        {
+            GameObject go = new GameObject(fileName.Replace(".prefab", ""));
+            go.transform.localScale = new Vector3(0.68f, 0.68f, 1f);
+
+            SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = coinSprite;
+            sr.sortingOrder = 17;
+
+            CircleCollider2D col = go.AddComponent<CircleCollider2D>();
+            col.isTrigger = true;
+            col.radius = 0.52f;
+
+            GameObject auraObj = new GameObject("CoinHalo");
+            auraObj.transform.SetParent(go.transform, false);
+            auraObj.transform.localScale = new Vector3(1.25f, 1.25f, 1f);
+            SpriteRenderer auraSr = auraObj.AddComponent<SpriteRenderer>();
+            auraSr.sprite = auraSprite;
+            auraSr.color = new Color(1.0f, 0.84f, 0.25f, 0.24f);
+            auraSr.sortingOrder = 16;
+
+            CoinCollectible coin = go.AddComponent<CoinCollectible>();
+            SerializedObject coinSo = new SerializedObject(coin);
+            coinSo.FindProperty("coinRenderer").objectReferenceValue = sr;
+            coinSo.ApplyModifiedPropertiesWithoutUndo();
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, Path.Combine(PrefabsFolder, fileName));
             Object.DestroyImmediate(go);

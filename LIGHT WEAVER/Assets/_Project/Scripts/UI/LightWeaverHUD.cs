@@ -38,6 +38,8 @@ namespace LightWeaver.UI
         [SerializeField] private Text sectorTitleText;
         [SerializeField] private Text scoreValueText;
         [SerializeField] private Text multiplierBadgeText;
+        [SerializeField] private Text coinValueText;
+        [SerializeField] private Text aimHintText;
 
         [Header("Top-Center Feedback Banner")]
         [SerializeField] private CanvasGroup bannerCanvasGroup;
@@ -122,8 +124,10 @@ namespace LightWeaver.UI
             {
                 gameFlow.OnGameStateChanged += HandleGameStateChanged;
                 gameFlow.OnScoreChanged += HandleScoreChanged;
+                gameFlow.OnRunCoinsChanged += HandleRunCoinsChanged;
                 gameFlow.OnBannerMessage += ShowBanner;
             }
+            ProgressManager.OnCoinsChanged += HandleCoinsTotalChanged;
             if (batterySystem != null)
             {
                 batterySystem.OnBatteryChanged += HandleBatteryChanged;
@@ -144,8 +148,10 @@ namespace LightWeaver.UI
             {
                 gameFlow.OnGameStateChanged -= HandleGameStateChanged;
                 gameFlow.OnScoreChanged -= HandleScoreChanged;
+                gameFlow.OnRunCoinsChanged -= HandleRunCoinsChanged;
                 gameFlow.OnBannerMessage -= ShowBanner;
             }
+            ProgressManager.OnCoinsChanged -= HandleCoinsTotalChanged;
             if (batterySystem != null)
             {
                 batterySystem.OnBatteryChanged -= HandleBatteryChanged;
@@ -163,6 +169,8 @@ namespace LightWeaver.UI
             if (state == GameState.Playing)
             {
                 UpdateHighBeamVisual(touchInput != null && touchInput.IsLongBeamHeld);
+                RefreshCoinDisplay();
+                if (aimHintText != null) aimHintText.gameObject.SetActive(true);
                 if (batterySystem != null)
                 {
                     HandleBatteryChanged(batterySystem.CurrentBattery, batterySystem.MaxBattery);
@@ -175,6 +183,16 @@ namespace LightWeaver.UI
             {
                 touchInput.SetUiFocusHeld(false);
             }
+        }
+
+        private void HandleRunCoinsChanged(int runCoins) => RefreshCoinDisplay();
+        private void HandleCoinsTotalChanged(int totalCoins) => RefreshCoinDisplay();
+
+        private void RefreshCoinDisplay()
+        {
+            if (coinValueText == null) return;
+            ProgressManager.EnsureLoaded();
+            coinValueText.text = ProgressManager.Coins.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void HandleBatteryChanged(float current, float max)
