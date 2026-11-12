@@ -93,6 +93,7 @@ namespace LightWeaver.EditorTools
             Sprite btnDarkSprite = LoadAndImportEgyptSprite("egypt_ui_btn_dark.png", 100f, null, new Vector4(44f, 28f, 44f, 28f));
             Sprite glassPillSprite = LoadAndImportEgyptSprite("egypt_ui_glass_pill.png", 100f, null, new Vector4(24f, 24f, 24f, 24f));
             Sprite titleLogoSprite = LoadAndImportEgyptSprite("egypt_title_logo.png", 100f);
+            Sprite mainMenuKeyArtSprite = LoadAndImportEgyptSprite("egypt_main_menu_keyart.png", 100f);
             Sprite vignetteSprite = LoadAndImportEgyptSprite("egypt_ui_vignette.png", 100f);
             Sprite stickRingSprite = GenerateHollowRingSprite(Path.Combine(SpritesFolder, "ui_joystick_ring.png"));
             Sprite highBeamIconSprite = GenerateHighBeamIconSprite(Path.Combine(SpritesFolder, "ui_highbeam_icon.png"));
@@ -300,6 +301,7 @@ namespace LightWeaver.EditorTools
                 btnDarkSprite,
                 glassPillSprite,
                 titleLogoSprite,
+                mainMenuKeyArtSprite,
                 vignetteSprite);
 
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
@@ -401,6 +403,7 @@ namespace LightWeaver.EditorTools
             Sprite btnDarkSprite,
             Sprite glassPillSprite,
             Sprite titleLogoSprite,
+            Sprite mainMenuKeyArtSprite,
             Sprite vignetteSprite)
         {
             Font builtinFont = AssetDatabase.LoadAssetAtPath<Font>("Assets/_Project/Art/Fonts/LW_UISans.ttf");
@@ -715,12 +718,23 @@ namespace LightWeaver.EditorTools
             GameObject mainMenuPanel = CreateUIObject("MainMenuPanel", safeRoot.transform);
             StretchFull(mainMenuPanel.GetComponent<RectTransform>());
 
-            // Sinematik Sol & Alt Vinyet (Piramitler, Ay ve Dedektif net görünür, UI kontrastı artar)
+            // Tam Ekran Ana Menü Key Art (Bize bakan Dedektif, Fener, Giza Piramitleri & Sfenks)
+            GameObject keyArtGo = CreateUIObject("MainMenuKeyArt", mainMenuPanel.transform);
+            StretchFull(keyArtGo.GetComponent<RectTransform>());
+            Image keyArtImg = keyArtGo.AddComponent<Image>();
+            keyArtImg.sprite = mainMenuKeyArtSprite;
+            keyArtImg.color = Color.white;
+            keyArtImg.raycastTarget = false;
+            AspectRatioFitter keyArtFitter = keyArtGo.AddComponent<AspectRatioFitter>();
+            keyArtFitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            keyArtFitter.aspectRatio = 16f / 9f;
+
+            // Sinematik Sol & Alt Vinyet (UI kontrastını artırır)
             GameObject vigGo = CreateUIObject("CinematicVignette", mainMenuPanel.transform);
             StretchFull(vigGo.GetComponent<RectTransform>());
             Image vigImg = vigGo.AddComponent<Image>();
             vigImg.sprite = vignetteSprite;
-            vigImg.color = Color.white;
+            vigImg.color = new Color(1f, 1f, 1f, 0.72f);
             vigImg.raycastTarget = false;
 
             // Sol Üst: Özel Boyama LIGHT WEAVER Logo Arması & Rekor Rozeti
@@ -729,8 +743,8 @@ namespace LightWeaver.EditorTools
             titleBlockRt.anchorMin = new Vector2(0f, 1f);
             titleBlockRt.anchorMax = new Vector2(0f, 1f);
             titleBlockRt.pivot = new Vector2(0f, 1f);
-            titleBlockRt.anchoredPosition = new Vector2(46f, -32f);
-            titleBlockRt.sizeDelta = new Vector2(620f, 260f);
+            titleBlockRt.anchoredPosition = new Vector2(38f, -26f);
+            titleBlockRt.sizeDelta = new Vector2(460f, 220f);
 
             GameObject logoGo = CreateUIObject("TitleLogo", titleBlock.transform);
             RectTransform logoRt = logoGo.GetComponent<RectTransform>();
@@ -738,18 +752,18 @@ namespace LightWeaver.EditorTools
             logoRt.anchorMax = new Vector2(0f, 1f);
             logoRt.pivot = new Vector2(0f, 1f);
             logoRt.anchoredPosition = Vector2.zero;
-            logoRt.sizeDelta = new Vector2(560f, 188f);
+            logoRt.sizeDelta = new Vector2(440f, 148f);
             Image logoImg = logoGo.AddComponent<Image>();
             logoImg.sprite = titleLogoSprite;
             logoImg.preserveAspect = true;
             logoImg.raycastTarget = false;
 
-            GameObject bestPill = CreateObsidianPill("BestScorePill", titleBlock.transform, glassPillSprite, new Vector2(410f, 48f));
+            GameObject bestPill = CreateObsidianPill("BestScorePill", titleBlock.transform, glassPillSprite, new Vector2(360f, 44f));
             RectTransform bestPillRt = bestPill.GetComponent<RectTransform>();
             bestPillRt.anchorMin = new Vector2(0f, 1f);
             bestPillRt.anchorMax = new Vector2(0f, 1f);
             bestPillRt.pivot = new Vector2(0f, 1f);
-            bestPillRt.anchoredPosition = new Vector2(14f, -196f);
+            bestPillRt.anchoredPosition = new Vector2(10f, -158f);
 
             Text bestTxt = CreateUIText("BestScoreText", bestPill.transform, builtinFont, "BEST: 0   •   0m", 20, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.22f, 0.94f, 0.86f, 1f));
             StretchFull(bestTxt.GetComponent<RectTransform>());
