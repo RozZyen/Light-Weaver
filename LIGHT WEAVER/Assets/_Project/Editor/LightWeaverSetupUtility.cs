@@ -85,15 +85,15 @@ namespace LightWeaver.EditorTools
             Sprite pyramidPanoramaSprite = LoadAndImportEgyptSprite("egypt_bg_panorama.png", 66.2f);
             Sprite sandDuneSprite = GenerateSandDuneSprite(Path.Combine(SpritesFolder, "egypt_dune_mid.png"));
 
-            // Minimalist Modern Mısır UI/UX Seti (Temiz Düz Obsidian & İnce Altın Çizgi)
+            // Antik Mısır UI/UX Seti (9-Slice Oyma Taş, Art-Deco Altın & Obsidian Cam)
             Sprite batteryOutlineSprite = LoadAndImportEgyptSprite("egypt_ui_battery_frame.png", 100f);
             Sprite batteryGradientSprite = LoadAndImportEgyptSprite("egypt_battery_fill.png", 100f);
-            Sprite uiPanelSprite = LoadAndImportEgyptSprite("egypt_ui_flat_card.png", 100f, null, new Vector4(24f, 24f, 24f, 24f));
-            Sprite btnGoldSprite = LoadAndImportEgyptSprite("egypt_ui_flat_cta.png", 100f, null, new Vector4(24f, 24f, 24f, 24f));
-            Sprite btnDarkSprite = uiPanelSprite;
-            Sprite glassPillSprite = uiPanelSprite;
-            Sprite titleLogoSprite = LoadAndImportEgyptSprite("egypt_ui_divider.png", 100f);
-            Sprite mainMenuKeyArtSprite = titleLogoSprite;
+            Sprite uiPanelSprite = LoadAndImportEgyptSprite("egypt_ui_panel_dark.png", 100f, null, new Vector4(64f, 64f, 64f, 64f));
+            Sprite btnGoldSprite = LoadAndImportEgyptSprite("egypt_ui_btn_gold.png", 100f, null, new Vector4(68f, 32f, 68f, 32f));
+            Sprite btnDarkSprite = LoadAndImportEgyptSprite("egypt_ui_btn_dark.png", 100f, null, new Vector4(44f, 28f, 44f, 28f));
+            Sprite glassPillSprite = LoadAndImportEgyptSprite("egypt_ui_glass_pill.png", 100f, null, new Vector4(24f, 24f, 24f, 24f));
+            Sprite titleLogoSprite = LoadAndImportEgyptSprite("egypt_title_logo.png", 100f);
+            Sprite mainMenuKeyArtSprite = LoadAndImportEgyptSprite("egypt_main_menu_keyart.png", 100f);
             Sprite vignetteSprite = LoadAndImportEgyptSprite("egypt_ui_vignette.png", 100f);
             Sprite stickRingSprite = GenerateHollowRingSprite(Path.Combine(SpritesFolder, "ui_joystick_ring.png"));
             Sprite highBeamIconSprite = GenerateHighBeamIconSprite(Path.Combine(SpritesFolder, "ui_highbeam_icon.png"));
@@ -637,7 +637,7 @@ namespace LightWeaver.EditorTools
                 out Image highBeamIconImg,
                 out Text highBeamLabelTxt);
 
-            Button burstBtn = CreateNeonButton("MobileBurstBtn", hudRoot.transform, btnGoldSprite, displayFont, "SOLAR BURST", 16, Color.white, new Color(0.05f, 0.06f, 0.09f, 1f), new Vector2(168f, 54f));
+            Button burstBtn = CreateNeonButton("MobileBurstBtn", hudRoot.transform, btnGoldSprite, displayFont, "SOLAR BURST", 16, Color.white, new Color(1.0f, 0.92f, 0.64f, 1f), new Vector2(168f, 54f));
             RectTransform brsRt = burstBtn.GetComponent<RectTransform>();
             brsRt.anchorMin = new Vector2(0f, 0f);
             brsRt.anchorMax = new Vector2(0f, 0f);
@@ -716,10 +716,21 @@ namespace LightWeaver.EditorTools
             hudRoot.SetActive(false);
 
             // =================================================================
-            // 2. MINIMALIST ATMOSPHERIC MAIN MENU (Temiz Tipografi + Canlı Sahne)
+            // 2. SCENIC FULL-SCREEN MAIN MENU (Noir Dedektif Key Art + Art-Deco UI)
             // =================================================================
             GameObject mainMenuPanel = CreateUIObject("MainMenuPanel", safeRoot.transform);
             StretchFull(mainMenuPanel.GetComponent<RectTransform>());
+
+            // Tam Ekran Ana Menü Key Art
+            GameObject keyArtGo = CreateUIObject("MainMenuKeyArt", mainMenuPanel.transform);
+            StretchFull(keyArtGo.GetComponent<RectTransform>());
+            Image keyArtImg = keyArtGo.AddComponent<Image>();
+            keyArtImg.sprite = mainMenuKeyArtSprite;
+            keyArtImg.color = Color.white;
+            keyArtImg.raycastTarget = false;
+            AspectRatioFitter keyArtFitter = keyArtGo.AddComponent<AspectRatioFitter>();
+            keyArtFitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            keyArtFitter.aspectRatio = 16f / 9f;
 
             // Sinematik Sol & Alt Vinyet (UI kontrastını artırır)
             GameObject vigGo = CreateUIObject("CinematicVignette", mainMenuPanel.transform);
@@ -729,49 +740,33 @@ namespace LightWeaver.EditorTools
             vigImg.color = new Color(1f, 1f, 1f, 0.68f);
             vigImg.raycastTarget = false;
 
-            // Sol Üst: Temiz Editorial Başlık & İnce Altın Çizgi & Rekor Rozeti
+            // Sol Üst: Özel Boyama LIGHT WEAVER Logo Arması & Rekor Rozeti
             GameObject titleBlock = CreateUIObject("TitleBlock", mainMenuPanel.transform);
             RectTransform titleBlockRt = titleBlock.GetComponent<RectTransform>();
             titleBlockRt.anchorMin = new Vector2(0f, 1f);
             titleBlockRt.anchorMax = new Vector2(0f, 1f);
             titleBlockRt.pivot = new Vector2(0f, 1f);
-            titleBlockRt.anchoredPosition = new Vector2(54f, -44f);
-            titleBlockRt.sizeDelta = new Vector2(620f, 200f);
+            titleBlockRt.anchoredPosition = new Vector2(38f, -26f);
+            titleBlockRt.sizeDelta = new Vector2(460f, 220f);
 
-            Text titleTxt = CreateUIText("Title", titleBlock.transform, displayFont, "LIGHT WEAVER", 58, FontStyle.Bold, TextAnchor.UpperLeft, new Color(0.97f, 0.91f, 0.78f, 1f));
-            RectTransform tRt = titleTxt.GetComponent<RectTransform>();
-            tRt.anchorMin = new Vector2(0f, 1f);
-            tRt.anchorMax = new Vector2(0f, 1f);
-            tRt.pivot = new Vector2(0f, 1f);
-            tRt.anchoredPosition = Vector2.zero;
-            tRt.sizeDelta = new Vector2(600f, 68f);
+            GameObject logoGo = CreateUIObject("TitleLogo", titleBlock.transform);
+            RectTransform logoRt = logoGo.GetComponent<RectTransform>();
+            logoRt.anchorMin = new Vector2(0f, 1f);
+            logoRt.anchorMax = new Vector2(0f, 1f);
+            logoRt.pivot = new Vector2(0f, 1f);
+            logoRt.anchoredPosition = Vector2.zero;
+            logoRt.sizeDelta = new Vector2(440f, 148f);
+            Image logoImg = logoGo.AddComponent<Image>();
+            logoImg.sprite = titleLogoSprite;
+            logoImg.preserveAspect = true;
+            logoImg.raycastTarget = false;
 
-            GameObject divGo = CreateUIObject("TitleDivider", titleBlock.transform);
-            RectTransform divRt = divGo.GetComponent<RectTransform>();
-            divRt.anchorMin = new Vector2(0f, 1f);
-            divRt.anchorMax = new Vector2(0f, 1f);
-            divRt.pivot = new Vector2(0f, 1f);
-            divRt.anchoredPosition = new Vector2(2f, -72f);
-            divRt.sizeDelta = new Vector2(300f, 2f);
-            Image divImg = divGo.AddComponent<Image>();
-            divImg.sprite = titleLogoSprite;
-            divImg.color = new Color(0.88f, 0.72f, 0.36f, 0.75f);
-            divImg.raycastTarget = false;
-
-            Text subTxt = CreateUIText("Subtitle", titleBlock.transform, builtinFont, "GIZA EXPEDITION", 16, FontStyle.Bold, TextAnchor.UpperLeft, new Color(0.78f, 0.72f, 0.60f, 0.90f));
-            RectTransform sRt = subTxt.GetComponent<RectTransform>();
-            sRt.anchorMin = new Vector2(0f, 1f);
-            sRt.anchorMax = new Vector2(0f, 1f);
-            sRt.pivot = new Vector2(0f, 1f);
-            sRt.anchoredPosition = new Vector2(2f, -82f);
-            sRt.sizeDelta = new Vector2(400f, 24f);
-
-            GameObject bestPill = CreateObsidianPill("BestScorePill", titleBlock.transform, glassPillSprite, new Vector2(340f, 42f));
+            GameObject bestPill = CreateObsidianPill("BestScorePill", titleBlock.transform, glassPillSprite, new Vector2(360f, 44f));
             RectTransform bestPillRt = bestPill.GetComponent<RectTransform>();
             bestPillRt.anchorMin = new Vector2(0f, 1f);
             bestPillRt.anchorMax = new Vector2(0f, 1f);
             bestPillRt.pivot = new Vector2(0f, 1f);
-            bestPillRt.anchoredPosition = new Vector2(0f, -120f);
+            bestPillRt.anchoredPosition = new Vector2(10f, -158f);
 
             Text bestTxt = CreateUIText("BestScoreText", bestPill.transform, builtinFont, "BEST: 0   •   0m", 20, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(0.22f, 0.94f, 0.86f, 1f));
             StretchFull(bestTxt.GetComponent<RectTransform>());
@@ -834,14 +829,14 @@ namespace LightWeaver.EditorTools
             dockRt.anchoredPosition = new Vector2(-48f, 42f);
             dockRt.sizeDelta = new Vector2(380f, 186f);
 
-            Button playBtn = CreateNeonButton("PlayButton", actionDock.transform, btnGoldSprite, displayFont, "PLAY", 26, Color.white, new Color(0.05f, 0.06f, 0.09f, 1f), new Vector2(320f, 76f));
+            Button playBtn = CreateNeonButton("PlayButton", actionDock.transform, btnGoldSprite, displayFont, "EXPEDITION", 28, Color.white, new Color(1.0f, 0.95f, 0.78f, 1f), new Vector2(368f, 94f));
             RectTransform plRt = playBtn.GetComponent<RectTransform>();
             plRt.anchorMin = new Vector2(1f, 0f);
             plRt.anchorMax = new Vector2(1f, 0f);
             plRt.pivot = new Vector2(1f, 0f);
-            plRt.anchoredPosition = new Vector2(0f, 74f);
+            plRt.anchoredPosition = new Vector2(0f, 84f);
 
-            Button openShopBtn = CreateNeonButton("OpenShopButton", actionDock.transform, btnDarkSprite, displayFont, "WORKSHOP", 20, Color.white, new Color(0.92f, 0.86f, 0.72f, 1f), new Vector2(320f, 58f));
+            Button openShopBtn = CreateNeonButton("OpenShopButton", actionDock.transform, btnDarkSprite, displayFont, "RELIC SHOP", 21, Color.white, new Color(0.24f, 0.94f, 0.86f, 1f), new Vector2(368f, 70f));
             RectTransform osRt = openShopBtn.GetComponent<RectTransform>();
             osRt.anchorMin = new Vector2(1f, 0f);
             osRt.anchorMax = new Vector2(1f, 0f);
@@ -914,7 +909,7 @@ namespace LightWeaver.EditorTools
             Text pauseTitle = CreateUIText("PauseTitle", pausePanel.transform, displayFont, "PAUSED", 40, FontStyle.Bold, TextAnchor.MiddleCenter, new Color(1.0f, 0.84f, 0.34f, 1f));
             SetAnchoredPos(pauseTitle.rectTransform, new Vector2(0f, 138f), new Vector2(440f, 60f));
 
-            Button resumeBtn = CreateNeonButton("ResumeBtn", pausePanel.transform, btnGoldSprite, displayFont, "RESUME", 24, Color.white, new Color(0.05f, 0.06f, 0.09f, 1f), new Vector2(310f, 70f));
+            Button resumeBtn = CreateNeonButton("ResumeBtn", pausePanel.transform, btnGoldSprite, displayFont, "RESUME", 24, Color.white, new Color(1.0f, 0.96f, 0.78f, 1f), new Vector2(310f, 70f));
             SetAnchoredPos(resumeBtn.GetComponent<RectTransform>(), new Vector2(0f, 38f), new Vector2(310f, 70f));
 
             Button pauseRestartBtn = CreateNeonButton("PauseRestartBtn", pausePanel.transform, btnDarkSprite, displayFont, "RESTART", 21, Color.white, Color.white, new Vector2(310f, 60f));
@@ -938,7 +933,7 @@ namespace LightWeaver.EditorTools
             SetAnchoredPos(newBestObj.rectTransform, new Vector2(0f, 26f), new Vector2(360f, 30f));
             newBestObj.gameObject.SetActive(false);
 
-            Button solarReviveBtn = CreateNeonButton("SolarReviveBtn", gameOverPanel.transform, btnGoldSprite, displayFont, "SOLAR REVIVE (+100% ENERGY)", 19, Color.white, new Color(0.05f, 0.06f, 0.09f, 1f), new Vector2(460f, 74f));
+            Button solarReviveBtn = CreateNeonButton("SolarReviveBtn", gameOverPanel.transform, btnGoldSprite, displayFont, "SOLAR REVIVE (+100% ENERGY)", 19, Color.white, new Color(1.0f, 0.95f, 0.72f, 1f), new Vector2(460f, 74f));
             SetAnchoredPos(solarReviveBtn.GetComponent<RectTransform>(), new Vector2(0f, -45f), new Vector2(460f, 74f));
 
             Button retryBtn = CreateNeonButton("RetryBtn", gameOverPanel.transform, btnDarkSprite, displayFont, "RETRY", 23, Color.white, new Color(0.22f, 0.94f, 0.86f, 1f), new Vector2(218f, 64f));
@@ -1154,7 +1149,7 @@ namespace LightWeaver.EditorTools
             statText = CreateUIText("Stat", card.transform, font, "MAX: 100 -> 120", 17, FontStyle.Bold, TextAnchor.MiddleCenter, Color.white);
             SetAnchoredPos(statText.rectTransform, new Vector2(0f, -58f), new Vector2(260f, 30f));
 
-            buyButton = CreateNeonButton("BuyBtn", card.transform, panelSprite, font, "50 COINS", 19, Color.white, new Color(0.05f, 0.06f, 0.09f, 1f), new Vector2(226f, 58f));
+            buyButton = CreateNeonButton("BuyBtn", card.transform, panelSprite, font, "50 COINS", 20, Color.white, new Color(1.0f, 0.96f, 0.80f, 1f), new Vector2(226f, 62f));
             SetAnchoredPos(buyButton.GetComponent<RectTransform>(), new Vector2(0f, -124f), new Vector2(226f, 62f));
             buyLabel = buyButton.GetComponentInChildren<Text>();
         }
