@@ -712,6 +712,9 @@ namespace LightWeaver.EditorTools
             hudSo.FindProperty("mobileFocusTrigger").objectReferenceValue = null;
             hudSo.ApplyModifiedPropertiesWithoutUndo();
 
+            // Edit Mode'da ve açılış karesinde HUD'ın Ana Menü üzerine binmesini önle
+            hudRoot.SetActive(false);
+
             // =================================================================
             // 2. SCENIC FULL-SCREEN MAIN MENU (Açık Piramit & Dedektif Manzarası)
             // =================================================================
